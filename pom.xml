@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!--    <dependencies>-->
+    <!--        <dependency>-->
+    <!--            <groupId>org.springframework.boot</groupId>-->
+    <!--            <artifactId>spring-boot-autoconfigure</artifactId>-->
+    <!--            <version>2.2.6.RELEASE</version>-->
+    <!--        </dependency>-->
+    <!--    </dependencies>-->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.2.6.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.l2jserver</groupId>
+    <artifactId>l2j-server</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>l2j-server</name>
+    <description>Demo project for Spring Boot</description>
+    <packaging>pom</packaging>
+    <properties>
+        <java.version>14</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>14</maven.compiler.source>
+        <maven.compiler.target>14</maven.compiler.target>
+    </properties>
+
+    <modules>
+        <module>l2j-server-mmocore</module>
+        <module>l2j-server-commons</module>
+        <module>l2j-server-login</module>
+        <module>l2j-server-geo-driver</module>
+        <module>l2j-server-game</module>
+        <module>l2j-server-datapack</module>
+    </modules>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.l2jserver</groupId>
+                <artifactId>l2j-server-mmocore</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.l2jserver</groupId>
+                <artifactId>l2j-server-commons</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.l2jserver</groupId>
+                <artifactId>l2j-server-game</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.l2jserver</groupId>
+                <artifactId>l2j-server-geo-driver</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.aeonbits.owner</groupId>
+                <artifactId>owner-java8</artifactId>
+                <version>1.0.11</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>7.1.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
