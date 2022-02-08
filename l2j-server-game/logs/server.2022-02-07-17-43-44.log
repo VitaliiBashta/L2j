@@ -1,0 +1,6 @@
+[INFO ] 2022-02-07 17:43:45 GameServer: -----------------------------------=[ Network Configuration ]
+[INFO ] 2022-02-07 17:43:45 IPConfigData: Using automatic network configuration.
+[INFO ] 2022-02-07 17:43:45 IPConfigData: Adding new subnet: 127.0.0.0/8 address: 127.0.0.1
+[INFO ] 2022-02-07 17:43:46 IPConfigData: Adding new subnet: 192.168.0.0/24 address: 192.168.0.87
+[INFO ] 2022-02-07 17:43:46 IPConfigData: Adding new subnet: 172.23.64.0/20 address: 172.23.64.1
+[INFO ] 2022-02-07 17:43:46 IPConfigData: Adding new subnet: 0.0.0.0/0 address: 86.49.253.107

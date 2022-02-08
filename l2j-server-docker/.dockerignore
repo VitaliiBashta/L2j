@@ -1,0 +1,9 @@
+.git
+.gitignore
+.vscode
+.project
+.idea
+.env
+!entry-point.sh
+docker-compose.yml
+custom/

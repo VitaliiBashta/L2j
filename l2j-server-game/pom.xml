@@ -1,0 +1,42 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.l2jserver</groupId>
+        <artifactId>l2j</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>l2j-server-game</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.mdkt.compiler</groupId>
+            <artifactId>InMemoryJavaCompiler</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.aeonbits.owner</groupId>
+            <artifactId>owner-java8</artifactId>
+        </dependency>
+        <!-- L2J -->
+        <dependency>
+            <groupId>com.l2jserver</groupId>
+            <artifactId>l2j-server-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.l2jserver</groupId>
+            <artifactId>l2j-server-geo-driver</artifactId>
+        </dependency>
+        <!-- Test -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

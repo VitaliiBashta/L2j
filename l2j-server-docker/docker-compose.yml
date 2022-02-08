@@ -1,0 +1,52 @@
+# Copyright 2004-2020 L2J Server
+# L2J Server is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+# L2J Server is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/. 
+
+version: '3.3'
+
+services:
+  mariadb:
+    container_name: l2j-server-mariadb
+    image: yobasystems/alpine-mariadb:latest
+    volumes:
+      - /var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+  l2jserver:
+    container_name: l2j-server-docker
+    image: l2jserver/l2j-server-docker:latest
+    restart: always
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    #   args:
+    #     branch_gs: "develop"
+    #     branch_dp: "develop"
+    environment:
+      IP_ADDRESS: ${GAMESERVER_ADDRESS}
+      RATE_XP: "1"
+      RATE_SP: "1"
+      ADMIN_RIGHTS: "True"
+      HELLBOUND_ACCESS: "True"
+      TVT_ENABLED: "True"
+      FORCE_GEODATA: "False"
+      COORD_SYNC: "-1"
+      BUFFER_SERVICE: "True"
+      CUSTOM_NPC_DATA: "True"
+      SAVE_GM_SPAWN_ON_CUSTOM: "True"
+      CUSTOM_SPAWNLIST_TABLE: "True"
+      CUSTOM_TELEPORT_TABLE: "True"
+      CUSTOM_NPC_BUFFER_TABLES: "True"
+      CUSTOM_SKILLS_LOAD: "True"
+      CUSTOM_ITEMS_LOAD: "True"
+      CUSTOM_MULTISELL_LOAD: "True"
+      CUSTOM_BUYLIST_LOAD: "True"
+    depends_on:
+      - mariadb
+    ports:
+      - "7777:7777"
+      - "2106:2106"
