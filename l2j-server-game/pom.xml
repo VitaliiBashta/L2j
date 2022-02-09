@@ -32,6 +32,11 @@
             <groupId>com.l2jserver</groupId>
             <artifactId>l2j-server-geo-driver</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.mockito</groupId>

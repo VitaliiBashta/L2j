@@ -20,7 +20,6 @@
         <module>l2j-server-commons</module>
         <module>l2j-server-game</module>
         <module>l2j-server-login</module>
-        <module>l2j-server-datapack</module>
     </modules>
 
     <dependencyManagement>

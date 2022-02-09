@@ -4,6 +4,13 @@ import com.l2jserver.commons.dao.ServerNameDAO;
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.commons.util.IPv4Filter;
 import com.l2jserver.commons.util.Util;
+import com.l2jserver.datapack.ai.AILoader;
+import com.l2jserver.datapack.gracia.GraciaLoader;
+import com.l2jserver.datapack.handlers.MasterHandler;
+import com.l2jserver.datapack.hellbound.HellboundLoader;
+import com.l2jserver.datapack.instances.InstanceLoader;
+import com.l2jserver.datapack.quests.QuestLoader;
+import com.l2jserver.datapack.quests.TerritoryWarScripts.TerritoryWarSuperClass;
 import com.l2jserver.gameserver.bbs.service.ForumsBBSManager;
 import com.l2jserver.gameserver.cache.HtmCache;
 import com.l2jserver.gameserver.dao.factory.impl.DAOFactory;
@@ -210,23 +217,23 @@ public final class GameServer {
 		GraciaSeedsManager.getInstance();
 		
 		printSection("Handlers");
-		ScriptEngineManager.getInstance().executeScript("com/l2jserver/datapack/handlers/MasterHandler.java");
+		ScriptEngineManager.getInstance().executeScript(MasterHandler.class);
 		
 		printSection("AI");
-		ScriptEngineManager.getInstance().executeScript("com/l2jserver/datapack/ai/AILoader.java");
+		ScriptEngineManager.getInstance().executeScript(AILoader.class);
 		
 		printSection("Instances");
-		ScriptEngineManager.getInstance().executeScript("com/l2jserver/datapack/instances/InstanceLoader.java");
+		ScriptEngineManager.getInstance().executeScript(InstanceLoader.class);
 		
 		printSection("Gracia");
-		ScriptEngineManager.getInstance().executeScript("com/l2jserver/datapack/gracia/GraciaLoader.java");
+		ScriptEngineManager.getInstance().executeScript(GraciaLoader.class);
 		
 		printSection("Hellbound");
-		ScriptEngineManager.getInstance().executeScript("com/l2jserver/datapack/hellbound/HellboundLoader.java");
+		ScriptEngineManager.getInstance().executeScript(HellboundLoader.class);
 		
 		printSection("Quests");
-		ScriptEngineManager.getInstance().executeScript("com/l2jserver/datapack/quests/QuestLoader.java");
-		ScriptEngineManager.getInstance().executeScript("com/l2jserver/datapack/quests/TerritoryWarScripts/TerritoryWarSuperClass.java");
+		ScriptEngineManager.getInstance().executeScript(QuestLoader.class);
+		ScriptEngineManager.getInstance().executeScript(TerritoryWarSuperClass.class);
 		
 		printSection("Scripts");
 		ScriptEngineManager.getInstance().executeScriptList(new File(server().getDatapackRoot(), "data/scripts.cfg"));

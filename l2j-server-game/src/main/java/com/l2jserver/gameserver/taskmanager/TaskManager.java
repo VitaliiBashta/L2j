@@ -116,7 +116,6 @@ public final class TaskManager {
     registerTask(new TaskRaidPointsReset());
     registerTask(new TaskRecom());
     registerTask(new TaskRestart());
-    registerTask(new TaskScript());
     registerTask(new TaskSevenSignsUpdate());
     registerTask(new TaskShutdown());
   }

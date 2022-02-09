@@ -182,18 +182,6 @@ public class AdminReload implements IAdminCommandHandler {
 					AdminData.getInstance().broadcastMessageToGMs(activeChar.getName() + ": Reloaded Crests.");
 					break;
 				}
-				case "effect": {
-					final File file = new File(server().getScriptRoot(), "com/l2jserver/datapack/handlers/EffectMasterHandler.java");
-					ScriptEngineManager.getInstance().compileScript(file);
-					AdminData.getInstance().broadcastMessageToGMs(activeChar.getName() + ": Reloaded Effects.");
-					break;
-				}
-				case "handler": {
-					final File file = new File(server().getScriptRoot(), "com/l2jserver/datapack/handlers/MasterHandler.java");
-					ScriptEngineManager.getInstance().compileScript(file);
-					AdminData.getInstance().broadcastMessageToGMs(activeChar.getName() + ": Reloaded Handlers.");
-					break;
-				}
 				case "enchant": {
 					EnchantItemGroupsData.getInstance().load();
 					EnchantItemData.getInstance().load();
