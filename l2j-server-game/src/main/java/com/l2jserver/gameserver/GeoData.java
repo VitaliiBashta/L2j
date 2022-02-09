@@ -1,21 +1,3 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver;
 
 import static com.l2jserver.gameserver.config.Configuration.geodata;
@@ -25,8 +7,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.l2jserver.gameserver.data.xml.impl.DoorData;
 import com.l2jserver.gameserver.model.L2Object;
@@ -38,15 +18,12 @@ import com.l2jserver.gameserver.util.LinePointIterator;
 import com.l2jserver.gameserver.util.LinePointIterator3D;
 import com.l2jserver.geodriver.Cell;
 import com.l2jserver.geodriver.GeoDriver;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-/**
- * Geodata.
- * @author -Nemesiss-
- * @author HorridoJoho
- */
 public class GeoData {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(GeoData.class);
+	private static final Logger LOG = LogManager.getLogger(GeoData.class);
 	
 	private static final String FILE_NAME_FORMAT = "%d_%d.l2j";
 	
@@ -168,26 +145,12 @@ public class GeoData {
 		return _driver.getWorldY(geoY);
 	}
 	
-	// ///////////////////
-	// L2J METHODS
-	/**
-	 * Gets the height.
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 * @param z the z coordinate
-	 * @return the height
-	 */
+
 	public int getHeight(int x, int y, int z) {
 		return getNearestZ(getGeoX(x), getGeoY(y), z);
 	}
 	
-	/**
-	 * Gets the spawn height.
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 * @param z the the z coordinate
-	 * @return the spawn height
-	 */
+
 	public int getSpawnHeight(int x, int y, int z) {
 		final int geoX = getGeoX(x);
 		final int geoY = getGeoY(y);
@@ -200,20 +163,14 @@ public class GeoData {
 		return Math.abs(nextLowerZ - z) <= SPAWN_Z_DELTA_LIMIT ? nextLowerZ : z;
 	}
 	
-	/**
-	 * Gets the spawn height.
-	 * @param location the location
-	 * @return the spawn height
-	 */
+
 	public int getSpawnHeight(Location location) {
 		return getSpawnHeight(location.getX(), location.getY(), location.getZ());
 	}
 	
 	/**
 	 * Can see target. Doors as target always return true. Checks doors between.
-	 * @param cha the character
-	 * @param target the target
-	 * @return {@code true} if the character can see the target (LOS), {@code false} otherwise
+
 	 */
 	public boolean canSeeTarget(L2Object cha, L2Object target) {
 		if (target == null) {
@@ -237,15 +194,6 @@ public class GeoData {
 	
 	/**
 	 * Can see target. Checks doors between.
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 * @param z the z coordinate
-	 * @param instanceId
-	 * @param tx the target's x coordinate
-	 * @param ty the target's y coordinate
-	 * @param tz the target's z coordinate
-	 * @param tInstanceId the target's instanceId
-	 * @return
 	 */
 	public boolean canSeeTarget(int x, int y, int z, int instanceId, int tx, int ty, int tz, int tInstanceId) {
 		if ((instanceId != tInstanceId)) {
@@ -256,13 +204,6 @@ public class GeoData {
 	
 	/**
 	 * Can see target. Checks doors between.
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 * @param z the z coordinate
-	 * @param instanceId
-	 * @param tx the target's x coordinate
-	 * @param ty the target's y coordinate
-	 * @param tz the target's z coordinate
 	 * @return {@code true} if there is line of sight between the given coordinate sets, {@code false} otherwise
 	 */
 	public boolean canSeeTarget(int x, int y, int z, int instanceId, int tx, int ty, int tz) {

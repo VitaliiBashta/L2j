@@ -5,7 +5,6 @@ import static com.l2jserver.gameserver.config.Configuration.rates;
 
 import java.util.Calendar;
 import java.util.concurrent.ScheduledFuture;
-import java.util.logging.Level;
 
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.gameserver.ThreadPoolManager;
@@ -97,7 +96,7 @@ public abstract class Chamber extends AbstractInstance {
 					Thread.sleep(5000);
 					changeRoom(CDWorld.this);
 				} catch (Exception e) {
-					_log.log(Level.WARNING, getClass().getSimpleName() + " ChangeRoomTask exception : " + e.getMessage(), e);
+					LOG.warn(getClass().getSimpleName() + " ChangeRoomTask exception : " + e.getMessage(), e);
 				}
 			}
 		}

@@ -1,4 +1,3 @@
-
 package com.l2jserver.datapack.handlers.effecthandlers.consume;
 
 import static com.l2jserver.gameserver.model.itemcontainer.Inventory.PAPERDOLL_LBRACELET;
@@ -12,11 +11,6 @@ import com.l2jserver.gameserver.model.effects.AbstractEffect;
 import com.l2jserver.gameserver.model.skills.BuffInfo;
 import com.l2jserver.gameserver.network.serverpackets.ExBR_AgathionEnergyInfo;
 
-/**
- * Consume AgathionEnergy effect implementation.
- * @author Zoey76
- * @version 2.6.2.0
- */
 public final class ConsumeAgathionEnergy extends AbstractEffect {
 	
 	private final int energy;

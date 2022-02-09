@@ -5,6 +5,7 @@ import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.L2Attackable;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import com.l2jserver.gameserver.model.events.AbstractScript;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
@@ -22,7 +23,6 @@ import org.w3c.dom.Node;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.*;
-import java.util.logging.Level;
 
 import static com.l2jserver.gameserver.config.Configuration.server;
 
@@ -151,7 +151,7 @@ public class Q00350_EnhanceYourWeapon extends Quest {
     try {
       ((L2Attackable) npc).addAbsorber(caster);
     } catch (Exception e) {
-      _log.log(Level.SEVERE, "", e);
+      AbstractScript.LOG.error("", e);
     }
     return null;
   }

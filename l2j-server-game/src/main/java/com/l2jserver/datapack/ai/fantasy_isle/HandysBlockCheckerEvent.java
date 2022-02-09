@@ -16,10 +16,7 @@ import com.l2jserver.gameserver.network.serverpackets.ExCubeGameChangeTimeToStar
 import com.l2jserver.gameserver.network.serverpackets.ExCubeGameRequestReady;
 import com.l2jserver.gameserver.network.serverpackets.ExCubeGameTeamList;
 
-/**
- * Handys Block Checker Event AI.
- * @authors BiggBoss, Gigiikun
- */
+
 public class HandysBlockCheckerEvent extends Quest {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(HandysBlockCheckerEvent.class);

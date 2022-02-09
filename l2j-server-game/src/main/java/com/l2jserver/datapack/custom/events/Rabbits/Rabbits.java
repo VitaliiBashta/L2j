@@ -70,7 +70,7 @@ public final class Rabbits extends Event {
 
     // Check starting conditions
     if (!general().customNpcData()) {
-      _log.info(getName() + ": Event can't be started, because custom NPCs are disabled!");
+      LOG.info(getName() + ": Event can't be started, because custom NPCs are disabled!");
       eventMaker.sendMessage(
           "Event " + getName() + " can't be started because custom NPCs are disabled!");
       return false;

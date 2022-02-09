@@ -241,7 +241,7 @@ public final class Sailren extends AbstractNpcAI {
 	@Override
 	public boolean unload(boolean removeFromList) {
 		if (STATUS == Status.IN_FIGHT) {
-			_log.info(getClass().getSimpleName() + ": Script is being unloaded while Sailren is active, clearing zone.");
+			LOG.info(getClass().getSimpleName() + ": Script is being unloaded while Sailren is active, clearing zone.");
 			notifyEvent("TIME_OUT", null, null);
 		}
 		return super.unload(removeFromList);

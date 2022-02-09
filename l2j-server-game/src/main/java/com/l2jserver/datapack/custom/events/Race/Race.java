@@ -101,7 +101,7 @@ public final class Race extends Event {
 		
 		// Check Custom Table - we use custom NPC's
 		if (!general().customNpcData()) {
-			_log.info(getName() + ": Event can't be started, because custom npc table is disabled!");
+			LOG.info(getName() + ": Event can't be started, because custom npc table is disabled!");
 			eventMaker.sendMessage("Event " + getName() + " can't be started because custom NPC table is disabled!");
 			return false;
 		}

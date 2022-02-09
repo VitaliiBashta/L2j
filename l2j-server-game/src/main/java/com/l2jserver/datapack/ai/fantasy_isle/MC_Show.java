@@ -64,6 +64,10 @@ public class MC_Show extends AbstractNpcAI {
     scheduleTimer();
   }
 
+  public static void main(String[] args) {
+    new MC_Show();
+  }
+
   private void load() {
     // TODO put this stuff in Routes.xml
     TALKS.put("1", new ShoutInfo(MESSAGES[1], "2", 1000));
@@ -193,7 +197,7 @@ public class MC_Show extends AbstractNpcAI {
     diff = hourDiff + minDiff;
     if (general().debug()) {
       SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-      _log.info(
+      LOG.info(
           "Fantasy Isle: MC show script starting at "
               + format.format(System.currentTimeMillis() + diff)
               + " and is scheduled each next 4 hours.");
@@ -250,7 +254,7 @@ public class MC_Show extends AbstractNpcAI {
   @Override
   public String onAdvEvent(String event, L2Npc npc, L2PcInstance player) {
     if ((event == null) || event.isEmpty()) {
-      _log.warning("MC_Show: Null/Empty event for npc " + npc + " and player " + player + "!");
+      LOG.warn("MC_Show: Null/Empty event for npc {} and player {}! ", npc, player);
       return null;
     }
 
@@ -439,9 +443,5 @@ public class MC_Show extends AbstractNpcAI {
     public int getTime() {
       return _time;
     }
-  }
-
-  public static void main(String[] args) {
-		new MC_Show();
   }
 }

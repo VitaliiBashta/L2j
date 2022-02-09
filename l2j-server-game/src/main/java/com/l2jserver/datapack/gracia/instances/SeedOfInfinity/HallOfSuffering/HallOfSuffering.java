@@ -28,18 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class HallOfSuffering extends AbstractInstance {
-  protected class HSWorld extends InstanceWorld {
-    protected Map<L2Npc, Boolean> npcList = new HashMap<>();
-    protected L2Npc klodekus = null;
-    protected L2Npc klanikus = null;
-    protected boolean isBossesAttacked = false;
-    protected long startTime = 0;
-    protected String ptLeaderName = "";
-    protected int rewardItemId = -1;
-    protected String rewardHtm = "";
-    protected boolean isRewarded = false;
-  }
-
   // NPCs
   private static final int MOUTH_OF_EKIMUS = 32537;
   private static final int TEPIOS = 32530;
@@ -123,7 +111,6 @@ public final class HallOfSuffering extends AbstractInstance {
   private static final int TEMPLATE_ID = 115;
   private static final int MIN_LEVEL = 75;
   private static final int MAX_LEVEL = 82;
-
   public HallOfSuffering() {
     super(HallOfSuffering.class.getSimpleName(), "gracia/instances/SeedOfInfinity");
     addStartNpc(MOUTH_OF_EKIMUS, TEPIOS);
@@ -227,7 +214,7 @@ public final class HallOfSuffering extends AbstractInstance {
       case 4:
         return ROOM_5_MOBS;
     }
-    _log.warning("");
+    LOG.warn("");
     return new int[][] {};
   }
 
@@ -478,7 +465,7 @@ public final class HallOfSuffering extends AbstractInstance {
     if (npc.getId() == TEPIOS) {
       InstanceWorld world = InstanceManager.getInstance().getPlayerWorld(player);
       if (((HSWorld) world).rewardItemId == -1) {
-        _log.warning(
+        LOG.warn(
             "Hall of Suffering: "
                 + player.getName()
                 + "("
@@ -505,7 +492,7 @@ public final class HallOfSuffering extends AbstractInstance {
     } else if (npc.getId() == TEPIOS) {
       InstanceWorld world = InstanceManager.getInstance().getPlayerWorld(talker);
       if (((HSWorld) world).rewardItemId == -1) {
-        _log.warning(
+        LOG.warn(
             "Hall of Suffering: "
                 + talker.getName()
                 + "("
@@ -532,5 +519,17 @@ public final class HallOfSuffering extends AbstractInstance {
       return getPtLeaderText(talker, (HSWorld) world);
     }
     return super.onTalk(npc, talker);
+  }
+
+  protected class HSWorld extends InstanceWorld {
+    protected Map<L2Npc, Boolean> npcList = new HashMap<>();
+    protected L2Npc klodekus = null;
+    protected L2Npc klanikus = null;
+    protected boolean isBossesAttacked = false;
+    protected long startTime = 0;
+    protected String ptLeaderName = "";
+    protected int rewardItemId = -1;
+    protected String rewardHtm = "";
+    protected boolean isRewarded = false;
   }
 }

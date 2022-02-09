@@ -158,7 +158,7 @@ public final class ClassMaster extends AbstractNpcAI {
 			}
 			player.getClan().changeLevel(5);
 		} else {
-			_log.warning("Player " + player + " send invalid request [" + event + "]");
+			LOG.warn("Player " + player + " send invalid request [" + event + "]");
 		}
 		return "";
 	}
@@ -181,7 +181,7 @@ public final class ClassMaster extends AbstractNpcAI {
 			int val = Integer.parseInt(request.substring(2));
 			checkAndChangeClass(player, val);
 		} catch (NumberFormatException e) {
-			_log.warning("Player " + player + " send invalid class change request [" + request + "]!");
+			LOG.warn("Player " + player + " send invalid class change request [" + request + "]!");
 		}
 		player.sendPacket(STATIC_PACKET);
 	}
