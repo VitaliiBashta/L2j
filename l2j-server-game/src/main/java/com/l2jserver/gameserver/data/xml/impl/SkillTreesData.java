@@ -131,7 +131,7 @@ public final class SkillTreesData implements IXmlReader {
 		_gameMasterAuraSkillTree.clear();
 		
 		// Load files.
-		parseDatapackDirectory("data/skillTrees/", false);
+		parseDatapackDirectory("data/skillTrees/");
 		
 		// Generate check arrays.
 		generateCheckArrays();

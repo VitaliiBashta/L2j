@@ -51,7 +51,7 @@ public final class PetDataTable implements IXmlReader {
 	@Override
 	public void load() {
 		_pets.clear();
-		parseDatapackDirectory("data/stats/pets", false);
+		parseDatapackDirectory("data/stats/pets");
 		LOG.info("Loaded {} Pets.", _pets.size());
 	}
 	

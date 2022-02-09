@@ -62,7 +62,7 @@ public final class MapRegionManager implements IXmlReader {
 	@Override
 	public void load() {
 		REGIONS.clear();
-		parseDatapackDirectory("data/mapregion", false);
+		parseDatapackDirectory("data/mapregion");
 		LOG.info("Loaded {} map regions.", REGIONS.size());
 	}
 	

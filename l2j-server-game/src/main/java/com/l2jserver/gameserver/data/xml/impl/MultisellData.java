@@ -69,9 +69,9 @@ public final class MultisellData implements IXmlReader {
 	@Override
 	public void load() {
 		_entries.clear();
-		parseDatapackDirectory("data/multisell", false);
+		parseDatapackDirectory("data/multisell");
 		if (general().customMultisellLoad()) {
-			parseDatapackDirectory("data/multisell/custom", false);
+			parseDatapackDirectory("data/multisell/custom");
 		}
 		
 		verify();

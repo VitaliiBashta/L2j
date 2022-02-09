@@ -72,7 +72,7 @@ public final class SpawnTable implements IXmlReader {
 			}
 			
 			// Load XML list
-			parseDatapackDirectory("data/spawnlist", false);
+			parseDatapackDirectory("data/spawnlist");
 			LOG.info("Loaded {} NPC spawns from XML.", _xmlSpawnCount);
 		}
 	}

@@ -58,9 +58,9 @@ public final class BuyListData implements IXmlReader {
 	@Override
 	public synchronized void load() {
 		_buyLists.clear();
-		parseDatapackDirectory("data/buylists", false);
+		parseDatapackDirectory("data/buylists");
 		if (general().customBuyListLoad()) {
-			parseDatapackDirectory("data/buylists/custom", false);
+			parseDatapackDirectory("data/buylists/custom");
 		}
 		
 		LOG.info("Loaded {} buy lists.", _buyLists.size());

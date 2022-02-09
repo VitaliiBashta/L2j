@@ -288,8 +288,8 @@ public final class ZoneManager implements IXmlReader {
 	public void load() {
 		_classZones.clear();
 		_spawnTerritories.clear();
-		parseDatapackDirectory("data/zones", false);
-		parseDatapackDirectory("data/zones/npcSpawnTerritories", false);
+		parseDatapackDirectory("data/zones");
+		parseDatapackDirectory("data/zones/npcSpawnTerritories");
 		LOG.info("Loaded {} zone classes and {} zones.", _classZones.size(), getSize());
 		LOG.info("Loaded {} NPC spawn territoriers.", _spawnTerritories.size());
 	}
@@ -393,7 +393,9 @@ public final class ZoneManager implements IXmlReader {
 	@SuppressWarnings("unchecked")
 	public <T extends L2ZoneType> T getZoneById(int id, Class<T> zoneType) {
 		Map<Integer, ? extends L2ZoneType> zones = _classZones.get(zoneType);
-
+		if (zones == null) {
+			return null;
+		}
 		return (T) zones.get(id);
 	}
 	

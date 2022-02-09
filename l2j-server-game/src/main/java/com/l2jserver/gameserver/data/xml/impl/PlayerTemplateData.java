@@ -53,7 +53,7 @@ public final class PlayerTemplateData implements IXmlReader {
 	@Override
 	public void load() {
 		_playerTemplates.clear();
-		parseDatapackDirectory("data/stats/chars/baseStats", false);
+		parseDatapackDirectory("data/stats/chars/baseStats");
 		LOG.info("Loaded {} character templates.", _playerTemplates.size());
 		LOG.info("Loaded {} level up gain records.", _dataCount);
 	}

@@ -52,7 +52,7 @@ public class OptionData implements IXmlReader {
 	@Override
 	public synchronized void load() {
 		_optionData.clear();
-		parseDatapackDirectory("data/stats/options", false);
+		parseDatapackDirectory("data/stats/options");
 		LOG.info("Loaded {} item options.", _optionData.size());
 	}
 	
