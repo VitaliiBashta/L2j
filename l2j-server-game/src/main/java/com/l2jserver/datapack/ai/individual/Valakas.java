@@ -1,11 +1,6 @@
 
 package com.l2jserver.datapack.ai.individual;
 
-import static com.l2jserver.gameserver.config.Configuration.grandBoss;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.GeoData;
 import com.l2jserver.gameserver.ai.CtrlIntention;
@@ -25,9 +20,12 @@ import com.l2jserver.gameserver.model.zone.type.L2BossZone;
 import com.l2jserver.gameserver.network.serverpackets.SocialAction;
 import com.l2jserver.gameserver.network.serverpackets.SpecialCamera;
 import com.l2jserver.gameserver.util.Util;
-import org.springframework.stereotype.Service;
 
-@Service
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.l2jserver.gameserver.config.Configuration.grandBoss;
+
 public class Valakas extends AbstractNpcAI {
 	// NPC
 	private static final int VALAKAS = 29028;

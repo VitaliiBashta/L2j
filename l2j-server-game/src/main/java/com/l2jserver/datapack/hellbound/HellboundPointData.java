@@ -1,23 +1,20 @@
 
 package com.l2jserver.datapack.hellbound;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.l2jserver.gameserver.util.IXmlReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import com.l2jserver.gameserver.util.IXmlReader;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * Point data parser.
- * @author Zoey76
- */
-public final class HellboundPointData implements IXmlReader {
-	
+@Service
+public class HellboundPointData implements IXmlReader {
+
 	private static final Logger LOG = LoggerFactory.getLogger(HellboundPointData.class);
 	
 	private final Map<Integer, int[]> _pointsInfo = new HashMap<>();

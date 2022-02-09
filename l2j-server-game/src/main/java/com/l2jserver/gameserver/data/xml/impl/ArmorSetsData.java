@@ -1,8 +1,8 @@
 package com.l2jserver.gameserver.data.xml.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.l2jserver.gameserver.model.L2ArmorSet;
+import com.l2jserver.gameserver.model.holders.SkillHolder;
+import com.l2jserver.gameserver.util.IXmlReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -10,12 +10,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import com.l2jserver.gameserver.model.L2ArmorSet;
-import com.l2jserver.gameserver.model.holders.SkillHolder;
-import com.l2jserver.gameserver.util.IXmlReader;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
-public final class ArmorSetsData implements IXmlReader {
+public class ArmorSetsData implements IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ArmorSetsData.class);
 	

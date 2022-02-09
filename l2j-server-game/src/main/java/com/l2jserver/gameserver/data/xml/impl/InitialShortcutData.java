@@ -1,33 +1,4 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.data.xml.impl;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
 
 import com.l2jserver.gameserver.enums.MacroType;
 import com.l2jserver.gameserver.enums.ShortcutType;
@@ -39,13 +10,25 @@ import com.l2jserver.gameserver.model.base.ClassId;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.network.serverpackets.ShortCutRegister;
 import com.l2jserver.gameserver.util.IXmlReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class holds the Initial Shortcuts information.<br>
  * What shortcuts get each newly created character.
  * @author Zoey76
  */
-public final class InitialShortcutData implements IXmlReader {
+@Service
+public class InitialShortcutData implements IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(InitialShortcutData.class);
 	
@@ -59,13 +42,17 @@ public final class InitialShortcutData implements IXmlReader {
 		load();
 	}
 	
+	public static InitialShortcutData getInstance() {
+		return SingletonHolder.INSTANCE;
+	}
+	
 	@Override
 	public void load() {
 		_initialShortcutData.clear();
 		_initialGlobalShortcutList.clear();
-		
+
 		parseDatapackFile("data/stats/initialShortcuts.xml");
-		
+
 		LOG.info("Loaded {} initial dlobal shortcuts data.", _initialGlobalShortcutList.size());
 		LOG.info("Loaded {} initial shortcuts data.", _initialShortcutData.size());
 		LOG.info("Loaded {} macros presets.", _macroPresets.size());
@@ -104,7 +91,7 @@ public final class InitialShortcutData implements IXmlReader {
 				}
 			}
 		}
-		
+
 		if (classIdNode != null) {
 			_initialShortcutData.put(ClassId.getClassId(Integer.parseInt(classIdNode.getNodeValue())), list);
 		} else {
@@ -123,7 +110,7 @@ public final class InitialShortcutData implements IXmlReader {
 				if (!parseBoolean(attrs, "enabled", true)) {
 					continue;
 				}
-				
+
 				final int macroId = parseInteger(attrs, "macroId");
 				final int icon = parseInteger(attrs, "icon");
 				final String name = parseString(attrs, "name");
@@ -212,7 +199,7 @@ public final class InitialShortcutData implements IXmlReader {
 		if (player == null) {
 			return;
 		}
-		
+
 		// Register global shortcuts.
 		for (Shortcut shortcut : _initialGlobalShortcutList) {
 			int shortcutId = shortcut.getId();
@@ -237,13 +224,13 @@ public final class InitialShortcutData implements IXmlReader {
 					player.registerMacro(macro);
 				}
 			}
-			
+
 			// Register shortcut
 			final Shortcut newShortcut = new Shortcut(shortcut.getSlot(), shortcut.getPage(), shortcut.getType(), shortcutId, shortcut.getLevel(), shortcut.getCharacterType());
 			player.sendPacket(new ShortCutRegister(newShortcut));
 			player.registerShortCut(newShortcut);
 		}
-		
+
 		// Register class specific shortcuts.
 		if (_initialShortcutData.containsKey(player.getClassId())) {
 			for (Shortcut shortcut : _initialShortcutData.get(player.getClassId())) {
@@ -275,10 +262,6 @@ public final class InitialShortcutData implements IXmlReader {
 				player.registerShortCut(newShortcut);
 			}
 		}
-	}
-	
-	public static InitialShortcutData getInstance() {
-		return SingletonHolder.INSTANCE;
 	}
 	
 	private static class SingletonHolder {

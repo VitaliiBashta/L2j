@@ -1,36 +1,4 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.datatables;
-
-import static com.l2jserver.gameserver.config.Configuration.character;
-import static com.l2jserver.gameserver.config.Configuration.general;
-import static com.l2jserver.gameserver.model.itemcontainer.Inventory.ADENA_ID;
-import static com.l2jserver.gameserver.model.items.type.EtcItemType.ARROW;
-import static com.l2jserver.gameserver.model.items.type.EtcItemType.SHOT;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.ThreadPoolManager;
@@ -51,12 +19,24 @@ import com.l2jserver.gameserver.model.items.L2Item;
 import com.l2jserver.gameserver.model.items.L2Weapon;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.util.GMAudit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-/**
- * This class serves as a container for all item templates in the game.
- */
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ScheduledFuture;
+
+import static com.l2jserver.gameserver.config.Configuration.character;
+import static com.l2jserver.gameserver.config.Configuration.general;
+import static com.l2jserver.gameserver.model.itemcontainer.Inventory.ADENA_ID;
+import static com.l2jserver.gameserver.model.items.type.EtcItemType.ARROW;
+import static com.l2jserver.gameserver.model.items.type.EtcItemType.SHOT;
+
+@Service
 public class ItemTable {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(ItemTable.class);
 	
 	private static final Logger LOG_ITEM = LoggerFactory.getLogger("item");
@@ -70,7 +50,9 @@ public class ItemTable {
 	private final Map<Integer, L2Armor> _armors = new HashMap<>();
 	
 	private final Map<Integer, L2Weapon> _weapons = new HashMap<>();
-	
+
+  private final DocumentEngine documentEngine;
+
 	static {
 		SLOTS.put("shirt", L2Item.SLOT_UNDERWEAR);
 		SLOTS.put("lbracelet", L2Item.SLOT_L_BRACELET);
@@ -109,12 +91,17 @@ public class ItemTable {
 		SLOTS.put("deco1", L2Item.SLOT_DECO);
 		SLOTS.put("waist", L2Item.SLOT_BELT);
 	}
-	
+
+  private final EnchantItemHPBonusData enchantItemHPBonusData;
+
 	public static ItemTable getInstance() {
 		return SingletonHolder._instance;
 	}
-	
-	protected ItemTable() {
+
+  protected ItemTable(
+      DocumentEngine documentEngine, EnchantItemHPBonusData enchantItemHPBonusData) {
+    this.documentEngine = documentEngine;
+    this.enchantItemHPBonusData = enchantItemHPBonusData;
 		load();
 	}
 	
@@ -123,7 +110,7 @@ public class ItemTable {
 		_armors.clear();
 		_etcItems.clear();
 		_weapons.clear();
-		for (L2Item item : DocumentEngine.getInstance().loadItems()) {
+    for (L2Item item : documentEngine.loadItems()) {
 			if (highest < item.getId()) {
 				highest = item.getId();
 			}
@@ -322,7 +309,7 @@ public class ItemTable {
 	
 	public void reload() {
 		load();
-		EnchantItemHPBonusData.getInstance().load();
+    enchantItemHPBonusData.load();
 	}
 	
 	protected static class ResetOwner implements Runnable {
@@ -352,6 +339,6 @@ public class ItemTable {
 	}
 	
 	private static class SingletonHolder {
-		protected static final ItemTable _instance = new ItemTable();
+    protected static final ItemTable _instance = new ItemTable(null, null);
 	}
 }

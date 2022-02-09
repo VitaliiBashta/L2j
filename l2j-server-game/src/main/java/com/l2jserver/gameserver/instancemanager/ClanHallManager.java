@@ -1,31 +1,6 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.instancemanager;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.l2jserver.commons.database.ConnectionFactory;
+import com.l2jserver.gameserver.Context;
 import com.l2jserver.gameserver.data.sql.impl.ClanTable;
 import com.l2jserver.gameserver.model.L2Clan;
 import com.l2jserver.gameserver.model.L2Object;
@@ -35,13 +10,17 @@ import com.l2jserver.gameserver.model.entity.ClanHall;
 import com.l2jserver.gameserver.model.entity.clanhall.AuctionableHall;
 import com.l2jserver.gameserver.model.entity.clanhall.SiegableHall;
 import com.l2jserver.gameserver.model.zone.type.L2ClanHallZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-/**
- * Clan Hall Manger.
- * @author Steuf
- */
-public final class ClanHallManager {
-	
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Service
+public class ClanHallManager {
+
 	private static final Logger LOG = LoggerFactory.getLogger(ClanHallManager.class);
 	
 	private final Map<Integer, AuctionableHall> _clanHall = new ConcurrentHashMap<>();
@@ -57,15 +36,18 @@ public final class ClanHallManager {
 	public boolean loaded() {
 		return _loaded;
 	}
-	
-	protected ClanHallManager() {
+
+  private final Context context;
+
+  protected ClanHallManager(Context context) {
+    this.context = context;
 		load();
 	}
 	
 	private void load() {
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var s = con.createStatement();
-			var rs = s.executeQuery("SELECT * FROM clanhall ORDER BY id")) {
+    try (var con = context.connectionFactory.getConnection();
+        var s = con.createStatement();
+        var rs = s.executeQuery("SELECT * FROM clanhall ORDER BY id")) {
 			int id, ownerId, lease;
 			while (rs.next()) {
 				StatsSet set = new StatsSet();
@@ -229,6 +211,6 @@ public final class ClanHallManager {
 	}
 	
 	private static class SingletonHolder {
-		protected static final ClanHallManager INSTANCE = new ClanHallManager();
+    protected static final ClanHallManager INSTANCE = new ClanHallManager(null);
 	}
 }

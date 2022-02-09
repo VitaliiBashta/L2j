@@ -1,32 +1,4 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.model.actor.instance;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Future;
-
-import com.l2jserver.gameserver.Context;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.ThreadPoolManager;
@@ -36,7 +8,6 @@ import com.l2jserver.gameserver.data.xml.impl.DoorData;
 import com.l2jserver.gameserver.enums.InstanceType;
 import com.l2jserver.gameserver.enums.Race;
 import com.l2jserver.gameserver.instancemanager.CastleManager;
-import com.l2jserver.gameserver.instancemanager.ClanHallManager;
 import com.l2jserver.gameserver.instancemanager.FortManager;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
 import com.l2jserver.gameserver.instancemanager.TerritoryWarManager;
@@ -62,6 +33,14 @@ import com.l2jserver.gameserver.network.serverpackets.DoorStatusUpdate;
 import com.l2jserver.gameserver.network.serverpackets.OnEventTrigger;
 import com.l2jserver.gameserver.network.serverpackets.StaticObject;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Future;
 
 public class L2DoorInstance extends L2Character {
 	private static final Logger LOG = LoggerFactory.getLogger(L2DoorInstance.class);
@@ -83,9 +62,9 @@ public class L2DoorInstance extends L2Character {
 	private int _meshindex = 1;
 	// used for autoclose on open
 	private Future<?> _autoCloseTask;
-	
-	public L2DoorInstance(Context context, L2DoorTemplate template) {
-		super(context, template);
+
+  public L2DoorInstance(int id, L2DoorTemplate template, ClanHall hall) {
+    super(id, template);
 		setInstanceType(InstanceType.L2DoorInstance);
 		setIsInvul(false);
 		setLethalable(false);
@@ -103,7 +82,6 @@ public class L2DoorInstance extends L2Character {
 		
 		int clanhallId = template.getClanHallId();
 		if (clanhallId > 0) {
-			ClanHall hall = ClanHallManager.getInstance().getAllClanHalls().get(clanhallId);
 			if (hall != null) {
 				setClanHall(hall);
 				hall.getDoors().add(this);

@@ -1,14 +1,15 @@
 package com.l2jserver.gameserver.data.xml.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.l2jserver.gameserver.Context;
+import com.l2jserver.gameserver.instancemanager.ClanHallManager;
+import com.l2jserver.gameserver.instancemanager.InstanceManager;
+import com.l2jserver.gameserver.instancemanager.MapRegionManager;
+import com.l2jserver.gameserver.model.StatsSet;
+import com.l2jserver.gameserver.model.actor.instance.L2DoorInstance;
+import com.l2jserver.gameserver.model.actor.templates.L2DoorTemplate;
+import com.l2jserver.gameserver.model.entity.ClanHall;
+import com.l2jserver.gameserver.pathfinding.AbstractNodeLoc;
+import com.l2jserver.gameserver.util.IXmlReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,15 +17,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import com.l2jserver.gameserver.instancemanager.InstanceManager;
-import com.l2jserver.gameserver.instancemanager.MapRegionManager;
-import com.l2jserver.gameserver.model.StatsSet;
-import com.l2jserver.gameserver.model.actor.instance.L2DoorInstance;
-import com.l2jserver.gameserver.model.actor.templates.L2DoorTemplate;
-import com.l2jserver.gameserver.pathfinding.AbstractNodeLoc;
-import com.l2jserver.gameserver.util.IXmlReader;
-
-import javax.annotation.PostConstruct;
+import java.util.*;
 
 @Service
 public class DoorData implements IXmlReader {
@@ -40,8 +33,11 @@ public class DoorData implements IXmlReader {
 	private final Map<Integer, List<L2DoorInstance>> _regions = new HashMap<>();
 
 	private final Context context;
-	protected DoorData(Context context) {
+  private final ClanHallManager clanHallManager;
+
+  protected DoorData(Context context, ClanHallManager clanHallManager) {
 		this.context = context;
+    this.clanHallManager = clanHallManager;
 		load();
 	}
 
@@ -67,7 +63,7 @@ public class DoorData implements IXmlReader {
 							final Node att = attrs.item(i);
 							set.set(att.getNodeName(), att.getNodeValue());
 						}
-						makeDoor(set);
+            makeDoor(context.idFactory.getNextId(), set);
 						_templates.put(set.getInt("id"), set);
 					}
 				}
@@ -93,11 +89,13 @@ public class DoorData implements IXmlReader {
 		set.set("collisionRadius", collisionRadius);
 		set.set("collisionHeight", height);
 	}
-	
-	private void makeDoor(StatsSet set) {
+
+  private void makeDoor(int id, StatsSet set) {
 		insertCollisionData(set);
 		L2DoorTemplate template = new L2DoorTemplate(set);
-		L2DoorInstance door = new L2DoorInstance(context, template);
+    ClanHall hall = clanHallManager.getAllClanHalls().get(template.getClanHallId());
+
+    L2DoorInstance door = new L2DoorInstance(id, template, hall);
 		door.setCurrentHp(door.getMaxHp());
 		door.spawnMe(template.getX(), template.getY(), template.getZ());
 		putDoor(door, MapRegionManager.getInstance().getMapRegionLocId(door));
@@ -202,6 +200,6 @@ public class DoorData implements IXmlReader {
 	}
 	
 	private static class SingletonHolder {
-		protected static final DoorData INSTANCE = new DoorData(null);
+    protected static final DoorData INSTANCE = new DoorData(null, null);
 	}
 }

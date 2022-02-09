@@ -18,25 +18,6 @@
  */
 package com.l2jserver.gameserver.data.xml.impl;
 
-import static com.l2jserver.gameserver.config.Configuration.character;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-
 import com.l2jserver.gameserver.datatables.SkillData;
 import com.l2jserver.gameserver.enums.Race;
 import com.l2jserver.gameserver.model.L2Clan;
@@ -54,6 +35,17 @@ import com.l2jserver.gameserver.model.interfaces.ISkillsHolder;
 import com.l2jserver.gameserver.model.skills.CommonSkill;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.util.IXmlReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+
+import java.util.*;
+import java.util.Map.Entry;
+
+import static com.l2jserver.gameserver.config.Configuration.character;
 
 /**
  * This class loads and manage the characters and pledges skills trees.<br>
@@ -76,7 +68,8 @@ import com.l2jserver.gameserver.util.IXmlReader;
  * For XML schema please refer to skillTrees.xsd in datapack in xsd folder and for parameters documentation refer to documentation.txt in skillTrees folder.<br>
  * @author Zoey76
  */
-public final class SkillTreesData implements IXmlReader {
+@Service
+public class SkillTreesData implements IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SkillTreesData.class);
 	

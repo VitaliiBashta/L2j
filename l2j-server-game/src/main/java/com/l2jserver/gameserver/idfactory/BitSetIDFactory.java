@@ -1,7 +1,7 @@
 package com.l2jserver.gameserver.idfactory;
 
 import com.l2jserver.commons.database.ConnectionFactory;
-import com.l2jserver.gameserver.Context;
+import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.util.file.filter.PrimeFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +18,12 @@ public class BitSetIDFactory extends IdFactory {
   private AtomicInteger _freeIdCount;
   private AtomicInteger _nextFreeId;
 
-  protected BitSetIDFactory(ConnectionFactory connectionFactory, Context context) {
+  protected BitSetIDFactory(
+      ConnectionFactory connectionFactory, ThreadPoolManager threadPoolManager) {
     super(connectionFactory);
 
     synchronized (BitSetIDFactory.class) {
-      context.threadPoolManager.scheduleGeneralAtFixedRate(new BitSetCapacityCheck(), 30000, 30000);
+      threadPoolManager.scheduleGeneralAtFixedRate(new BitSetCapacityCheck(), 30000, 30000);
       initialize();
     }
     LOG.info("{} Ids available.", _freeIds.size());

@@ -1,57 +1,38 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.data.xml.impl;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-
-import com.l2jserver.commons.database.ConnectionFactory;
+import com.l2jserver.gameserver.Context;
 import com.l2jserver.gameserver.datatables.ItemTable;
 import com.l2jserver.gameserver.model.buylist.L2BuyList;
 import com.l2jserver.gameserver.model.buylist.Product;
 import com.l2jserver.gameserver.model.items.L2Item;
 import com.l2jserver.gameserver.util.IXmlReader;
 import com.l2jserver.gameserver.util.file.filter.NumericNameFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
-/**
- * Loads buy lists for NPCs.
- * @author NosBit
- */
+import java.io.File;
+import java.io.FileFilter;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
+
+@Service
 public final class BuyListData implements IXmlReader {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(BuyListData.class);
 	
 	private static final FileFilter NUMERIC_FILTER = new NumericNameFilter();
 	
 	private final Map<Integer, L2BuyList> _buyLists = new HashMap<>();
-	
-	protected BuyListData() {
+  private final Context context;
+
+  protected BuyListData(Context context) {
+    this.context = context;
 		load();
 	}
 	
@@ -64,10 +45,10 @@ public final class BuyListData implements IXmlReader {
 		}
 		
 		LOG.info("Loaded {} buy lists.", _buyLists.size());
-		
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var statement = con.createStatement();
-			var rs = statement.executeQuery("SELECT * FROM `buylists`")) {
+
+    try (var con = context.connectionFactory.getConnection();
+        var statement = con.createStatement();
+        var rs = statement.executeQuery("SELECT * FROM `buylists`")) {
 			while (rs.next()) {
 				int buyListId = rs.getInt("buylist_id");
 				int itemId = rs.getInt("item_id");
@@ -158,6 +139,6 @@ public final class BuyListData implements IXmlReader {
 	}
 	
 	private static class SingletonHolder {
-		protected static final BuyListData INSTANCE = new BuyListData();
+    protected static final BuyListData INSTANCE = new BuyListData(null);
 	}
 }

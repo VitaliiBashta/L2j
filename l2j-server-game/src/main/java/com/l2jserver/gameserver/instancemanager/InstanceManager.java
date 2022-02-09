@@ -7,6 +7,7 @@ import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.util.IXmlReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -15,7 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class InstanceManager implements IXmlReader {
+@Service
+public class InstanceManager implements IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(InstanceManager.class);
 
@@ -31,7 +33,10 @@ public final class InstanceManager implements IXmlReader {
   private final Map<Integer, Map<Integer, Long>> _playerInstanceTimes = new ConcurrentHashMap<>();
   private int _dynamic = 300000;
 
-  protected InstanceManager() {
+  private final ClanHallManager clanHallManager;
+
+  protected InstanceManager(ClanHallManager clanHallManager) {
+    this.clanHallManager = clanHallManager;
     // Creates the multiverse.
     INSTANCES.put(-1, new Instance(-1, "multiverse"));
     LOG.info("Multiverse Instance created.");
@@ -245,6 +250,6 @@ public final class InstanceManager implements IXmlReader {
   }
 
   private static class SingletonHolder {
-    protected static final InstanceManager _instance = new InstanceManager();
+    protected static final InstanceManager _instance = new InstanceManager(null);
   }
 }

@@ -1,27 +1,5 @@
 package com.l2jserver.gameserver.data.xml.impl;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-
 import com.l2jserver.gameserver.datatables.SkillData;
 import com.l2jserver.gameserver.enums.AISkillScope;
 import com.l2jserver.gameserver.model.StatsSet;
@@ -37,6 +15,20 @@ import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.util.IXmlReader;
 import com.l2jserver.gameserver.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
 
 @Service
 public class NpcData implements IXmlReader {
@@ -46,27 +38,30 @@ public class NpcData implements IXmlReader {
 	private final Map<Integer, L2NpcTemplate> _npcs = new ConcurrentHashMap<>();
 	
 	private final Map<String, Integer> _clans = new ConcurrentHashMap<>();
-	
-	private MinionData _minionData;
 	private final SkillLearnData skillLearnData;
+	private MinionData _minionData;
 	protected NpcData(SkillLearnData skillLearnData) {
 		this.skillLearnData = skillLearnData;
 		load();
 	}
 	
+	public static NpcData getInstance() {
+		return SingletonHolder.INSTANCE;
+	}
+	
 	@Override
 	public synchronized void load() {
 		_minionData = new MinionData();
-		
+
 		parseDatapackDirectory("data/stats/npcs");
 		LOG.info("Loaded {} NPCs.", _npcs.size());
-		
+
 		if (general().customNpcData()) {
 			final int npcCount = _npcs.size();
 			parseDatapackDirectory("data/stats/npcs/custom", true);
 			LOG.info("Loaded {} custom NPCs.", (_npcs.size() - npcCount));
 		}
-		
+
 		_minionData = null;
 		loadNpcsSkillLearn();
 	}
@@ -100,7 +95,7 @@ public class NpcData implements IXmlReader {
 									if (parameters == null) {
 										parameters = new HashMap<>();
 									}
-									
+
 									for (Node parametersNode = npcNode.getFirstChild(); parametersNode != null; parametersNode = parametersNode.getNextSibling()) {
 										attrs = parametersNode.getAttributes();
 										switch (parametersNode.getNodeName().toLowerCase()) {
@@ -114,7 +109,7 @@ public class NpcData implements IXmlReader {
 														minions.add(new MinionHolder(parseInteger(attrs, "id"), parseInteger(attrs, "count"), parseInteger(attrs, "respawnTime"), parseInteger(attrs, "weightPoint")));
 													}
 												}
-												
+
 												if (!minions.isEmpty()) {
 													parameters.put(parseString(parametersNode.getAttributes(), "name"), minions);
 												}
@@ -299,17 +294,17 @@ public class NpcData implements IXmlReader {
 								case "droplists" -> {
 									for (Node dropListsNode = npcNode.getFirstChild(); dropListsNode != null; dropListsNode = dropListsNode.getNextSibling()) {
 										DropListScope dropListScope = null;
-										
+
 										try {
 											dropListScope = Enum.valueOf(DropListScope.class, dropListsNode.getNodeName().toUpperCase());
 										} catch (Exception e) {
 										}
-										
+
 										if (dropListScope != null) {
 											if (dropLists == null) {
 												dropLists = new EnumMap<>(DropListScope.class);
 											}
-											
+
 											List<IDropItem> dropList = new ArrayList<>();
 											parseDropList(f, dropListsNode, dropListScope, dropList);
 											dropLists.put(dropListScope, Collections.unmodifiableList(dropList));
@@ -333,7 +328,7 @@ public class NpcData implements IXmlReader {
 								}
 							}
 						}
-						
+
 						L2NpcTemplate template = _npcs.get(npcId);
 						if (template == null) {
 							template = new L2NpcTemplate(set);
@@ -341,39 +336,39 @@ public class NpcData implements IXmlReader {
 						} else {
 							template.set(set);
 						}
-						
+
 						if (_minionData._tempMinions.containsKey(npcId)) {
 							if (parameters == null) {
 								parameters = new HashMap<>();
 							}
 							parameters.putIfAbsent("Privates", _minionData._tempMinions.get(npcId));
 						}
-						
+
 						if (parameters != null) {
 							// Using unmodifiable map parameters of template are not meant to be changed at runtime.
 							template.setParameters(new StatsSet(Collections.unmodifiableMap(parameters)));
 						} else {
 							template.setParameters(StatsSet.EMPTY_STATSET);
 						}
-						
+
 						if (skills != null) {
 							Map<AISkillScope, List<Skill>> aiSkillLists = null;
 							for (Skill skill : skills.values()) {
 								if (skill.isPassive()) {
 									continue;
 								}
-								
+
 								if (aiSkillLists == null) {
 									aiSkillLists = new EnumMap<>(AISkillScope.class);
 								}
-								
+
 								final List<AISkillScope> aiSkillScopes = new ArrayList<>();
 								final AISkillScope shortOrLongRangeScope = skill.getCastRange() <= 150 ? AISkillScope.SHORT_RANGE : AISkillScope.LONG_RANGE;
 								if (skill.isSuicideAttack()) {
 									aiSkillScopes.add(AISkillScope.SUICIDE);
 								} else {
 									aiSkillScopes.add(AISkillScope.GENERAL);
-									
+
 									if (skill.isContinuous()) {
 										if (!skill.isDebuff()) {
 											aiSkillScopes.add(AISkillScope.BUFF);
@@ -412,23 +407,23 @@ public class NpcData implements IXmlReader {
 										}
 									}
 								}
-								
+
 								for (AISkillScope aiSkillScope : aiSkillScopes) {
 									List<Skill> aiSkills = aiSkillLists.computeIfAbsent(aiSkillScope, k -> new ArrayList<>());
 									aiSkills.add(skill);
 								}
 							}
-							
+
 							template.setSkills(skills);
 							template.setAISkillLists(aiSkillLists);
 						} else {
 							template.setSkills(null);
 							template.setAISkillLists(null);
 						}
-						
+
 						template.setClans(clans);
 						template.setIgnoreClanNpcIds(ignoreClanNpcIds);
-						
+
 						template.setDropLists(dropLists);
 					}
 				}
@@ -445,7 +440,7 @@ public class NpcData implements IXmlReader {
 				for (Node groupNode = dropNode.getFirstChild(); groupNode != null; groupNode = groupNode.getNextSibling()) {
 					parseDropListItem(groupNode, dropListScope, groupedDropList);
 				}
-				
+
 				List<GeneralDropItem> items = new ArrayList<>(groupedDropList.size());
 				for (IDropItem item : groupedDropList) {
 					if (item instanceof GeneralDropItem) {
@@ -455,7 +450,7 @@ public class NpcData implements IXmlReader {
 					}
 				}
 				dropItem.setItems(items);
-				
+
 				drops.add(dropItem);
 			} else {
 				parseDropListItem(dropNode, dropListScope, drops);
@@ -584,22 +579,22 @@ public class NpcData implements IXmlReader {
 	 * @author Zealar
 	 */
 	private static class MinionData implements IXmlReader {
-		
+
 		private static final Logger LOG = LoggerFactory.getLogger(MinionData.class);
-		
+
 		public final Map<Integer, List<MinionHolder>> _tempMinions = new HashMap<>();
-		
+
 		protected MinionData() {
 			load();
 		}
-		
+
 		@Override
 		public void load() {
 			_tempMinions.clear();
 			parseDatapackFile("data/minionData.xml");
 			LOG.info("Loaded {} minions data.", _tempMinions.size());
 		}
-		
+
 		@Override
 		public void parseDocument(Document doc) {
 			for (Node node = doc.getFirstChild(); node != null; node = node.getNextSibling()) {
@@ -621,10 +616,6 @@ public class NpcData implements IXmlReader {
 				}
 			}
 		}
-	}
-	
-	public static NpcData getInstance() {
-		return SingletonHolder.INSTANCE;
 	}
 	
 	private static class SingletonHolder {

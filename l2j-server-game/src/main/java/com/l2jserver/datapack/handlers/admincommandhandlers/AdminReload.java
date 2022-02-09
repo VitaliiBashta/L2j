@@ -29,6 +29,16 @@ public class AdminReload implements IAdminCommandHandler {
   private static final String RELOAD_USAGE =
       "Usage: //reload <config|access|npc|quest [quest_id|quest_name]|walker|htm[l] [file|directory]|multisell|buylist|teleport|skill|item|door|effect|handler|enchant|creationpoint>";
 
+  private final BuyListData buyListData;
+  private final AdminData adminData;
+  private final AdminHtml adminHtml;
+
+  public AdminReload(BuyListData buyListData, AdminData adminData, AdminHtml adminHtml) {
+    this.buyListData = buyListData;
+    this.adminData = adminData;
+    this.adminHtml = adminHtml;
+  }
+
   @Override
   public boolean useAdminCommand(String command, L2PcInstance activeChar) {
     final StringTokenizer st = new StringTokenizer(command, " ");
@@ -51,9 +61,8 @@ public class AdminReload implements IAdminCommandHandler {
                 if (Reloadable.class.isAssignableFrom(field.getType())) {
                   field.setAccessible(true);
                   ((Reloadable) field.get(null)).reload();
-                  AdminData.getInstance()
-                      .broadcastMessageToGMs(
-                          activeChar.getName() + ": Reloaded " + configName + " configuration.");
+                  adminData.broadcastMessageToGMs(
+                      activeChar.getName() + ": Reloaded " + configName + " configuration.");
                 } else {
                   activeChar.sendMessage(configName + " configuration cannot be reloaded.");
                 }
@@ -72,23 +81,21 @@ public class AdminReload implements IAdminCommandHandler {
                   }
                 }
               }
-              AdminData.getInstance()
-                  .broadcastMessageToGMs(activeChar.getName() + ": Reloaded all configurations.");
+              adminData.broadcastMessageToGMs(
+                  activeChar.getName() + ": Reloaded all configurations.");
             }
             break;
           }
         case "access":
           {
-            AdminData.getInstance().load();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Access.");
+            adminData.load();
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Access.");
             break;
           }
         case "npc":
           {
             NpcData.getInstance().load();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Npcs.");
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Npcs.");
             break;
           }
         case "quest":
@@ -97,21 +104,18 @@ public class AdminReload implements IAdminCommandHandler {
               String value = st.nextToken();
               if (!Util.isDigit(value)) {
                 QuestManager.getInstance().reload(value);
-                AdminData.getInstance()
-                    .broadcastMessageToGMs(
-                        activeChar.getName() + ": Reloaded Quest Name:" + value + ".");
+                adminData.broadcastMessageToGMs(
+                    activeChar.getName() + ": Reloaded Quest Name:" + value + ".");
               } else {
                 final int questId = Integer.parseInt(value);
                 QuestManager.getInstance().reload(questId);
-                AdminData.getInstance()
-                    .broadcastMessageToGMs(
-                        activeChar.getName() + ": Reloaded Quest ID:" + questId + ".");
+                adminData.broadcastMessageToGMs(
+                    activeChar.getName() + ": Reloaded Quest ID:" + questId + ".");
               }
             } else {
               QuestManager.getInstance().reloadAllScripts();
               activeChar.sendMessage("All scripts have been reloaded.");
-              AdminData.getInstance()
-                  .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Quests.");
+              adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Quests.");
             }
             break;
           }
@@ -119,8 +123,7 @@ public class AdminReload implements IAdminCommandHandler {
           {
             WalkingManager.getInstance().load();
             activeChar.sendMessage("All walkers have been reloaded");
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Walkers.");
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Walkers.");
             break;
           }
         case "htm":
@@ -131,9 +134,8 @@ public class AdminReload implements IAdminCommandHandler {
               final File file = new File(server().getDatapackRoot(), "data/html/" + path);
               if (file.exists()) {
                 HtmCache.getInstance().reload(file);
-                AdminData.getInstance()
-                    .broadcastMessageToGMs(
-                        activeChar.getName() + ": Reloaded Htm File:" + file.getName() + ".");
+                adminData.broadcastMessageToGMs(
+                    activeChar.getName() + ": Reloaded Htm File:" + file.getName() + ".");
               } else {
                 activeChar.sendMessage("File or Directory does not exist.");
               }
@@ -145,94 +147,83 @@ public class AdminReload implements IAdminCommandHandler {
                       + " megabytes on "
                       + HtmCache.getInstance().getLoadedFiles()
                       + " files loaded");
-              AdminData.getInstance()
-                  .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Htms.");
+              adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Htms.");
             }
             break;
           }
         case "multisell":
           {
             MultisellData.getInstance().load();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Multisells.");
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Multisells.");
             break;
           }
         case "buylist":
           {
-            BuyListData.getInstance().load();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Buylists.");
+            buyListData.load();
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Buylists.");
             break;
           }
         case "teleport":
           {
             TeleportLocationTable.getInstance().reloadAll();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Teleports.");
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Teleports.");
             break;
           }
         case "skill":
           {
             SkillData.getInstance().reload();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Skills.");
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Skills.");
             break;
           }
         case "item":
           {
             ItemTable.getInstance().reload();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Items.");
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Items.");
             break;
           }
         case "door":
           {
             DoorData.getInstance().load();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Doors.");
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Doors.");
             break;
           }
         case "zone":
           {
             ZoneManager.getInstance().reload();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Zones.");
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Zones.");
             break;
           }
         case "cw":
           {
             CursedWeaponsManager.getInstance().reload();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Cursed Weapons.");
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Cursed Weapons.");
             break;
           }
         case "crest":
           {
             CrestTable.getInstance().load();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded Crests.");
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded Crests.");
             break;
           }
         case "enchant":
           {
             EnchantItemGroupsData.getInstance().load();
             EnchantItemData.getInstance().load();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded item enchanting data.");
+            adminData.broadcastMessageToGMs(
+                activeChar.getName() + ": Reloaded item enchanting data.");
             break;
           }
         case "transform":
           {
             TransformData.getInstance().load();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded transform data.");
+            adminData.broadcastMessageToGMs(activeChar.getName() + ": Reloaded transform data.");
             break;
           }
         case "creationpoint":
           {
             PlayerCreationPointData.getInstance().load();
-            AdminData.getInstance()
-                .broadcastMessageToGMs(activeChar.getName() + ": Reloaded creation points data.");
+            adminData.broadcastMessageToGMs(
+                activeChar.getName() + ": Reloaded creation points data.");
             break;
           }
         default:

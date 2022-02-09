@@ -1,7 +1,6 @@
 package com.l2jserver.gameserver.model.actor;
 
 import com.l2jserver.commons.util.Rnd;
-import com.l2jserver.gameserver.Context;
 import com.l2jserver.gameserver.GameTimeController;
 import com.l2jserver.gameserver.GeoData;
 import com.l2jserver.gameserver.ThreadPoolManager;
@@ -13,7 +12,6 @@ import com.l2jserver.gameserver.data.xml.impl.CategoryData;
 import com.l2jserver.gameserver.data.xml.impl.DoorData;
 import com.l2jserver.gameserver.datatables.ItemTable;
 import com.l2jserver.gameserver.enums.*;
-import com.l2jserver.gameserver.idfactory.IdFactory;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
 import com.l2jserver.gameserver.instancemanager.MapRegionManager;
 import com.l2jserver.gameserver.instancemanager.TerritoryWarManager;
@@ -207,7 +205,8 @@ public abstract class L2Character extends L2Object implements ISkillsHolder, IDe
 	 * @param template the creature template
 	 */
 	public L2Character(L2CharTemplate template) {
-		this(IdFactory.getInstance().getNextId(), template);
+		this(0, template);
+		throw new IllegalStateException("Create instance with id!");
 	}
 	
 	/**

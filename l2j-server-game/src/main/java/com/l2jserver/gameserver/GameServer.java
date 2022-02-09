@@ -37,6 +37,7 @@ import com.l2jserver.gameserver.status.Status;
 import com.l2jserver.gameserver.taskmanager.KnownListUpdateTaskManager;
 import com.l2jserver.gameserver.taskmanager.TaskManager;
 import com.l2jserver.gameserver.util.DeadLockDetector;
+import com.l2jserver.gameserver.util.IXmlReader;
 import com.l2jserver.mmocore.SelectorConfig;
 import com.l2jserver.mmocore.SelectorThread;
 import org.slf4j.Logger;
@@ -48,6 +49,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.l2jserver.gameserver.config.Configuration.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -62,10 +64,14 @@ public class GameServer {
   private final DeadLockDetector deadDetectThread;
 
   private final IdFactory idFactory;
+  private final List<IXmlReader> xmlreaders;
 
-  public GameServer(L2GamePacketHandler gamePacketHandler, IdFactory idFactory) throws IOException {
+  public GameServer(
+      L2GamePacketHandler gamePacketHandler, IdFactory idFactory, List<IXmlReader> xmlreaders)
+      throws IOException {
     this.gamePacketHandler = gamePacketHandler;
     this.idFactory = idFactory;
+    this.xmlreaders = xmlreaders;
 
     final var serverLoadStart = System.currentTimeMillis();
     printSection("Database");
@@ -79,6 +85,7 @@ public class GameServer {
 
     DAOFactory.getInstance();
 
+    xmlreaders.forEach(IXmlReader::load);
     if (!idFactory.isInitialized()) {
       LOG.error("Could not read object IDs from database. Please check your configuration.");
       throw new IllegalStateException("Could not initialize the Id factory!");
@@ -117,9 +124,7 @@ public class GameServer {
     ItemTable.getInstance();
     EnchantItemGroupsData.getInstance();
     EnchantItemData.getInstance();
-    EnchantItemOptionsData.getInstance();
     OptionData.getInstance();
-    EnchantItemHPBonusData.getInstance();
     MerchantPriceConfigTable.getInstance().loadInstances();
     BuyListData.getInstance();
     MultisellData.getInstance();
