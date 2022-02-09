@@ -1,21 +1,3 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.instancemanager;
 
 import java.util.ArrayList;
@@ -26,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.l2jserver.gameserver.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,12 +24,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2GrandBossInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.interfaces.IStorable;
 import com.l2jserver.gameserver.model.zone.type.L2BossZone;
+import org.springframework.stereotype.Service;
 
-/**
- * Grand Boss manager.
- * @author DaRkRaGe
- * @author Emperorc
- */
+@Service
 public final class GrandBossManager implements IStorable {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(GrandBossManager.class);
@@ -66,13 +46,14 @@ public final class GrandBossManager implements IStorable {
 	private final Map<Integer, Integer> _bossStatus = new ConcurrentHashMap<>();
 	
 	private final Map<Integer, L2BossZone> _zones = new ConcurrentHashMap<>();
-	
-	protected GrandBossManager() {
+	private final Context context;
+	protected GrandBossManager(Context context) {
+		this.context = context;
 		init();
 	}
 	
 	private void init() {
-		try (var con = ConnectionFactory.getInstance().getConnection();
+		try (var con = context.connectionFactory.getConnection();
 			var s = con.createStatement();
 			var rs = s.executeQuery("SELECT * from grandboss_data ORDER BY boss_id")) {
 			while (rs.next()) {
@@ -112,7 +93,7 @@ public final class GrandBossManager implements IStorable {
 			zones.put(zoneId, new ArrayList<>());
 		}
 		
-		try (var con = ConnectionFactory.getInstance().getConnection();
+		try (var con = context.connectionFactory.getConnection();
 			var s = con.createStatement();
 			var rs = s.executeQuery("SELECT * from grandboss_list ORDER BY player_id")) {
 			while (rs.next()) {
@@ -305,15 +286,11 @@ public final class GrandBossManager implements IStorable {
 		return _zones;
 	}
 	
-	/**
-	 * Gets the single instance of {@code GrandBossManager}.
-	 * @return single instance of {@code GrandBossManager}
-	 */
 	public static GrandBossManager getInstance() {
 		return SingletonHolder._instance;
 	}
 	
 	private static class SingletonHolder {
-		protected static final GrandBossManager _instance = new GrandBossManager();
+		protected static final GrandBossManager _instance = new GrandBossManager(null);
 	}
 }

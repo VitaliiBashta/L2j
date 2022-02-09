@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import com.l2jserver.gameserver.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,8 +84,8 @@ public class L2DoorInstance extends L2Character {
 	// used for autoclose on open
 	private Future<?> _autoCloseTask;
 	
-	public L2DoorInstance(L2DoorTemplate template) {
-		super(template);
+	public L2DoorInstance(Context context, L2DoorTemplate template) {
+		super(context, template);
 		setInstanceType(InstanceType.L2DoorInstance);
 		setIsInvul(false);
 		setLethalable(false);

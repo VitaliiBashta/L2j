@@ -1,6 +1,7 @@
 package com.l2jserver.gameserver.model.actor;
 
 import com.l2jserver.commons.util.Rnd;
+import com.l2jserver.gameserver.Context;
 import com.l2jserver.gameserver.GameTimeController;
 import com.l2jserver.gameserver.GeoData;
 import com.l2jserver.gameserver.ThreadPoolManager;

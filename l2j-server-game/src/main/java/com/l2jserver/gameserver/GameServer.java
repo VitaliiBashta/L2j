@@ -164,7 +164,6 @@ public class GameServer {
     }
 
     printSection("NPCs");
-    SkillLearnData.getInstance();
     NpcData.getInstance();
     WalkingManager.getInstance();
     StaticObjectData.getInstance();

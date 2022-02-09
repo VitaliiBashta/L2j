@@ -1,21 +1,3 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.dao.impl.mysql;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
@@ -36,10 +18,7 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.util.Util;
 
-/**
- * Skill DAO MySQL implementation.
- * @author Zoey76
- */
+
 public class SkillDAOMySQLImpl implements SkillDAO {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SkillDAOMySQLImpl.class);
@@ -55,7 +34,10 @@ public class SkillDAOMySQLImpl implements SkillDAO {
 	private static final String DELETE_ONE = "DELETE FROM character_skills WHERE skill_id=? AND charId=? AND class_index=?";
 	
 	private static final String DELETE_ALL = "DELETE FROM character_skills WHERE charId=? AND class_index=?";
-	
+
+	public SkillDAOMySQLImpl() {
+	}
+
 	@Override
 	public void load(L2PcInstance player) {
 		try (var con = ConnectionFactory.getInstance().getConnection();

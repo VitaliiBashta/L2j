@@ -1,5 +1,6 @@
 package com.l2jserver.gameserver.model;
 
+import com.l2jserver.gameserver.Context;
 import com.l2jserver.gameserver.enums.InstanceType;
 import com.l2jserver.gameserver.enums.ShotType;
 import com.l2jserver.gameserver.handler.ActionHandler;
@@ -42,6 +43,7 @@ public abstract class L2Object extends ListenersContainer
   private final AtomicInteger _heading = new AtomicInteger(0);
   /** Instance id of object. 0 - Global */
   private final AtomicInteger _instanceId = new AtomicInteger(0);
+  private final Map<Class<?>, Object> scripts = new ConcurrentHashMap<>(1);
   /** Name */
   private String _name;
   /** Object ID */
@@ -50,8 +52,6 @@ public abstract class L2Object extends ListenersContainer
   private L2WorldRegion _worldRegion;
   /** Instance type */
   private InstanceType _instanceType = null;
-
-  private final Map<Class<?>, Object> scripts = new ConcurrentHashMap<>(1);
   private boolean _isVisible;
   private boolean _isInvisible;
   private ObjectKnownList _knownList;

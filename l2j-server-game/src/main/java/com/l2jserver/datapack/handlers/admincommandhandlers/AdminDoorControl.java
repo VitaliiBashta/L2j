@@ -24,15 +24,19 @@ public class AdminDoorControl implements IAdminCommandHandler {
   private static final String[] ADMIN_COMMANDS = {
     "admin_open", "admin_close", "admin_openall", "admin_closeall"
   };
-  private static DoorData _doorTable = DoorData.getInstance();
+  private final DoorData doorData;
+
+  public AdminDoorControl(DoorData doorData) {
+    this.doorData = doorData;
+  }
 
   @Override
   public boolean useAdminCommand(String command, L2PcInstance activeChar) {
     try {
       if (command.startsWith("admin_open ")) {
         int doorId = Integer.parseInt(command.substring(11));
-        if (_doorTable.getDoor(doorId) != null) {
-          _doorTable.getDoor(doorId).openMe();
+        if (doorData.getDoor(doorId) != null) {
+          doorData.getDoor(doorId).openMe();
         } else {
           for (Castle castle : CastleManager.getInstance().getCastles()) {
             if (castle.getDoor(doorId) != null) {
@@ -42,8 +46,8 @@ public class AdminDoorControl implements IAdminCommandHandler {
         }
       } else if (command.startsWith("admin_close ")) {
         int doorId = Integer.parseInt(command.substring(12));
-        if (_doorTable.getDoor(doorId) != null) {
-          _doorTable.getDoor(doorId).closeMe();
+        if (doorData.getDoor(doorId) != null) {
+          doorData.getDoor(doorId).closeMe();
         } else {
           for (Castle castle : CastleManager.getInstance().getCastles()) {
             if (castle.getDoor(doorId) != null) {
@@ -53,7 +57,7 @@ public class AdminDoorControl implements IAdminCommandHandler {
         }
       }
       if (command.equals("admin_closeall")) {
-        for (L2DoorInstance door : _doorTable.getDoors()) {
+        for (L2DoorInstance door : doorData.getDoors()) {
           door.closeMe();
         }
         for (Castle castle : CastleManager.getInstance().getCastles()) {
@@ -63,7 +67,7 @@ public class AdminDoorControl implements IAdminCommandHandler {
         }
       }
       if (command.equals("admin_openall")) {
-        for (L2DoorInstance door : _doorTable.getDoors()) {
+        for (L2DoorInstance door : doorData.getDoors()) {
           door.openMe();
         }
         for (Castle castle : CastleManager.getInstance().getCastles()) {

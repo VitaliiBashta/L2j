@@ -25,12 +25,10 @@ import com.l2jserver.gameserver.model.zone.type.L2BossZone;
 import com.l2jserver.gameserver.network.serverpackets.SocialAction;
 import com.l2jserver.gameserver.network.serverpackets.SpecialCamera;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Valakas' AI.
- * @author Tryskell
- */
-public final class Valakas extends AbstractNpcAI {
+@Service
+public class Valakas extends AbstractNpcAI {
 	// NPC
 	private static final int VALAKAS = 29028;
 	// Skills

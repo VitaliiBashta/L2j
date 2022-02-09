@@ -56,7 +56,7 @@ public abstract class L2Playable extends L2Character {
 	}
 	
 	public L2Playable(L2CharTemplate template) {
-		super(template);
+		super(null, template);
 		setInstanceType(InstanceType.L2Playable);
 		setIsInvul(false);
 	}

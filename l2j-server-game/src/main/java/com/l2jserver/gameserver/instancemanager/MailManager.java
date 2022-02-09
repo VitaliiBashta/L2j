@@ -1,21 +1,3 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.instancemanager;
 
 import java.util.ArrayList;
@@ -24,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.l2jserver.gameserver.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,19 +18,18 @@ import com.l2jserver.gameserver.model.L2World;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.entity.Message;
 import com.l2jserver.gameserver.network.serverpackets.ExNoticePostArrived;
+import org.springframework.stereotype.Service;
 
-/**
- * Mail Manager.
- * @author Migi
- * @author DS
- */
+@Service
 public final class MailManager {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(MailManager.class);
 	
 	private final Map<Integer, Message> _messages = new ConcurrentHashMap<>();
-	
-	protected MailManager() {
+
+	private final Context context;
+	protected MailManager(Context context) {
+		this.context = context;
 		load();
 	}
 	
@@ -184,7 +166,7 @@ public final class MailManager {
 	}
 	
 	public void removeAttachmentsInDb(int msgId) {
-		try (var con = ConnectionFactory.getInstance().getConnection();
+		try (var con = context.connectionFactory.getConnection();
 			var ps = con.prepareStatement("UPDATE messages SET hasAttachments = 'false' WHERE messageId = ?")) {
 			ps.setInt(1, msgId);
 			ps.execute();
@@ -194,7 +176,7 @@ public final class MailManager {
 	}
 	
 	public void deleteMessageInDb(int msgId) {
-		try (var con = ConnectionFactory.getInstance().getConnection();
+		try (var con = context.connectionFactory.getConnection();
 			var ps = con.prepareStatement("DELETE FROM messages WHERE messageId = ?")) {
 			ps.setInt(1, msgId);
 			ps.execute();
@@ -211,6 +193,6 @@ public final class MailManager {
 	}
 	
 	private static class SingletonHolder {
-		protected static final MailManager INSTANCE = new MailManager();
+		protected static final MailManager INSTANCE = new MailManager(null);
 	}
 }

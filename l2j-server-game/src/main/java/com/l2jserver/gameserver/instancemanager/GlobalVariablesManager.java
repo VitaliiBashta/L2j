@@ -1,35 +1,16 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.instancemanager;
 
 import java.util.Map.Entry;
 
+import com.l2jserver.gameserver.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.model.variables.AbstractVariables;
+import org.springframework.stereotype.Service;
 
-/**
- * Global Variables Manager.
- * @author xban1x
- */
+@Service
 public final class GlobalVariablesManager extends AbstractVariables {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(GlobalVariablesManager.class);
@@ -39,15 +20,17 @@ public final class GlobalVariablesManager extends AbstractVariables {
 	private static final String DELETE_QUERY = "DELETE FROM global_variables";
 	
 	private static final String INSERT_QUERY = "INSERT INTO global_variables (var, value) VALUES (?, ?)";
-	
-	protected GlobalVariablesManager() {
+	private final Context context;
+
+	protected GlobalVariablesManager(Context context) {
+		this.context = context;
 		restoreMe();
 	}
 	
 	@Override
 	public boolean restoreMe() {
 		// Restore previous variables.
-		try (var con = ConnectionFactory.getInstance().getConnection();
+		try (var con = context.connectionFactory.getConnection();
 			var st = con.createStatement();
 			var rs = st.executeQuery(SELECT_QUERY)) {
 			while (rs.next()) {
@@ -98,6 +81,6 @@ public final class GlobalVariablesManager extends AbstractVariables {
 	}
 	
 	private static class SingletonHolder {
-		protected static final GlobalVariablesManager _instance = new GlobalVariablesManager();
+		protected static final GlobalVariablesManager _instance = new GlobalVariablesManager(null);
 	}
 }

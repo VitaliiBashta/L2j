@@ -768,8 +768,9 @@ public class SevenSignsFestival implements SpawnListener {
 	 * constructs. These are accessed by the use of an offset based on the number of festivals, thus: offset = FESTIVAL_COUNT + festivalId (Data for Dawn is always accessed by offset > FESTIVAL_COUNT)
 	 */
 	private final Map<Integer, Map<Integer, StatsSet>> _festivalData = new HashMap<>();
-	
-	protected SevenSignsFestival() {
+	private final Context context;
+	protected SevenSignsFestival(Context context) {
+		this.context = context;
 		restoreFestivalData();
 		
 		if (SevenSigns.getInstance().isSealValidationPeriod()) {
@@ -871,7 +872,7 @@ public class SevenSignsFestival implements SpawnListener {
 	 * Restores saved festival data, basic settings from the properties file and past high score data from the database.
 	 */
 	protected void restoreFestivalData() {
-		try (var con = ConnectionFactory.getInstance().getConnection();
+		try (var con = context.connectionFactory.getConnection();
 			var s = con.createStatement();
 			var rs = s.executeQuery("SELECT festivalId, cabal, cycle, date, score, members " + "FROM seven_signs_festival")) {
 			while (rs.next()) {
@@ -913,7 +914,7 @@ public class SevenSignsFestival implements SpawnListener {
 		query.append(' ');
 		query.append("FROM seven_signs_status WHERE id=0");
 		
-		try (var con = ConnectionFactory.getInstance().getConnection();
+		try (var con = context.connectionFactory.getConnection();
 			var s = con.createStatement();
 			var rs = s.executeQuery(query.toString())) {
 			while (rs.next()) {
@@ -933,7 +934,7 @@ public class SevenSignsFestival implements SpawnListener {
 	 * @param updateSettings
 	 */
 	public void saveFestivalData(boolean updateSettings) {
-		try (var con = ConnectionFactory.getInstance().getConnection();
+		try (var con = context.connectionFactory.getConnection();
 			var psInsert = con.prepareStatement("REPLACE INTO seven_signs_festival (festivalId, cabal, cycle, date, score, members) VALUES (?,?,?,?,?,?)")) {
 			for (Map<Integer, StatsSet> currCycleData : _festivalData.values()) {
 				for (StatsSet festivalDat : currCycleData.values()) {
@@ -2096,6 +2097,6 @@ public class SevenSignsFestival implements SpawnListener {
 	}
 	
 	private static class SingletonHolder {
-		protected static final SevenSignsFestival _instance = new SevenSignsFestival();
+		protected static final SevenSignsFestival _instance = new SevenSignsFestival(null);
 	}
 }

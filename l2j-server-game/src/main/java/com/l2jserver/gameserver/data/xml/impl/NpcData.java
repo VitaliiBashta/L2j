@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -37,6 +38,7 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.util.IXmlReader;
 import com.l2jserver.gameserver.util.Util;
 
+@Service
 public class NpcData implements IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(NpcData.class);
@@ -46,8 +48,9 @@ public class NpcData implements IXmlReader {
 	private final Map<String, Integer> _clans = new ConcurrentHashMap<>();
 	
 	private MinionData _minionData;
-	
-	protected NpcData() {
+	private final SkillLearnData skillLearnData;
+	protected NpcData(SkillLearnData skillLearnData) {
+		this.skillLearnData = skillLearnData;
 		load();
 	}
 	
@@ -568,7 +571,7 @@ public class NpcData implements IXmlReader {
 	
 	public void loadNpcsSkillLearn() {
 		_npcs.values().forEach(template -> {
-			final List<ClassId> teachInfo = SkillLearnData.getInstance().getSkillLearnData(template.getId());
+			final List<ClassId> teachInfo = skillLearnData.getSkillLearnData(template.getId());
 			if (teachInfo != null) {
 				template.addTeachInfo(teachInfo);
 			}
@@ -625,6 +628,6 @@ public class NpcData implements IXmlReader {
 	}
 	
 	private static class SingletonHolder {
-		protected static final NpcData INSTANCE = new NpcData();
+		protected static final NpcData INSTANCE = new NpcData(null);
 	}
 }
