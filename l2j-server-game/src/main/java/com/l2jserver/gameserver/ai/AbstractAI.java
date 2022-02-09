@@ -18,15 +18,6 @@
  */
 package com.l2jserver.gameserver.ai;
 
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_ATTACK;
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_FOLLOW;
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_IDLE;
-
-import java.util.concurrent.Future;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.l2jserver.gameserver.GameTimeController;
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.model.L2Object;
@@ -35,105 +26,81 @@ import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Summon;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.skills.Skill;
-import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
-import com.l2jserver.gameserver.network.serverpackets.AutoAttackStart;
-import com.l2jserver.gameserver.network.serverpackets.AutoAttackStop;
-import com.l2jserver.gameserver.network.serverpackets.Die;
-import com.l2jserver.gameserver.network.serverpackets.MoveToLocation;
-import com.l2jserver.gameserver.network.serverpackets.MoveToPawn;
-import com.l2jserver.gameserver.network.serverpackets.StopMove;
-import com.l2jserver.gameserver.network.serverpackets.StopRotation;
+import com.l2jserver.gameserver.network.serverpackets.*;
 import com.l2jserver.gameserver.taskmanager.AttackStanceTaskManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Mother class of all objects AI in the world.<br>
- * AbstractAI :<br>
- * <li>L2CharacterAI</li>
- */
+import java.util.concurrent.Future;
+
+import static com.l2jserver.gameserver.ai.CtrlIntention.*;
+
+
 public abstract class AbstractAI implements Ctrl {
 	protected static final Logger LOG = LoggerFactory.getLogger(AbstractAI.class);
-	
-	private NextAction _nextAction;
-	
+
+	private NextAction nextAction;
+
 	public NextAction getNextAction() {
-		return _nextAction;
+		return nextAction;
 	}
-	
+
 	public void setNextAction(NextAction nextAction) {
-		_nextAction = nextAction;
+		this.nextAction = nextAction;
 	}
-	
-	private class FollowTask implements Runnable {
-		protected int _range = 70;
-		
-		public FollowTask() {
+
+	@Override
+	public final void setIntention(CtrlIntention intention, Object arg0, Object arg1) {
+		// Stop the follow mode if necessary
+		if ((intention != AI_INTENTION_FOLLOW) && (intention != AI_INTENTION_ATTACK)) {
+			stopFollow();
 		}
-		
-		public FollowTask(int range) {
-			_range = range;
+
+		// Launch the onIntention method of the L2CharacterAI corresponding to the new Intention
+		switch (intention) {
+			case AI_INTENTION_IDLE -> onIntentionIdle();
+			case AI_INTENTION_ACTIVE -> onIntentionActive();
+			case AI_INTENTION_REST -> onIntentionRest();
+			case AI_INTENTION_ATTACK -> onIntentionAttack((L2Character) arg0);
+			case AI_INTENTION_CAST -> onIntentionCast((Skill) arg0, (L2Object) arg1);
+			case AI_INTENTION_MOVE_TO -> onIntentionMoveTo((Location) arg0);
+			case AI_INTENTION_FOLLOW -> onIntentionFollow((L2Character) arg0);
+			case AI_INTENTION_PICK_UP -> onIntentionPickUp((L2Object) arg0);
+			case AI_INTENTION_INTERACT -> onIntentionInteract((L2Object) arg0);
 		}
-		
-		@Override
-		public void run() {
-			try {
-				if (_followTask == null) {
-					return;
-				}
-				
-				L2Character followTarget = _followTarget; // copy to prevent NPE
-				if (followTarget == null) {
-					if (_actor instanceof L2Summon) {
-						((L2Summon) _actor).setFollowStatus(false);
-					}
-					setIntention(AI_INTENTION_IDLE);
-					return;
-				}
-				
-				if (!_actor.isInsideRadius(followTarget, _range, true, false)) {
-					if (!_actor.isInsideRadius(followTarget, 3000, true, false)) {
-						// if the target is too far (maybe also teleported)
-						if (_actor instanceof L2Summon) {
-							((L2Summon) _actor).setFollowStatus(false);
-						}
-						
-						setIntention(AI_INTENTION_IDLE);
-						return;
-					}
-					
-					moveToPawn(followTarget, _range);
-				}
-			} catch (Exception e) {
-				LOG.warn("{}: There has been a problem running the follow task!", getClass().getSimpleName(), e);
-			}
+
+		// If do move or follow intention drop next action.
+		if ((nextAction != null) && nextAction.getIntentions().contains(intention)) {
+			nextAction = null;
 		}
 	}
-	
+
 	/** The character that this AI manages */
 	protected final L2Character _actor;
-	
+
 	/** Current long-term intention */
 	protected CtrlIntention _intention = AI_INTENTION_IDLE;
 	/** Current long-term intention parameter */
 	protected Object _intentionArg0 = null;
 	/** Current long-term intention parameter */
 	protected Object _intentionArg1 = null;
-	
+
 	/** Flags about client's state, in order to know which messages to send */
 	protected volatile boolean _clientMoving;
 	/** Flags about client's state, in order to know which messages to send */
 	protected volatile boolean _clientAutoAttacking;
 	/** Flags about client's state, in order to know which messages to send */
 	protected int _clientMovingToPawnOffset;
-	
+
 	/** Different targets this AI maintains */
 	private L2Object _target;
 	private L2Character _castTarget;
 	protected L2Character _attackTarget;
 	protected L2Character _followTarget;
-	
+
 	/** The skill we are currently casting by INTENTION_CAST */
 	Skill _skill;
-	
+
 	/** Different internal state flags */
 	private int _moveToPawnTimeout;
 	
@@ -225,52 +192,6 @@ public abstract class AbstractAI implements Ctrl {
 		setIntention(intention, arg0, null);
 	}
 	
-	@Override
-	public final void setIntention(CtrlIntention intention, Object arg0, Object arg1) {
-		// Stop the follow mode if necessary
-		if ((intention != AI_INTENTION_FOLLOW) && (intention != AI_INTENTION_ATTACK)) {
-			stopFollow();
-		}
-		
-		// Launch the onIntention method of the L2CharacterAI corresponding to the new Intention
-		switch (intention) {
-			case AI_INTENTION_IDLE -> onIntentionIdle();
-			case AI_INTENTION_ACTIVE -> onIntentionActive();
-			case AI_INTENTION_REST -> onIntentionRest();
-			case AI_INTENTION_ATTACK -> onIntentionAttack((L2Character) arg0);
-			case AI_INTENTION_CAST -> onIntentionCast((Skill) arg0, (L2Object) arg1);
-			case AI_INTENTION_MOVE_TO -> onIntentionMoveTo((Location) arg0);
-			case AI_INTENTION_FOLLOW -> onIntentionFollow((L2Character) arg0);
-			case AI_INTENTION_PICK_UP -> onIntentionPickUp((L2Object) arg0);
-			case AI_INTENTION_INTERACT -> onIntentionInteract((L2Object) arg0);
-		}
-		
-		// If do move or follow intention drop next action.
-		if ((_nextAction != null) && _nextAction.getIntentions().contains(intention)) {
-			_nextAction = null;
-		}
-	}
-	
-	/**
-	 * Launch the L2CharacterAI onEvt method corresponding to the Event.<br>
-	 * <FONT COLOR=#FF0000><B> <U>Caution</U> : The current general intention won't be change (ex : If the character attack and is stunned, he will attack again after the stunned period)</B></FONT>
-	 * @param evt The event whose the AI must be notified
-	 */
-	@Override
-	public final void notifyEvent(CtrlEvent evt) {
-		notifyEvent(evt, null, null);
-	}
-	
-	/**
-	 * Launch the L2CharacterAI onEvt method corresponding to the Event. <FONT COLOR=#FF0000><B> <U>Caution</U> : The current general intention won't be change (ex : If the character attack and is stunned, he will attack again after the stunned period)</B></FONT>
-	 * @param evt The event whose the AI must be notified
-	 * @param arg0 The first parameter of the Event (optional target)
-	 */
-	@Override
-	public final void notifyEvent(CtrlEvent evt, Object arg0) {
-		notifyEvent(evt, arg0, null);
-	}
-	
 	/**
 	 * Launch the L2CharacterAI onEvt method corresponding to the Event. <FONT COLOR=#FF0000><B> <U>Caution</U> : The current general intention won't be change (ex : If the character attack and is stunned, he will attack again after the stunned period)</B></FONT>
 	 * @param evt The event whose the AI must be notified
@@ -280,7 +201,7 @@ public abstract class AbstractAI implements Ctrl {
 		if ((!_actor.isVisible() && !_actor.isTeleporting()) || !_actor.hasAI()) {
 			return;
 		}
-		
+
 		switch (evt) {
 			case EVT_THINK:
 				onEvtThink();
@@ -355,10 +276,95 @@ public abstract class AbstractAI implements Ctrl {
 				break;
 			}
 		}
-		
+
 		// Do next action.
-		if ((_nextAction != null) && _nextAction.getEvents().contains(evt)) {
-			_nextAction.doAction();
+		if ((nextAction != null) && nextAction.getEvents().contains(evt)) {
+			nextAction.doAction();
+		}
+	}
+	
+	/**
+	 * Launch the L2CharacterAI onEvt method corresponding to the Event.<br>
+	 * <FONT COLOR=#FF0000><B> <U>Caution</U> : The current general intention won't be change (ex : If the character attack and is stunned, he will attack again after the stunned period)</B></FONT>
+	 * @param evt The event whose the AI must be notified
+	 */
+	@Override
+	public final void notifyEvent(CtrlEvent evt) {
+		notifyEvent(evt, null, null);
+	}
+	
+	/**
+	 * Launch the L2CharacterAI onEvt method corresponding to the Event. <FONT COLOR=#FF0000><B> <U>Caution</U> : The current general intention won't be change (ex : If the character attack and is stunned, he will attack again after the stunned period)</B></FONT>
+	 * @param evt The event whose the AI must be notified
+	 * @param arg0 The first parameter of the Event (optional target)
+	 */
+	@Override
+	public final void notifyEvent(CtrlEvent evt, Object arg0) {
+		notifyEvent(evt, arg0, null);
+	}
+	
+	/**
+	 * Move the actor to Pawn server side AND client side by sending Server->Client packet MoveToPawn <I>(broadcast)</I>.<br>
+	 * <FONT COLOR=#FF0000><B> <U>Caution</U> : Low level function, used by AI subclasses</B></FONT>
+	 * @param pawn
+	 * @param offset
+	 */
+	protected void moveToPawn(L2Object pawn, int offset) {
+		// Check if actor can move
+		if (!_actor.isMovementDisabled()) {
+			if (offset < 10) {
+				offset = 10;
+			}
+
+			// prevent possible extra calls to this function (there is none?),
+			// also don't send movetopawn packets too often
+			boolean sendPacket = true;
+			if (_clientMoving && (_target == pawn)) {
+				if (_clientMovingToPawnOffset == offset) {
+					if (GameTimeController.getInstance().getGameTicks() < _moveToPawnTimeout) {
+						return;
+					}
+					sendPacket = false;
+				} else if (_actor.isOnGeodataPath()) {
+					// minimum time to calculate new route is 2 seconds
+					if (GameTimeController.getInstance().getGameTicks() < (_moveToPawnTimeout + 10)) {
+						return;
+					}
+				}
+			}
+
+			// Set AI movement data
+			_clientMoving = true;
+			_clientMovingToPawnOffset = offset;
+			_target = pawn;
+			_moveToPawnTimeout = GameTimeController.getInstance().getGameTicks();
+			_moveToPawnTimeout += 1000 / GameTimeController.MILLIS_IN_TICK;
+
+			if (pawn == null) {
+				return;
+			}
+
+			// Calculate movement data for a move to location action and add the actor to movingObjects of GameTimeController
+			_actor.moveToLocation(pawn.getX(), pawn.getY(), pawn.getZ(), offset);
+
+			if (!_actor.isMoving()) {
+				clientActionFailed();
+				return;
+			}
+
+			// Send a Server->Client packet MoveToPawn/CharMoveToLocation to the actor and all L2PcInstance in its _knownPlayers
+			if (pawn instanceof L2Character) {
+				if (_actor.isOnGeodataPath()) {
+					_actor.broadcastPacket(new MoveToLocation(_actor));
+					_clientMovingToPawnOffset = 0;
+				} else if (sendPacket) {
+					_actor.broadcastPacket(new MoveToPawn(_actor, (L2Character) pawn, offset));
+				}
+			} else {
+				_actor.broadcastPacket(new MoveToLocation(_actor));
+			}
+		} else {
+			clientActionFailed();
 		}
 	}
 	
@@ -432,71 +438,6 @@ public abstract class AbstractAI implements Ctrl {
 	}
 	
 	/**
-	 * Move the actor to Pawn server side AND client side by sending Server->Client packet MoveToPawn <I>(broadcast)</I>.<br>
-	 * <FONT COLOR=#FF0000><B> <U>Caution</U> : Low level function, used by AI subclasses</B></FONT>
-	 * @param pawn
-	 * @param offset
-	 */
-	protected void moveToPawn(L2Object pawn, int offset) {
-		// Check if actor can move
-		if (!_actor.isMovementDisabled()) {
-			if (offset < 10) {
-				offset = 10;
-			}
-			
-			// prevent possible extra calls to this function (there is none?),
-			// also don't send movetopawn packets too often
-			boolean sendPacket = true;
-			if (_clientMoving && (_target == pawn)) {
-				if (_clientMovingToPawnOffset == offset) {
-					if (GameTimeController.getInstance().getGameTicks() < _moveToPawnTimeout) {
-						return;
-					}
-					sendPacket = false;
-				} else if (_actor.isOnGeodataPath()) {
-					// minimum time to calculate new route is 2 seconds
-					if (GameTimeController.getInstance().getGameTicks() < (_moveToPawnTimeout + 10)) {
-						return;
-					}
-				}
-			}
-			
-			// Set AI movement data
-			_clientMoving = true;
-			_clientMovingToPawnOffset = offset;
-			_target = pawn;
-			_moveToPawnTimeout = GameTimeController.getInstance().getGameTicks();
-			_moveToPawnTimeout += 1000 / GameTimeController.MILLIS_IN_TICK;
-			
-			if (pawn == null) {
-				return;
-			}
-			
-			// Calculate movement data for a move to location action and add the actor to movingObjects of GameTimeController
-			_actor.moveToLocation(pawn.getX(), pawn.getY(), pawn.getZ(), offset);
-			
-			if (!_actor.isMoving()) {
-				clientActionFailed();
-				return;
-			}
-			
-			// Send a Server->Client packet MoveToPawn/CharMoveToLocation to the actor and all L2PcInstance in its _knownPlayers
-			if (pawn instanceof L2Character) {
-				if (_actor.isOnGeodataPath()) {
-					_actor.broadcastPacket(new MoveToLocation(_actor));
-					_clientMovingToPawnOffset = 0;
-				} else if (sendPacket) {
-					_actor.broadcastPacket(new MoveToPawn(_actor, (L2Character) pawn, offset));
-				}
-			} else {
-				_actor.broadcastPacket(new MoveToLocation(_actor));
-			}
-		} else {
-			clientActionFailed();
-		}
-	}
-	
-	/**
 	 * Move the actor to Location (x,y,z) server side AND client side by sending Server->Client packet CharMoveToLocation <I>(broadcast)</I>.<br>
 	 * <FONT COLOR=#FF0000><B> <U>Caution</U> : Low level function, used by AI subclasses</B></FONT>
 	 * @param x
@@ -509,13 +450,13 @@ public abstract class AbstractAI implements Ctrl {
 			// Set AI movement data
 			_clientMoving = true;
 			_clientMovingToPawnOffset = 0;
-			
+
 			// Calculate movement data for a move to location action and add the actor to movingObjects of GameTimeController
 			_actor.moveToLocation(x, y, z, 0);
-			
+
 			// Send a Server->Client packet CharMoveToLocation to the actor and all L2PcInstance in its _knownPlayers
 			_actor.broadcastPacket(new MoveToLocation(_actor));
-			
+
 		} else {
 			clientActionFailed();
 		}
@@ -531,20 +472,39 @@ public abstract class AbstractAI implements Ctrl {
 		if (_actor.isMoving()) {
 			_actor.stopMove(loc);
 		}
-		
+
 		_clientMovingToPawnOffset = 0;
-		
+
 		if (_clientMoving || (loc != null)) {
 			_clientMoving = false;
-			
+
 			// Send a Server->Client packet StopMove to the actor and all L2PcInstance in its _knownPlayers
 			_actor.broadcastPacket(new StopMove(_actor));
-			
+
 			if (loc != null) {
 				// Send a Server->Client packet StopRotation to the actor and all L2PcInstance in its _knownPlayers
 				_actor.broadcastPacket(new StopRotation(_actor.getObjectId(), loc.getHeading(), 0));
 			}
 		}
+	}
+	
+	/**
+	 * Kill the actor client side by sending Server->Client packet AutoAttackStop, StopMove/StopRotation, Die <I>(broadcast)</I>.<br>
+	 * <FONT COLOR=#FF0000><B> <U>Caution</U> : Low level function, used by AI subclasses</B></FONT>
+	 */
+	protected void clientNotifyDead() {
+		// Send a Server->Client packet Die to the actor and all L2PcInstance in its _knownPlayers
+		Die msg = new Die(_actor);
+		_actor.broadcastPacket(msg);
+
+		// Init AI
+		_intention = AI_INTENTION_IDLE;
+		_target = null;
+		_castTarget = null;
+		_attackTarget = null;
+
+		// Cancel the follow task if necessary
+		stopFollow();
 	}
 	
 	/**
@@ -620,22 +580,18 @@ public abstract class AbstractAI implements Ctrl {
 	}
 	
 	/**
-	 * Kill the actor client side by sending Server->Client packet AutoAttackStop, StopMove/StopRotation, Die <I>(broadcast)</I>.<br>
-	 * <FONT COLOR=#FF0000><B> <U>Caution</U> : Low level function, used by AI subclasses</B></FONT>
+	 * Create and Launch an AI Follow Task to execute every 1s.
+	 * @param target The L2Character to follow
 	 */
-	protected void clientNotifyDead() {
-		// Send a Server->Client packet Die to the actor and all L2PcInstance in its _knownPlayers
-		Die msg = new Die(_actor);
-		_actor.broadcastPacket(msg);
-		
-		// Init AI
-		_intention = AI_INTENTION_IDLE;
-		_target = null;
-		_castTarget = null;
-		_attackTarget = null;
-		
-		// Cancel the follow task if necessary
-		stopFollow();
+	public synchronized void startFollow(L2Character target) {
+		if (_followTask != null) {
+			_followTask.cancel(false);
+			_followTask = null;
+		}
+
+		// Create and Launch an AI Follow Task to execute every 1s
+		_followTarget = target;
+		_followTask = ThreadPoolManager.getInstance().scheduleAiAtFixedRate(new FollowTask(), 5, FOLLOW_INTERVAL);
 	}
 	
 	/**
@@ -658,21 +614,6 @@ public abstract class AbstractAI implements Ctrl {
 	}
 	
 	/**
-	 * Create and Launch an AI Follow Task to execute every 1s.
-	 * @param target The L2Character to follow
-	 */
-	public synchronized void startFollow(L2Character target) {
-		if (_followTask != null) {
-			_followTask.cancel(false);
-			_followTask = null;
-		}
-		
-		// Create and Launch an AI Follow Task to execute every 1s
-		_followTarget = target;
-		_followTask = ThreadPoolManager.getInstance().scheduleAiAtFixedRate(new FollowTask(), 5, FOLLOW_INTERVAL);
-	}
-	
-	/**
 	 * Create and Launch an AI Follow Task to execute every 0.5s, following at specified range.
 	 * @param target The L2Character to follow
 	 * @param range
@@ -682,9 +623,54 @@ public abstract class AbstractAI implements Ctrl {
 			_followTask.cancel(false);
 			_followTask = null;
 		}
-		
+
 		_followTarget = target;
 		_followTask = ThreadPoolManager.getInstance().scheduleAiAtFixedRate(new FollowTask(range), 5, ATTACK_FOLLOW_INTERVAL);
+	}
+	
+	private class FollowTask implements Runnable {
+		protected int _range = 70;
+
+		public FollowTask() {
+		}
+
+		public FollowTask(int range) {
+			_range = range;
+		}
+
+		@Override
+		public void run() {
+			try {
+				if (_followTask == null) {
+					return;
+				}
+
+				L2Character followTarget = _followTarget; // copy to prevent NPE
+				if (followTarget == null) {
+					if (_actor instanceof L2Summon) {
+						((L2Summon) _actor).setFollowStatus(false);
+					}
+					setIntention(AI_INTENTION_IDLE);
+					return;
+				}
+
+				if (!_actor.isInsideRadius(followTarget, _range, true, false)) {
+					if (!_actor.isInsideRadius(followTarget, 3000, true, false)) {
+						// if the target is too far (maybe also teleported)
+						if (_actor instanceof L2Summon) {
+							((L2Summon) _actor).setFollowStatus(false);
+						}
+
+						setIntention(AI_INTENTION_IDLE);
+						return;
+					}
+
+					moveToPawn(followTarget, _range);
+				}
+			} catch (Exception e) {
+				LOG.warn("{}: There has been a problem running the follow task!", getClass().getSimpleName(), e);
+			}
+		}
 	}
 	
 	/**
