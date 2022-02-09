@@ -1,31 +1,68 @@
 package com.l2jserver.gameserver.scripting;
 
-import org.mdkt.compiler.InMemoryJavaCompiler;
+import com.l2jserver.datapack.conquerablehalls.DevastatedCastle.DevastatedCastle;
+import com.l2jserver.datapack.conquerablehalls.FortressOfResistance.FortressOfResistance;
+import com.l2jserver.datapack.conquerablehalls.FortressOfTheDead.FortressOfTheDead;
+import com.l2jserver.datapack.conquerablehalls.RainbowSpringsChateau.RainbowSpringsChateau;
+import com.l2jserver.datapack.conquerablehalls.flagwar.BanditStronghold.BanditStronghold;
+import com.l2jserver.datapack.conquerablehalls.flagwar.WildBeastReserve.WildBeastReserve;
+import com.l2jserver.datapack.custom.Validators.SubClassSkills;
+import com.l2jserver.datapack.custom.events.Elpies.Elpies;
+import com.l2jserver.datapack.custom.events.Rabbits.Rabbits;
+import com.l2jserver.datapack.custom.events.Race.Race;
+import com.l2jserver.datapack.custom.events.TvT.TvTManager.TvTManager;
+import com.l2jserver.datapack.custom.events.Wedding.Wedding;
+import com.l2jserver.datapack.custom.service.buffer.BufferService;
+import com.l2jserver.datapack.custom.service.teleporter.TeleporterService;
+import com.l2jserver.datapack.events.CharacterBirthday.CharacterBirthday;
+import com.l2jserver.datapack.events.FreyaCelebration.FreyaCelebration;
+import com.l2jserver.datapack.events.GiftOfVitality.GiftOfVitality;
+import com.l2jserver.datapack.events.HeavyMedal.HeavyMedal;
+import com.l2jserver.datapack.events.LoveYourGatekeeper.LoveYourGatekeeper;
+import com.l2jserver.datapack.events.MasterOfEnchanting.MasterOfEnchanting;
+import com.l2jserver.datapack.events.TheValentineEvent.TheValentineEvent;
+import com.l2jserver.datapack.features.SkillTransfer.SkillTransfer;
+import com.l2jserver.datapack.vehicles.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.script.ScriptException;
-import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.file.Path;
+import java.util.List;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-import static com.l2jserver.gameserver.config.Configuration.server;
-
-/**
- * Script engine manager.
- *
- * @author KenM
- * @author Zoey76
- */
 public final class ScriptEngineManager {
   private static final Logger LOG = LoggerFactory.getLogger(ScriptEngineManager.class);
 
-  private static final String CLASS_PATH =
-      server().getScriptRoot().getAbsolutePath()
-          + System.getProperty("path.separator")
-          + System.getProperty("java.class.path");
+  private static final List<Class<?>> scripts =
+      List.of(
+          SkillTransfer.class,
+          SubClassSkills.class,
+          BufferService.class,
+          TeleporterService.class,
+          Elpies.class,
+          Rabbits.class,
+          Race.class,
+          TvTManager.class,
+          Wedding.class,
+          BoatTalkingGludin.class,
+          BoatGiranTalking.class,
+          BoatInnadrilTour.class,
+          BoatGludinRune.class,
+          BoatRunePrimeval.class,
+          BanditStronghold.class,
+          WildBeastReserve.class,
+          DevastatedCastle.class,
+          FortressOfResistance.class,
+          FortressOfTheDead.class,
+          RainbowSpringsChateau.class,
+          CharacterBirthday.class,
+          GiftOfVitality.class,
+          HeavyMedal.class,
+          TheValentineEvent.class,
+          FreyaCelebration.class,
+          MasterOfEnchanting.class,
+          LoveYourGatekeeper.class);
 
   private static final String MAIN = "main";
 
@@ -33,41 +70,15 @@ public final class ScriptEngineManager {
 
   private static final Class<?>[] ARG_MAIN = new Class[] {String[].class};
 
-  private static String getClassForFile(Path script) {
-    final String path = script.toAbsolutePath().toString();
-    final String scpPath = server().getScriptRoot().getAbsolutePath();
-    if (path.startsWith(scpPath)) {
-      final int idx = path.lastIndexOf('.');
-      return path.substring(scpPath.length() + 1, idx).replace('/', '.').replace('\\', '.');
-    }
-    return null;
-  }
-
-  private static void runMain(Class<?> clazz) {
+  private static void runMain(Class<?> clazz)
+      throws InvocationTargetException, IllegalAccessException {
     final var mainMethod = findMethod(clazz, MAIN, ARG_MAIN);
     if (mainMethod == null) {
       LOG.warn("Unable to find main method in class {}!", clazz);
       return;
     }
 
-    try {
-      mainMethod.invoke(null, MAIN_METHOD_ARGS);
-    } catch (Exception ex) {
-      LOG.error("Error loading script {}!", clazz);
-    }
-  }
-
-  private static String readerToString(Reader reader) throws ScriptException {
-    try (var in = new BufferedReader(reader)) {
-      final var result = new StringBuilder();
-      String line;
-      while ((line = in.readLine()) != null) {
-        result.append(line).append(System.lineSeparator());
-      }
-      return result.toString();
-    } catch (IOException ex) {
-      throw new ScriptException(ex);
-    }
+    mainMethod.invoke(null, MAIN_METHOD_ARGS);
   }
 
   private static Method findMethod(Class<?> clazz, String methodName, Class<?>[] args) {
@@ -86,100 +97,15 @@ public final class ScriptEngineManager {
     return SingletonHolder.INSTANCE;
   }
 
-  private InMemoryJavaCompiler compiler() {
-    return InMemoryJavaCompiler.newInstance() //
-        .useOptions("-classpath", CLASS_PATH, "-g") //
-        .ignoreWarnings();
-  }
-
-  public void executeScriptList(File list) throws Exception {
-    if (general().noQuests()) {
-      return;
-    }
-
-    if (!list.isFile()) {
-      throw new IllegalArgumentException(
-          "Argument must be an file containing a list of scripts to be loaded");
-    }
-
-    final var compiler = compiler();
-    try (var fis = new FileInputStream(list);
-        var isr = new InputStreamReader(fis);
-        var lnr = new LineNumberReader(isr)) {
-      String line;
-      while ((line = lnr.readLine()) != null) {
-        final var parts = line.trim().split("#");
-        if ((parts.length <= 0) || parts[0].trim().isEmpty() || (parts[0].charAt(0) == '#')) {
-          continue;
-        }
-
-        line = parts[0].trim();
-        if (line.endsWith("/**")) {
-          line = line.substring(0, line.length() - 3);
-        } else if (line.endsWith("/*")) {
-          line = line.substring(0, line.length() - 2);
-        }
-
-        final var file = new File(server().getScriptRoot(), line);
-        if (file.isDirectory() && parts[0].endsWith("/**")) {
-          executeAllScriptsInDirectory(compiler, file, true);
-        } else if (file.isDirectory() && parts[0].endsWith("/*")) {
-          executeAllScriptsInDirectory(compiler, file, false);
-        } else if (file.isFile()) {
-          addSource(compiler, file.toPath());
-        } else {
-          LOG.warn(
-              "Failed loading: ({}) @ {}:{} - Reason: doesnt exists or is not a file.",
-              file.getCanonicalPath(),
-              list.getName(),
-              lnr.getLineNumber());
-        }
-      }
-    }
-
-    compiler.compileAll().forEach((k, v) -> runMain(v));
-  }
-
-  private void executeAllScriptsInDirectory(
-      InMemoryJavaCompiler compiler, File dir, boolean recurseDown) {
-    if (!dir.isDirectory()) {
-      throw new IllegalArgumentException(
-          "The argument directory either doesnt exists or is not an directory.");
-    }
-
-    final var files = dir.listFiles();
-    if (files == null) {
-      return;
-    }
-
-    for (var file : files) {
-      if (file.isDirectory() && recurseDown) {
-        if (general().debug()) {
-          LOG.info("Entering folder: {}", file.getName());
-        }
-        executeAllScriptsInDirectory(compiler, file, recurseDown);
-      } else if (file.isFile()) {
-        addSource(compiler, file.toPath());
-      }
+  public void executeScriptList() throws InvocationTargetException, IllegalAccessException {
+    for (Class<?> script : scripts) {
+      runMain(script);
     }
   }
 
-  public void executeScript(Class<?> clazz) {
+  public void executeScript(Class<?> clazz)
+      throws InvocationTargetException, IllegalAccessException {
     runMain(clazz);
-  }
-
-  public void addSource(InMemoryJavaCompiler compiler, Path file) {
-    if (general().debug()) {
-      LOG.info("Loading Script: {}", file.toAbsolutePath());
-    }
-
-    try (var fis = new FileInputStream(file.toFile());
-        var isr = new InputStreamReader(fis);
-        var reader = new BufferedReader(isr)) {
-      compiler.addSource(getClassForFile(file), readerToString(reader));
-    } catch (Exception ex) {
-      LOG.warn("Error executing script!", ex);
-    }
   }
 
   private static class SingletonHolder {

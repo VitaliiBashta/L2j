@@ -56,13 +56,13 @@ import static com.l2jserver.gameserver.config.Configuration.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public final class GameServer {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(GameServer.class);
-	
+
 	private static final String DATAPACK = "-dp";
-	
+
 	private static final String SCRIPT = "-s";
-	
+
 	private static final String GEODATA = "-gd";
 
   private final SelectorThread<L2GameClient> selectorThread;
@@ -72,14 +72,14 @@ public final class GameServer {
   private final DeadLockDetector deadDetectThread;
 
 	public static GameServer gameServer;
-	
+
 	public static final Calendar dateTimeServerStarted = Calendar.getInstance();
-	
+
 	public GameServer() throws Exception {
 		// TODO(Zoey76): Remove when loggers rework is completed.
 		LogManager.getLogManager().reset();
 		SLF4JBridgeHandler.install();
-		
+
 		final var serverLoadStart = System.currentTimeMillis();
 		printSection("Database");
 		ConnectionFactory.builder() //
@@ -89,18 +89,18 @@ public final class GameServer {
 			.withMaxIdleTime(database().getMaxIdleTime()) //
 			.withMaxPoolSize(database().getMaxConnections()) //
 			.build();
-		
+
 		DAOFactory.getInstance();
-		
+
 		if (!IdFactory.getInstance().isInitialized()) {
 			LOG.error("Could not read object IDs from database. Please check your configuration.");
 			throw new Exception("Could not initialize the Id factory!");
 		}
-		
+
 		ThreadPoolManager.getInstance();
 		EventDispatcher.getInstance();
 		ScriptEngineManager.getInstance();
-		
+
 		printSection("World");
 		GameTimeController.init();
 		InstanceManager.getInstance();
@@ -108,24 +108,24 @@ public final class GameServer {
 		MapRegionManager.getInstance();
 		AnnouncementsTable.getInstance();
 		GlobalVariablesManager.getInstance();
-		
+
 		printSection("Data");
 		CategoryData.getInstance();
 		SecondaryAuthData.getInstance();
-		
+
 		printSection("Effects");
 		EffectHandler.getInstance().executeScript();
-		
+
 		printSection("Enchant Skill Groups");
 		EnchantSkillGroupsData.getInstance();
-		
+
 		printSection("Skill Trees");
 		SkillTreesData.getInstance();
-		
+
 		printSection("Skills");
 		SkillData.getInstance();
 		SummonSkillsTable.getInstance();
-		
+
 		printSection("Items");
 		ItemTable.getInstance();
 		EnchantItemGroupsData.getInstance();
@@ -142,7 +142,7 @@ public final class GameServer {
 		FishingMonstersData.getInstance();
 		FishingRodsData.getInstance();
 		HennaData.getInstance();
-		
+
 		printSection("Characters");
 		ClassListData.getInstance();
 		InitialEquipmentData.getInstance();
@@ -158,24 +158,24 @@ public final class GameServer {
 		RaidBossPointsManager.getInstance();
 		PetDataTable.getInstance();
 		CharSummonTable.getInstance().init();
-		
+
 		printSection("BBS");
 		if (general().enableCommunityBoard()) {
 			ForumsBBSManager.getInstance().load();
 		}
-		
+
 		printSection("Clans");
 		ClanTable.getInstance();
 		ClanHallSiegeManager.getInstance();
 		ClanHallManager.getInstance();
 		AuctionManager.getInstance();
-		
+
 		printSection("Geodata");
 		GeoData.getInstance();
 		if (geodata().getPathFinding() > 0) {
 			PathFinding.getInstance();
 		}
-		
+
 		printSection("NPCs");
 		SkillLearnData.getInstance();
 		NpcData.getInstance();
@@ -187,17 +187,17 @@ public final class GameServer {
 		NpcBufferTable.getInstance();
 		GrandBossManager.getInstance().initZones();
 		EventDroplist.getInstance();
-		
+
 		printSection("Auction Manager");
 		ItemAuctionManager.getInstance();
-		
+
 		printSection("Olympiad");
 		Olympiad.getInstance();
 		Hero.getInstance();
-		
+
 		printSection("Seven Signs");
 		SevenSigns.getInstance();
-		
+
 		// Call to load caches
 		printSection("Cache");
 		HtmCache.getInstance();
@@ -215,35 +215,35 @@ public final class GameServer {
 		BoatManager.getInstance();
 		AirShipManager.getInstance();
 		GraciaSeedsManager.getInstance();
-		
+
 		printSection("Handlers");
 		ScriptEngineManager.getInstance().executeScript(MasterHandler.class);
-		
+
 		printSection("AI");
 		ScriptEngineManager.getInstance().executeScript(AILoader.class);
-		
+
 		printSection("Instances");
 		ScriptEngineManager.getInstance().executeScript(InstanceLoader.class);
-		
+
 		printSection("Gracia");
 		ScriptEngineManager.getInstance().executeScript(GraciaLoader.class);
-		
+
 		printSection("Hellbound");
 		ScriptEngineManager.getInstance().executeScript(HellboundLoader.class);
-		
+
 		printSection("Quests");
 		ScriptEngineManager.getInstance().executeScript(QuestLoader.class);
 		ScriptEngineManager.getInstance().executeScript(TerritoryWarSuperClass.class);
-		
+
 		printSection("Scripts");
-		ScriptEngineManager.getInstance().executeScriptList(new File(server().getDatapackRoot(), "data/scripts.cfg"));
-		
+		ScriptEngineManager.getInstance().executeScriptList();
+
 		SpawnTable.getInstance().load();
 		DayNightSpawnManager.getInstance().trim().notifyChangeMode();
 		FourSepulchersManager.getInstance().init();
 		DimensionalRiftManager.getInstance();
 		RaidBossSpawnManager.getInstance();
-		
+
 		printSection("Siege");
 		SiegeManager.getInstance().getSieges();
 		CastleManager.getInstance().activateInstances();
@@ -255,46 +255,46 @@ public final class GameServer {
 		TerritoryWarManager.getInstance();
 		CastleManorManager.getInstance();
 		MercTicketManager.getInstance();
-		
+
 		if (general().saveDroppedItem()) {
 			ItemsOnGroundManager.getInstance();
 		}
-		
+
 		if ((general().getAutoDestroyDroppedItemAfter() > 0) || (general().getAutoDestroyHerbTime() > 0)) {
 			ItemsAutoDestroy.getInstance();
 		}
-		
+
 		MonsterRace.getInstance();
 		SevenSigns.getInstance().spawnSevenSignsNPC();
 		SevenSignsFestival.getInstance();
 		AutoSpawnHandler.getInstance();
 		FaenorScriptEngine.getInstance();
-		
+
 		if (customs().allowWedding()) {
 			CoupleManager.getInstance();
 		}
-		
+
 		TaskManager.getInstance();
-		
+
 		AntiFeedManager.getInstance().registerEvent(AntiFeedManager.GAME_ID);
-		
+
 		if (general().allowMail()) {
 			MailManager.getInstance();
 		}
-		
+
 		PunishmentManager.getInstance();
-		
+
 		Runtime.getRuntime().addShutdownHook(Shutdown.getInstance());
-		
+
 		LOG.info("Free Object Ids remaining {}.", IdFactory.getInstance().size());
-		
+
 		TvTManager.getInstance();
 		KnownListUpdateTaskManager.getInstance();
-		
+
 		if ((customs().offlineTradeEnable() || customs().offlineCraftEnable()) && customs().restoreOffliners()) {
 			OfflineTradersTable.getInstance().restoreOfflineTraders();
 		}
-		
+
 		if (general().deadLockDetector()) {
       deadDetectThread = new DeadLockDetector();
       deadDetectThread.setDaemon(true);
@@ -309,7 +309,7 @@ public final class GameServer {
 		LOG.info("Started, free memory {} Mb of {} Mb", freeMem, totalMem);
 		Toolkit.getDefaultToolkit().beep();
 		LoginServerThread.getInstance().start();
-		
+
 		final SelectorConfig sc = new SelectorConfig();
 		sc.MAX_READ_PER_PASS = mmo().getMaxReadPerPass();
 		sc.MAX_SEND_PER_PASS = mmo().getMaxSendPerPass();
@@ -330,7 +330,7 @@ public final class GameServer {
 				LOG.warn("Bind address is invalid, using all available IPs!", ex);
 			}
 		}
-		
+
 		try {
       selectorThread.openServerSocket(bindAddress, server().getPort());
       selectorThread.start();
@@ -339,52 +339,52 @@ public final class GameServer {
 			LOG.error("Failed to open server socket!", ex);
 			System.exit(1);
 		}
-		
+
 		if (telnet().isEnabled()) {
 			new Status(telnet().getPort(), telnet().getPassword()).start();
 		} else {
 			LOG.info("Telnet server is currently disabled.");
 		}
-		
+
 		LOG.info("Maximum numbers of connected players {}.", server().getMaxOnlineUsers());
 		LOG.info("Server {} loaded in {} seconds.", ServerNameDAO.getServer(hexId().getServerID()), MILLISECONDS.toSeconds(System.currentTimeMillis() - serverLoadStart));
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		final String datapackRoot = Util.parseArg(args, DATAPACK, true);
 		if (datapackRoot != null) {
 			server().setProperty("DatapackRoot", datapackRoot);
 		}
-		
+
 		final String scriptRoot = Util.parseArg(args, SCRIPT, true);
 		if (scriptRoot != null) {
 			server().setProperty("ScriptRoot", scriptRoot);
 		}
-		
+
 		final String geodata = Util.parseArg(args, GEODATA, true);
 		if (geodata != null) {
 			geodata().setProperty("GeoDataPath", geodata);
 		}
-		
+
 		gameServer = new GameServer();
 	}
-	
+
 	public long getUsedMemoryMB() {
 		return (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576;
 	}
-	
+
 	public SelectorThread<L2GameClient> getSelectorThread() {
     return selectorThread;
 	}
-	
+
 	public L2GamePacketHandler getL2GamePacketHandler() {
     return gamePacketHandler;
 	}
-	
+
 	public DeadLockDetector getDeadLockDetectorThread() {
     return deadDetectThread;
 	}
-	
+
 	public static void printSection(String s) {
 		StringBuilder sBuilder = new StringBuilder("=[ " + s + " ]");
 		while (sBuilder.length() < 61) {

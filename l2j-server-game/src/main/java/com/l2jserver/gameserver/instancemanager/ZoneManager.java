@@ -360,7 +360,12 @@ public final class ZoneManager implements IXmlReader {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends L2ZoneType> Collection<T> getAllZones(Class<T> zoneType) {
-		return (Collection<T>) _classZones.get(zoneType).values();
+		Map<Integer, ? extends L2ZoneType> zones = _classZones.get(zoneType);
+		if (zones == null) {
+			return List.of();
+		}
+		Collection<? extends L2ZoneType> zoneTypes = zones.values();
+		return (Collection<T>) zoneTypes;
 	}
 	
 	/**
@@ -387,7 +392,9 @@ public final class ZoneManager implements IXmlReader {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends L2ZoneType> T getZoneById(int id, Class<T> zoneType) {
-		return (T) _classZones.get(zoneType).get(id);
+		Map<Integer, ? extends L2ZoneType> zones = _classZones.get(zoneType);
+
+		return (T) zones.get(id);
 	}
 	
 	/**

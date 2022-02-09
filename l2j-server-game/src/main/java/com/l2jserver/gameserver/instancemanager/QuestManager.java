@@ -96,7 +96,7 @@ public final class QuestManager extends ScriptManager<Quest> {
 		_scripts.clear();
 		
 		try {
-			ScriptEngineManager.getInstance().executeScriptList(new File(server().getDatapackRoot(), "data/scripts.cfg"));
+			ScriptEngineManager.getInstance().executeScriptList();
 		} catch (Exception ex) {
 			LOG.warn("Failed loading scripts.cfg, no script going to be loaded!", ex);
 		}
