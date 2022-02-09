@@ -3,7 +3,6 @@ package com.l2jserver.gameserver;
 import com.l2jserver.commons.dao.ServerNameDAO;
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.commons.util.IPv4Filter;
-import com.l2jserver.commons.util.Util;
 import com.l2jserver.datapack.ai.AILoader;
 import com.l2jserver.datapack.gracia.GraciaLoader;
 import com.l2jserver.datapack.handlers.MasterHandler;
@@ -351,25 +350,6 @@ public class GameServer {
         MILLISECONDS.toSeconds(System.currentTimeMillis() - serverLoadStart));
   }
 
-  public static void main(String[] args) throws Exception {
-    final String datapackRoot = Util.parseArg(args, DATAPACK, true);
-    if (datapackRoot != null) {
-      server().setProperty("DatapackRoot", datapackRoot);
-    }
-
-    final String scriptRoot = Util.parseArg(args, SCRIPT, true);
-    if (scriptRoot != null) {
-      server().setProperty("ScriptRoot", scriptRoot);
-    }
-
-    final String geodata = Util.parseArg(args, GEODATA, true);
-    if (geodata != null) {
-      geodata().setProperty("GeoDataPath", geodata);
-    }
-
-    gameServer = new GameServer();
-  }
-
   public static void printSection(String s) {
     StringBuilder sBuilder = new StringBuilder("=[ " + s + " ]");
     while (sBuilder.length() < 61) {
@@ -379,19 +359,11 @@ public class GameServer {
     LOG.info(s);
   }
 
-  public long getUsedMemoryMB() {
-    return (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576;
-  }
-
   public SelectorThread<L2GameClient> getSelectorThread() {
     return selectorThread;
   }
 
   public L2GamePacketHandler getL2GamePacketHandler() {
     return gamePacketHandler;
-  }
-
-  public DeadLockDetector getDeadLockDetectorThread() {
-    return deadDetectThread;
   }
 }
