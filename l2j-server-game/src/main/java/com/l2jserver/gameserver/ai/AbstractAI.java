@@ -40,7 +40,6 @@ public abstract class AbstractAI implements Ctrl {
 	protected static final Logger LOG = LoggerFactory.getLogger(AbstractAI.class);
 
 	private NextAction nextAction;
-
 	public NextAction getNextAction() {
 		return nextAction;
 	}
