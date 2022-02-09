@@ -1,21 +1,3 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver;
 
 import static com.l2jserver.gameserver.config.Configuration.character;
@@ -60,6 +42,7 @@ import com.l2jserver.gameserver.network.serverpackets.CreatureSay;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
 /**
  * Seven Signs Festival of Darkness Engine.<br>
@@ -70,6 +53,7 @@ import com.l2jserver.gameserver.util.Util;
  * </ul>
  * @author Tempy
  */
+@Service
 public class SevenSignsFestival implements SpawnListener {
 	protected static final Logger LOG = LoggerFactory.getLogger(SevenSignsFestival.class);
 	
@@ -1554,25 +1538,25 @@ public class SevenSignsFestival implements SpawnListener {
 			_duskChatGuide = npc;
 		}
 	}
-	
+
 	/**
 	 * The FestivalManager class is the main runner of all the festivals. It is used for easier integration and management of all running festivals.
 	 * @author Tempy
 	 */
 	private class FestivalManager implements Runnable {
 		protected Map<Integer, L2DarknessFestival> _festivalInstances;
-		
+
 		public FestivalManager() {
 			_festivalInstances = new HashMap<>();
-			
+
 			// Increment the cycle counter.
 			_festivalCycle++;
-			
+
 			// Set the next start timers.
 			setNextCycleStart();
 			setNextFestivalStart(sevenSigns().getFestivalCycleLength() - FESTIVAL_SIGNUP_TIME);
 		}
-		
+
 		@Override
 		public synchronized void run() {
 			try {
@@ -1580,7 +1564,7 @@ public class SevenSignsFestival implements SpawnListener {
 				if (SevenSigns.getInstance().isSealValidationPeriod()) {
 					return;
 				}
-				
+
 				// If the next period is due to start before the end of this
 				// festival cycle, then don't run it.
 				if (SevenSigns.getInstance().getMilliToPeriodChange() < sevenSigns().getFestivalCycleLength()) {
@@ -1588,25 +1572,25 @@ public class SevenSignsFestival implements SpawnListener {
 				} else if (getMinsToNextFestival() == 2) {
 					sendMessageToAll("Festival Guide", NpcStringId.THE_MAIN_EVENT_WILL_START_IN_2_MINUTES_PLEASE_REGISTER_NOW);
 				}
-				
+
 				// Stand by until the allowed signup period has elapsed.
 				try {
 					wait(FESTIVAL_SIGNUP_TIME);
 				} catch (InterruptedException e) {
 				}
-				
+
 				// Clear past participants, they can no longer register their score if not done so already.
 				_dawnPreviousParticipants.clear();
 				_duskPreviousParticipants.clear();
-				
+
 				// Get rid of random monsters that avoided deletion after last festival
 				for (L2DarknessFestival festivalInst : _festivalInstances.values()) {
 					festivalInst.unspawnMobs();
 				}
-				
+
 				// Start only if participants signed up
 				_noPartyRegister = true;
-				
+
 				while (_noPartyRegister) {
 					if ((_duskFestivalParticipants.isEmpty() && _dawnFestivalParticipants.isEmpty())) {
 						try {
@@ -1624,70 +1608,70 @@ public class SevenSignsFestival implements SpawnListener {
 						_noPartyRegister = false;
 					}
 				}
-				
+
 				/* INITIATION */
 				// Set the festival timer to 0, as it is just beginning.
 				long elapsedTime;
-				
+
 				// Create the instances for the festivals in both Oracles,
 				// but only if they have participants signed up for them.
 				for (int i = 0; i < FESTIVAL_COUNT; i++) {
 					if (_duskFestivalParticipants.get(i) != null) {
 						_festivalInstances.put(10 + i, new L2DarknessFestival(SevenSigns.CABAL_DUSK, i));
 					}
-					
+
 					if (_dawnFestivalParticipants.get(i) != null) {
 						_festivalInstances.put(20 + i, new L2DarknessFestival(SevenSigns.CABAL_DAWN, i));
 					}
 				}
-				
+
 				// Prevent future signups while festival is in progress.
 				_festivalInitialized = true;
-				
+
 				setNextFestivalStart(sevenSigns().getFestivalCycleLength());
 				sendMessageToAll("Festival Guide", NpcStringId.THE_MAIN_EVENT_IS_NOW_STARTING);
-				
+
 				// Stand by for a short length of time before starting the festival.
 				try {
 					wait(sevenSigns().getFestivalFirstSpawn());
 				} catch (InterruptedException e) {
 				}
-				
+
 				elapsedTime = sevenSigns().getFestivalFirstSpawn();
-				
+
 				// Participants can now opt to increase the challenge, if desired.
 				_festivalInProgress = true;
-				
+
 				/* PROPAGATION */
 				// Sequentially set all festivals to begin, spawn the Festival Witch and notify participants.
 				for (L2DarknessFestival festivalInst : _festivalInstances.values()) {
 					festivalInst.festivalStart();
 					festivalInst.sendMessageToParticipants(NpcStringId.THE_MAIN_EVENT_IS_NOW_STARTING);
 				}
-				
+
 				// After a short time period, move all idle spawns to the center of the arena.
 				try {
 					wait(sevenSigns().getFestivalFirstSwarm() - sevenSigns().getFestivalFirstSpawn());
 				} catch (InterruptedException e) {
 				}
-				
+
 				elapsedTime += sevenSigns().getFestivalFirstSwarm() - sevenSigns().getFestivalFirstSpawn();
-				
+
 				for (L2DarknessFestival festivalInst : _festivalInstances.values()) {
 					festivalInst.moveMonstersToCenter();
 				}
-				
+
 				// Stand by until the time comes for the second spawn.
 				try {
 					wait(sevenSigns().getFestivalSecondSpawn() - sevenSigns().getFestivalFirstSwarm());
 				} catch (InterruptedException e) {
 				}
-				
+
 				// Spawn an extra set of monsters (archers) on the free platforms with
 				// a faster respawn when killed.
 				for (L2DarknessFestival festivalInst : _festivalInstances.values()) {
 					festivalInst.spawnFestivalMonsters(FESTIVAL_DEFAULT_RESPAWN / 2, 2);
-					
+
 					long end = (sevenSigns().getFestivalLength() - sevenSigns().getFestivalSecondSpawn()) / 60000;
 					if (end == 2) {
 						festivalInst.sendMessageToParticipants(NpcStringId.THE_FESTIVAL_OF_DARKNESS_WILL_END_IN_TWO_MINUTES);
@@ -1695,64 +1679,64 @@ public class SevenSignsFestival implements SpawnListener {
 						festivalInst.sendMessageToParticipants("The Festival of Darkness will end in " + end + " minute(s).");
 					}
 				}
-				
+
 				elapsedTime += sevenSigns().getFestivalSecondSpawn() - sevenSigns().getFestivalFirstSwarm();
-				
+
 				// After another short time period, again move all idle spawns to the center of the arena.
 				try {
 					wait(sevenSigns().getFestivalSecondSwarm() - sevenSigns().getFestivalSecondSpawn());
 				} catch (InterruptedException e) {
 				}
-				
+
 				for (L2DarknessFestival festivalInst : _festivalInstances.values()) {
 					festivalInst.moveMonstersToCenter();
 				}
-				
+
 				elapsedTime += sevenSigns().getFestivalSecondSwarm() - sevenSigns().getFestivalSecondSpawn();
-				
+
 				// Stand by until the time comes for the chests to be spawned.
 				try {
 					wait(sevenSigns().getFestivalChestSpawn() - sevenSigns().getFestivalSecondSwarm());
 				} catch (InterruptedException e) {
 				}
-				
+
 				// Spawn the festival chests, which enable the team to gain greater rewards
 				// for each chest they kill.
 				for (L2DarknessFestival festivalInst : _festivalInstances.values()) {
 					festivalInst.spawnFestivalMonsters(FESTIVAL_DEFAULT_RESPAWN, 3);
 					festivalInst.sendMessageToParticipants("The chests have spawned! Be quick, the festival will end soon."); // FIXME What is the correct npcString?
 				}
-				
+
 				elapsedTime += sevenSigns().getFestivalChestSpawn() - sevenSigns().getFestivalSecondSwarm();
-				
+
 				// Stand by and wait until it's time to end the festival.
 				try {
 					wait(sevenSigns().getFestivalLength() - elapsedTime);
 				} catch (InterruptedException e) {
 				}
-				
+
 				// Participants can no longer opt to increase the challenge, as the festival will soon close.
 				_festivalInProgress = false;
-				
+
 				/* TERMINATION */
 				// Sequentially begin the ending sequence for all running festivals.
 				for (L2DarknessFestival festivalInst : _festivalInstances.values()) {
 					festivalInst.festivalEnd();
 				}
-				
+
 				// Clear the participants list for the next round of signups.
 				_dawnFestivalParticipants.clear();
 				_duskFestivalParticipants.clear();
-				
+
 				// Allow signups for the next festival cycle.
 				_festivalInitialized = false;
-				
+
 				sendMessageToAll("Festival Witch", NpcStringId.THAT_WILL_DO_ILL_MOVE_YOU_TO_THE_OUTSIDE_SOON);
 			} catch (Exception e) {
 				LOG.warn("Could not run festival task!", e);
 			}
 		}
-		
+
 		/**
 		 * Returns the running instance of a festival for the given Oracle and festivalID. <BR>
 		 * A <B>null</B> value is returned if there are no participants in that festival.
@@ -1764,16 +1748,16 @@ public class SevenSignsFestival implements SpawnListener {
 			if (!isFestivalInitialized()) {
 				return null;
 			}
-			
+
 			/*
 			 * Compute the offset if a Dusk instance is required. ID: 0 1 2 3 4 Dusk 1:1011121314 Dawn 2:2021222324
 			 */
-			
+
 			festivalId += (oracle == SevenSigns.CABAL_DUSK) ? 10 : 20;
 			return _festivalInstances.get(festivalId);
 		}
 	}
-	
+
 	/**
 	 * Each running festival is represented by an L2DarknessFestival class. It contains all the spawn information and data for the running festival. All festivals are managed by the FestivalManager class, which must be initialized first.
 	 * @author Tempy
@@ -1782,20 +1766,20 @@ public class SevenSignsFestival implements SpawnListener {
 		protected final int _cabal;
 		protected final int _levelRange;
 		protected boolean _challengeIncreased;
-		
+
 		private final FestivalSpawn _startLocation;
 		private final FestivalSpawn _witchSpawn;
-		
+
 		private L2Npc _witchInst;
 		List<L2FestivalMonsterInstance> _npcInsts = new ArrayList<>();
-		
+
 		private List<Integer> _participants;
 		private final Map<Integer, FestivalSpawn> _originalLocations = new ConcurrentHashMap<>();
-		
+
 		protected L2DarknessFestival(int cabal, int levelRange) {
 			_cabal = cabal;
 			_levelRange = levelRange;
-			
+
 			if (cabal == SevenSigns.CABAL_DAWN) {
 				_participants = _dawnFestivalParticipants.get(levelRange);
 				_witchSpawn = new FestivalSpawn(FESTIVAL_DAWN_WITCH_SPAWNS[levelRange]);
@@ -1805,18 +1789,18 @@ public class SevenSignsFestival implements SpawnListener {
 				_witchSpawn = new FestivalSpawn(FESTIVAL_DUSK_WITCH_SPAWNS[levelRange]);
 				_startLocation = new FestivalSpawn(FESTIVAL_DUSK_PLAYER_SPAWNS[levelRange]);
 			}
-			
+
 			// FOR TESTING!
 			if (_participants == null) {
 				_participants = new ArrayList<>();
 			}
-			
+
 			festivalInit();
 		}
-		
+
 		protected void festivalInit() {
 			boolean isPositive;
-			
+
 			// Teleport all players to arena and notify them.
 			if ((_participants != null) && !_participants.isEmpty()) {
 				try {
@@ -1825,15 +1809,15 @@ public class SevenSignsFestival implements SpawnListener {
 						if (participant == null) {
 							continue;
 						}
-						
+
 						_originalLocations.put(participantObjId, new FestivalSpawn(participant.getX(), participant.getY(), participant.getZ(), participant.getHeading()));
-						
+
 						// Randomize the spawn point around the specific centerpoint for each player.
 						int x = _startLocation._x;
 						int y = _startLocation._y;
-						
+
 						isPositive = (Rnd.nextInt(2) == 1);
-						
+
 						if (isPositive) {
 							x += Rnd.nextInt(FESTIVAL_MAX_OFFSET_X);
 							y += Rnd.nextInt(FESTIVAL_MAX_OFFSET_Y);
@@ -1841,13 +1825,13 @@ public class SevenSignsFestival implements SpawnListener {
 							x -= Rnd.nextInt(FESTIVAL_MAX_OFFSET_X);
 							y -= Rnd.nextInt(FESTIVAL_MAX_OFFSET_Y);
 						}
-						
+
 						participant.getAI().setIntention(CtrlIntention.AI_INTENTION_IDLE);
 						participant.teleToLocation(new Location(x, y, _startLocation._z), true);
-						
+
 						// Remove all buffs from all participants on entry. Works like the skill Cancel.
 						participant.stopAllEffectsExceptThoseThatLastThroughDeath();
-						
+
 						// Remove any stray blood offerings in inventory
 						L2ItemInstance bloodOfferings = participant.getInventory().getItemByItemId(FESTIVAL_OFFERING_ID);
 						if (bloodOfferings != null) {
@@ -1858,66 +1842,66 @@ public class SevenSignsFestival implements SpawnListener {
 					// deleteMe handling should teleport party out in case of disconnect
 				}
 			}
-			
+
 			// Spawn the festival witch for this arena
 			try {
 				L2Spawn npcSpawn = new L2Spawn(_witchSpawn._npcId);
-				
+
 				npcSpawn.setX(_witchSpawn._x);
 				npcSpawn.setY(_witchSpawn._y);
 				npcSpawn.setZ(_witchSpawn._z);
 				npcSpawn.setHeading(_witchSpawn._heading);
 				npcSpawn.setAmount(1);
 				npcSpawn.setRespawnDelay(1);
-				
+
 				// Needed as doSpawn() is required to be called also for the NpcInstance it returns.
 				npcSpawn.startRespawn();
-				
+
 				SpawnTable.getInstance().addNewSpawn(npcSpawn, false);
 				_witchInst = npcSpawn.doSpawn();
 			} catch (Exception e) {
 				LOG.warn("Error while spawning Festival Witch ID {}!", _witchSpawn._npcId, e);
 			}
-			
+
 			// Make it appear as though the Witch has appeared there.
 			MagicSkillUse msu = new MagicSkillUse(_witchInst, _witchInst, 2003, 1, 1, 0);
 			_witchInst.broadcastPacket(msu);
-			
+
 			// And another one...:D
 			msu = new MagicSkillUse(_witchInst, _witchInst, 2133, 1, 1, 0);
 			_witchInst.broadcastPacket(msu);
-			
+
 			// Send a message to all participants from the witch.
 			sendMessageToParticipants(NpcStringId.THE_MAIN_EVENT_WILL_START_IN_2_MINUTES_PLEASE_REGISTER_NOW);
 		}
-		
+
 		protected void festivalStart() {
 			spawnFestivalMonsters(FESTIVAL_DEFAULT_RESPAWN, 0);
 		}
-		
+
 		protected void moveMonstersToCenter() {
 			boolean isPositive;
-			
+
 			for (L2FestivalMonsterInstance festivalMob : _npcInsts) {
 				if (festivalMob.isDead()) {
 					continue;
 				}
-				
+
 				// Only move monsters that are idle or doing their usual functions.
 				CtrlIntention currIntention = festivalMob.getAI().getIntention();
-				
+
 				if ((currIntention != CtrlIntention.AI_INTENTION_IDLE) && (currIntention != CtrlIntention.AI_INTENTION_ACTIVE)) {
 					continue;
 				}
-				
+
 				int x = _startLocation._x;
 				int y = _startLocation._y;
-				
+
 				/*
 				 * Random X and Y coords around the player start location, up to half of the maximum allowed offset are generated to prevent the mobs from all moving to the exact same place.
 				 */
 				isPositive = (Rnd.nextInt(2) == 1);
-				
+
 				if (isPositive) {
 					x += Rnd.nextInt(FESTIVAL_MAX_OFFSET_X);
 					y += Rnd.nextInt(FESTIVAL_MAX_OFFSET_Y);
@@ -1925,12 +1909,12 @@ public class SevenSignsFestival implements SpawnListener {
 					x -= Rnd.nextInt(FESTIVAL_MAX_OFFSET_X);
 					y -= Rnd.nextInt(FESTIVAL_MAX_OFFSET_Y);
 				}
-				
+
 				festivalMob.setRunning();
 				festivalMob.getAI().setIntention(CtrlIntention.AI_INTENTION_MOVE_TO, new Location(x, y, _startLocation._z, Rnd.nextInt(65536)));
 			}
 		}
-		
+
 		/**
 		 * Used to spawn monsters unique to the festival. <BR>
 		 * Valid SpawnTypes:<BR>
@@ -1948,31 +1932,31 @@ public class SevenSignsFestival implements SpawnListener {
 				case 3 -> (_cabal == SevenSigns.CABAL_DAWN) ? FESTIVAL_DAWN_CHEST_SPAWNS[_levelRange] : FESTIVAL_DUSK_CHEST_SPAWNS[_levelRange];
 				default -> new int[0][0];
 			};
-			
+
 			for (int[] _npcSpawn : _npcSpawns) {
 				FestivalSpawn currSpawn = new FestivalSpawn(_npcSpawn);
-				
+
 				// Only spawn archers/marksmen if specified to do so.
 				if ((spawnType == 1) && isFestivalArcher(currSpawn._npcId)) {
 					continue;
 				}
-				
+
 				try {
 					L2Spawn npcSpawn = new L2Spawn(currSpawn._npcId);
-					
+
 					npcSpawn.setX(currSpawn._x);
 					npcSpawn.setY(currSpawn._y);
 					npcSpawn.setZ(currSpawn._z);
 					npcSpawn.setHeading(Rnd.nextInt(65536));
 					npcSpawn.setAmount(1);
 					npcSpawn.setRespawnDelay(respawnDelay);
-					
+
 					// Needed as doSpawn() is required to be called also for the NpcInstance it returns.
 					npcSpawn.startRespawn();
-					
+
 					SpawnTable.getInstance().addNewSpawn(npcSpawn, false);
 					L2FestivalMonsterInstance festivalMob = (L2FestivalMonsterInstance) npcSpawn.doSpawn();
-					
+
 					// Set the offering bonus to 2x or 5x the amount per kill,
 					// if this spawn is part of an increased challenge or is a festival chest.
 					if (spawnType == 1) {
@@ -1980,39 +1964,39 @@ public class SevenSignsFestival implements SpawnListener {
 					} else if (spawnType == 3) {
 						festivalMob.setOfferingBonus(5);
 					}
-					
+
 					_npcInsts.add(festivalMob);
 				} catch (Exception e) {
 					LOG.warn("Error while spawning NPC ID {}!", currSpawn._npcId, e);
 				}
 			}
 		}
-		
+
 		protected boolean increaseChallenge() {
 			if (_challengeIncreased) {
 				return false;
 			}
-			
+
 			// Set this flag to true to make sure that this can only be done once.
 			_challengeIncreased = true;
-			
+
 			// Spawn more festival monsters, but this time with a twist.
 			spawnFestivalMonsters(FESTIVAL_DEFAULT_RESPAWN, 1);
 			return true;
 		}
-		
+
 		public void sendMessageToParticipants(NpcStringId npcStringId) {
 			if ((_participants != null) && !_participants.isEmpty()) {
 				_witchInst.broadcastPacket(new CreatureSay(_witchInst.getObjectId(), Say2.NPC_ALL, "Festival Witch", npcStringId));
 			}
 		}
-		
+
 		public void sendMessageToParticipants(String npcString) {
 			if ((_participants != null) && !_participants.isEmpty()) {
 				_witchInst.broadcastPacket(new CreatureSay(_witchInst.getObjectId(), Say2.NPC_ALL, "Festival Witch", npcString));
 			}
 		}
-		
+
 		protected void festivalEnd() {
 			if ((_participants != null) && !_participants.isEmpty()) {
 				for (int participantObjId : _participants) {
@@ -2021,13 +2005,13 @@ public class SevenSignsFestival implements SpawnListener {
 						if (participant == null) {
 							continue;
 						}
-						
+
 						relocatePlayer(participant, false);
 						participant.sendMessage("The festival has ended. Your party leader must now register your score before the next festival takes place.");
 					} catch (NullPointerException e) {
 					}
 				}
-				
+
 				if (_cabal == SevenSigns.CABAL_DAWN) {
 					_dawnPreviousParticipants.put(_levelRange, _participants);
 				} else {
@@ -2035,10 +2019,10 @@ public class SevenSignsFestival implements SpawnListener {
 				}
 			}
 			_participants = null;
-			
+
 			unspawnMobs();
 		}
-		
+
 		protected void unspawnMobs() {
 			// Delete all the NPCs in the current festival arena.
 			if (_witchInst != null) {
@@ -2046,7 +2030,7 @@ public class SevenSignsFestival implements SpawnListener {
 				_witchInst.deleteMe();
 				SpawnTable.getInstance().deleteSpawn(_witchInst.getSpawn(), false);
 			}
-			
+
 			for (L2FestivalMonsterInstance monsterInst : _npcInsts) {
 				if (monsterInst != null) {
 					monsterInst.getSpawn().stopRespawn();
@@ -2055,15 +2039,15 @@ public class SevenSignsFestival implements SpawnListener {
 				}
 			}
 		}
-		
+
 		public void relocatePlayer(L2PcInstance participant, boolean isRemoving) {
 			try {
 				FestivalSpawn origPosition = _originalLocations.get(participant.getObjectId());
-				
+
 				if (isRemoving) {
 					_originalLocations.remove(participant.getObjectId());
 				}
-				
+
 				participant.getAI().setIntention(CtrlIntention.AI_INTENTION_IDLE);
 				participant.teleToLocation(new Location(origPosition._x, origPosition._y, origPosition._z), true);
 				participant.sendMessage("You have been removed from the festival arena.");
@@ -2077,7 +2061,7 @@ public class SevenSignsFestival implements SpawnListener {
 			}
 		}
 	}
-	
+
 	private static class FestivalSpawn {
 		protected final int _x;
 		protected final int _y;

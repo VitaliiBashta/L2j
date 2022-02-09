@@ -6,7 +6,9 @@ import java.util.StringTokenizer;
 import com.l2jserver.gameserver.handler.IAdminCommandHandler;
 import com.l2jserver.gameserver.model.L2World;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
+@Service
 public class AdminKick implements IAdminCommandHandler {
 	private static final String[] ADMIN_COMMANDS = {
 		"admin_kick",

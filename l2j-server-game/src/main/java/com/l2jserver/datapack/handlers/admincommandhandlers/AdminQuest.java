@@ -11,11 +11,13 @@ import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestTimer;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+@Service
 public class AdminQuest implements IAdminCommandHandler {
   private static final String[] ADMIN_COMMANDS = {
     "admin_quest_reload",

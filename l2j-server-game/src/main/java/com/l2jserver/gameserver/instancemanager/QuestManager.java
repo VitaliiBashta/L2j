@@ -19,9 +19,7 @@
 package com.l2jserver.gameserver.instancemanager;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
-import static com.l2jserver.gameserver.config.Configuration.server;
 
-import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -96,7 +94,7 @@ public final class QuestManager extends ScriptManager<Quest> {
 		_scripts.clear();
 		
 		try {
-			ScriptEngineManager.getInstance().executeScriptList();
+			ScriptEngineManager.getInstance().runMainOnscripts();
 		} catch (Exception ex) {
 			LOG.warn("Failed loading scripts.cfg, no script going to be loaded!", ex);
 		}

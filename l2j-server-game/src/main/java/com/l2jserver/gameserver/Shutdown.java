@@ -1,21 +1,3 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver;
 
 import com.l2jserver.commons.database.ConnectionFactory;
@@ -41,11 +23,7 @@ import java.util.concurrent.TimeUnit;
 import static com.l2jserver.gameserver.config.Configuration.customs;
 import static com.l2jserver.gameserver.config.Configuration.general;
 
-/**
- * This class provides the functions for shutting down and restarting the server.<br>
- * It closes all open client connections and saves all data.
- * @since 2005/03/27 15:29:09
- */
+
 public class Shutdown extends Thread {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(Shutdown.class);
@@ -64,7 +42,8 @@ public class Shutdown extends Thread {
 		"restarting",
 		"aborting"
 	};
-	
+
+
 	/**
 	 * This function starts a shutdown count down from Telnet (Copied from Function startShutdown())
 	 * @param seconds seconds until shutdown
@@ -207,7 +186,6 @@ public class Shutdown extends Thread {
 			
 			// saveData sends messages to exit players, so shutdown selector after it
 			try {
-				GameServer.gameServer.getSelectorThread().shutdown();
 				LOG.info("Game Server: Selector thread has been shut down({}ms).", tc.getEstimatedTimeAndRestartCounter());
 			} catch (Exception e) {
 				// ignore

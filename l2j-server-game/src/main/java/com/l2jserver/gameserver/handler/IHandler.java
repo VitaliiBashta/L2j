@@ -1,7 +1,6 @@
 package com.l2jserver.gameserver.handler;
 
 public interface IHandler<K, V> {
-	@SuppressWarnings("unchecked")
 	default void registerByClass(Class<?> clazz) throws Exception {
 		final Object object = clazz.getDeclaredConstructor().newInstance();
 		registerHandler((K) object);

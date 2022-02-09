@@ -9,10 +9,7 @@ import static com.l2jserver.gameserver.config.Configuration.rates;
 import static com.l2jserver.gameserver.config.Configuration.sevenSigns;
 import static com.l2jserver.gameserver.enums.InstanceType.L2Npc;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -1436,8 +1433,8 @@ public class L2Npc extends L2Character {
 	 * @return {@link NpcVariables} instance containing parameters regarding NPC.
 	 */
 	public NpcVariables getVariables() {
-		final NpcVariables vars = getScript(NpcVariables.class);
-		return vars != null ? vars : addScript(new NpcVariables());
+		NpcVariables vars = getScript(NpcVariables.class);
+		return (NpcVariables) Objects.requireNonNullElseGet(vars, () -> addScript(new NpcVariables()));
 	}
 	
 	/**

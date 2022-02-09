@@ -10,6 +10,7 @@ import com.l2jserver.gameserver.model.buylist.L2BuyList;
 import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
 import com.l2jserver.gameserver.network.serverpackets.BuyList;
 import com.l2jserver.gameserver.network.serverpackets.ExBuySellList;
+import org.springframework.stereotype.Service;
 
 /**
  * This class handles following admin commands:
@@ -18,6 +19,7 @@ import com.l2jserver.gameserver.network.serverpackets.ExBuySellList;
  * <li>buy id = shows shop with respective id</li>
  * </ul>
  */
+@Service
 public class AdminShop implements IAdminCommandHandler {
 	private static final Logger _log = Logger.getLogger(AdminShop.class.getName());
 	

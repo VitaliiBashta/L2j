@@ -13,11 +13,13 @@ import com.l2jserver.gameserver.model.actor.instance.L2ControllableMobInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.taskmanager.DecayTaskManager;
+import org.springframework.stereotype.Service;
 
 /**
  * This class handles following admin commands: - res = resurrects target L2Character
  * @version $Revision: 1.2.4.5 $ $Date: 2005/04/11 10:06:06 $
  */
+@Service
 public class AdminRes implements IAdminCommandHandler {
 	private static Logger _log = Logger.getLogger(AdminRes.class.getName());
 	private static final String[] ADMIN_COMMANDS = {

@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import static com.l2jserver.gameserver.config.Configuration.geodata;
 import static com.l2jserver.gameserver.config.Configuration.server;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.l2jserver.*")
 public class GameServerLauncher {
   private static final String DATAPACK = "-dp";
   private static final String SCRIPT = "-s";

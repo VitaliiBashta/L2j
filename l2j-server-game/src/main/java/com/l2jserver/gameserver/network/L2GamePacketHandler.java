@@ -1,36 +1,15 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.network;
-
-import static com.l2jserver.gameserver.config.Configuration.general;
-
-import java.nio.ByteBuffer;
-import java.util.logging.Logger;
 
 import com.l2jserver.commons.util.Util;
 import com.l2jserver.gameserver.network.L2GameClient.GameClientState;
 import com.l2jserver.gameserver.network.clientpackets.*;
-import com.l2jserver.mmocore.ClientFactory;
-import com.l2jserver.mmocore.MMOConnection;
-import com.l2jserver.mmocore.MMOExecutor;
-import com.l2jserver.mmocore.PacketHandler;
-import com.l2jserver.mmocore.ReceivablePacket;
+import com.l2jserver.mmocore.*;
+import org.springframework.stereotype.Service;
+
+import java.nio.ByteBuffer;
+import java.util.logging.Logger;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
 
 /**
  * Stateful Packet Handler<BR>
@@ -40,12 +19,16 @@ import com.l2jserver.mmocore.ReceivablePacket;
  * <li>Clients sends a RequestAuthLogin being already authed. (Potential exploit).</li>
  * </ul>
  * Note: If for a given exception a packet needs to be handled on more then one state, then it should be added to all these states.
- * @author KenM
  */
+
+@Service
 public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, ClientFactory<L2GameClient>, MMOExecutor<L2GameClient> {
 	
 	private static final Logger _log = Logger.getLogger(L2GamePacketHandler.class.getName());
-	
+
+	public L2GamePacketHandler() {
+	}
+
 	@Override
 	public ReceivablePacket<L2GameClient> handlePacket(ByteBuffer buf, L2GameClient client) {
 		if (client.dropPacket()) {

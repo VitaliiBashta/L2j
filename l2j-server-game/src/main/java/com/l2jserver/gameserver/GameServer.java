@@ -41,15 +41,13 @@ import com.l2jserver.mmocore.SelectorConfig;
 import com.l2jserver.mmocore.SelectorThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Calendar;
-import java.util.logging.LogManager;
+import java.time.LocalDateTime;
 
 import static com.l2jserver.gameserver.config.Configuration.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -57,20 +55,17 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 @Service
 public class GameServer {
 
-  public static final Calendar dateTimeServerStarted = Calendar.getInstance();
+  public static final LocalDateTime dateTimeServerStarted = LocalDateTime.now();
   private static final Logger LOG = LoggerFactory.getLogger(GameServer.class);
-  private static final String DATAPACK = "-dp";
-  private static final String SCRIPT = "-s";
-  private static final String GEODATA = "-gd";
-  public static GameServer gameServer;
   private final SelectorThread<L2GameClient> selectorThread;
   private final L2GamePacketHandler gamePacketHandler;
   private final DeadLockDetector deadDetectThread;
 
-  public GameServer() throws Exception {
-    // TODO(Zoey76): Remove when loggers rework is completed.
-    LogManager.getLogManager().reset();
-    SLF4JBridgeHandler.install();
+  private final IdFactory idFactory;
+
+  public GameServer(L2GamePacketHandler gamePacketHandler, IdFactory idFactory) throws IOException {
+    this.gamePacketHandler = gamePacketHandler;
+    this.idFactory = idFactory;
 
     final var serverLoadStart = System.currentTimeMillis();
     printSection("Database");
@@ -84,9 +79,9 @@ public class GameServer {
 
     DAOFactory.getInstance();
 
-    if (!IdFactory.getInstance().isInitialized()) {
+    if (!idFactory.isInitialized()) {
       LOG.error("Could not read object IDs from database. Please check your configuration.");
-      throw new Exception("Could not initialize the Id factory!");
+      throw new IllegalStateException("Could not initialize the Id factory!");
     }
 
     ThreadPoolManager.getInstance();
@@ -228,7 +223,7 @@ public class GameServer {
     ScriptEngineManager.getInstance().executeScript(TerritoryWarSuperClass.class);
 
     printSection("Scripts");
-    ScriptEngineManager.getInstance().executeScriptList();
+    ScriptEngineManager.getInstance().runMainOnscripts();
 
     SpawnTable.getInstance().load();
     DayNightSpawnManager.getInstance().trim().notifyChangeMode();
@@ -279,7 +274,7 @@ public class GameServer {
 
     Runtime.getRuntime().addShutdownHook(Shutdown.getInstance());
 
-    LOG.info("Free Object Ids remaining {}.", IdFactory.getInstance().size());
+    LOG.info("Free Object Ids remaining {}.", idFactory.size());
 
     TvTManager.getInstance();
     KnownListUpdateTaskManager.getInstance();
@@ -314,7 +309,6 @@ public class GameServer {
     sc.HELPER_BUFFER_COUNT = mmo().getHelperBufferCount();
     sc.TCP_NODELAY = mmo().isTcpNoDelay();
 
-    gamePacketHandler = new L2GamePacketHandler();
     selectorThread =
         new SelectorThread<>(
             sc, gamePacketHandler, gamePacketHandler, gamePacketHandler, new IPv4Filter());

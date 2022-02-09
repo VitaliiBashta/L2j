@@ -4,11 +4,13 @@ package com.l2jserver.datapack.handlers.admincommandhandlers;
 import com.l2jserver.gameserver.handler.IAdminCommandHandler;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
 /**
  * This class handles following admin commands: - character_disconnect = disconnects target player
  * @version $Revision: 1.2.4.4 $ $Date: 2005/04/11 10:06:00 $
  */
+@Service
 public class AdminDisconnect implements IAdminCommandHandler {
 	private static final String[] ADMIN_COMMANDS = {
 		"admin_character_disconnect"

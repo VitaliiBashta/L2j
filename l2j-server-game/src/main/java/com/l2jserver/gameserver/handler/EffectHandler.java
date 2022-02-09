@@ -7,7 +7,7 @@ import com.l2jserver.datapack.handlers.EffectMasterHandler;
 import com.l2jserver.gameserver.model.effects.AbstractEffect;
 import com.l2jserver.gameserver.scripting.ScriptEngineManager;
 
-public final class EffectHandler implements IHandler<Class<? extends AbstractEffect>, String> {
+public class EffectHandler implements IHandler<Class<? extends AbstractEffect>, String> {
 	private final Map<String, Class<? extends AbstractEffect>> _handlers;
 	
 	protected EffectHandler() {
@@ -34,7 +34,7 @@ public final class EffectHandler implements IHandler<Class<? extends AbstractEff
 		return _handlers.size();
 	}
 	
-	public void executeScript() throws Exception {
+	public void executeScript()  {
 		ScriptEngineManager.getInstance().executeScript(EffectMasterHandler.class);
 	}
 	

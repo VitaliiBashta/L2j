@@ -28,10 +28,6 @@ public final class Rabbits extends Event {
   private static final int EVENT_TIME = 10;
   private static final int TOTAL_CHEST_COUNT = 75;
   private static final int TRANSFORMATION_ID = 105;
-  private final Set<L2Npc> _npcs = ConcurrentHashMap.newKeySet(TOTAL_CHEST_COUNT + 1);
-  private final List<L2PcInstance> _players = new ArrayList<>();
-  private boolean _isActive = false;
-
   /**
    * Drop data:<br>
    * Higher the chance harder the item.<br>
@@ -49,6 +45,9 @@ public final class Rabbits extends Event {
     {20004, 1, 1, 1}, // Energy Ginseng
     {20004, 0, 1, 1} // Energy Ginseng
   };
+  private final Set<L2Npc> _npcs = ConcurrentHashMap.newKeySet(TOTAL_CHEST_COUNT + 1);
+  private final List<L2PcInstance> _players = new ArrayList<>();
+  private boolean _isActive = false;
   // @formatter:on
 
   private Rabbits() {
@@ -58,6 +57,38 @@ public final class Rabbits extends Event {
     addStartNpc(NPC_MANAGER);
     addSkillSeeId(CHEST);
     addAttackId(CHEST);
+  }
+
+  private static void dropItem(L2Npc npc, L2PcInstance player, int[][] droplist) {
+    final int chance = getRandom(100);
+    for (int[] drop : droplist) {
+      if (chance > drop[1]) {
+        npc.dropItem(player, drop[0], getRandom(drop[2], drop[3]));
+        return;
+      }
+    }
+  }
+
+  private static void recordSpawn(
+      Set<L2Npc> npcs,
+      int npcId,
+      int x,
+      int y,
+      int z,
+      int heading,
+      boolean randomOffSet,
+      long despawnDelay) {
+    final L2Npc npc = addSpawn(npcId, x, y, z, heading, randomOffSet, despawnDelay);
+    if (npc.getId() == CHEST) {
+      npc.setIsImmobilized(true);
+      npc.disableCoreAI(true);
+      npc.setInvisible(true);
+    }
+    npcs.add(npc);
+  }
+
+  public static void main(String[] args) {
+    new Rabbits();
   }
 
   @Override
@@ -201,40 +232,8 @@ public final class Rabbits extends Event {
     return super.onAttack(npc, attacker, damage, isSummon);
   }
 
-  private static void dropItem(L2Npc npc, L2PcInstance player, int[][] droplist) {
-    final int chance = getRandom(100);
-    for (int[] drop : droplist) {
-      if (chance > drop[1]) {
-        npc.dropItem(player, drop[0], getRandom(drop[2], drop[3]));
-        return;
-      }
-    }
-  }
-
-  private static void recordSpawn(
-      Set<L2Npc> npcs,
-      int npcId,
-      int x,
-      int y,
-      int z,
-      int heading,
-      boolean randomOffSet,
-      long despawnDelay) {
-    final L2Npc npc = addSpawn(npcId, x, y, z, heading, randomOffSet, despawnDelay);
-    if (npc.getId() == CHEST) {
-      npc.setIsImmobilized(true);
-      npc.disableCoreAI(true);
-      npc.setInvisible(true);
-    }
-    npcs.add(npc);
-  }
-
   @Override
   public boolean eventBypass(L2PcInstance activeChar, String bypass) {
     return false;
-  }
-
-  public static void main(String[] args) {
-    new Rabbits();
   }
 }

@@ -18,11 +18,6 @@
  */
 package com.l2jserver.gameserver.model.zone.type;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.l2jserver.gameserver.GameServer;
 import com.l2jserver.gameserver.instancemanager.GrandBossManager;
 import com.l2jserver.gameserver.instancemanager.ZoneManager;
@@ -37,48 +32,18 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.zone.AbstractZoneSettings;
 import com.l2jserver.gameserver.model.zone.L2ZoneType;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 /**
  * @author DaRkRaGe
  */
 public class L2BossZone extends L2ZoneType {
-	private int _timeInvade;
-	
 	private final int[] _oustLoc;
-	
-	public static final class Settings extends AbstractZoneSettings {
-		// track the times that players got disconnected. Players are allowed
-		// to log back into the zone as long as their log-out was within _timeInvade time...
-		// <player objectId, expiration time in milliseconds>
-		private final Map<Integer, Long> _playerAllowedReEntryTimes = new ConcurrentHashMap<>();
-		
-		// track the players admitted to the zone who should be allowed back in
-		// after reboot/server downtime (outside of their control), within 30 of server restart
-		private final List<Integer> _playersAllowed = new CopyOnWriteArrayList<>();
-		
-		private final List<L2Character> _raidList = new CopyOnWriteArrayList<>();
-		
-		protected Settings() {
-		}
-		
-		public Map<Integer, Long> getPlayerAllowedReEntryTimes() {
-			return _playerAllowedReEntryTimes;
-		}
-		
-		public List<Integer> getPlayersAllowed() {
-			return _playersAllowed;
-		}
-		
-		public List<L2Character> getRaidList() {
-			return _raidList;
-		}
-		
-		@Override
-		public void clear() {
-			_playerAllowedReEntryTimes.clear();
-			_playersAllowed.clear();
-			_raidList.clear();
-		}
-	}
+	private int _timeInvade;
 	
 	public L2BossZone(int id) {
 		super(id);
@@ -130,12 +95,12 @@ public class L2BossZone extends L2ZoneType {
 					// Get the information about this player's last logout-exit from
 					// this zone.
 					final Long expirationTime = getSettings().getPlayerAllowedReEntryTimes().get(player.getObjectId());
-					
+
 					// with legal entries, do nothing.
 					if (expirationTime == null) // legal null expirationTime entries
 					{
-						long serverStartTime = GameServer.dateTimeServerStarted.getTimeInMillis();
-						if ((serverStartTime > (System.currentTimeMillis() - _timeInvade))) {
+						var serverStartTime = GameServer.dateTimeServerStarted;
+						if (serverStartTime.isAfter( LocalDateTime.now().minusSeconds(_timeInvade/1000))) {
 							return;
 						}
 					} else {
@@ -159,7 +124,7 @@ public class L2BossZone extends L2ZoneType {
 					if (getSettings().getPlayersAllowed().contains(player.getObjectId()) || player.canOverrideCond(PcCondOverride.ZONE_CONDITIONS)) {
 						return;
 					}
-					
+
 					// remove summon and teleport out owner
 					// who attempt "illegal" (re-)entry
 					if ((_oustLoc[0] != 0) && (_oustLoc[1] != 0) && (_oustLoc[2] != 0)) {
@@ -181,7 +146,7 @@ public class L2BossZone extends L2ZoneType {
 				if (player.canOverrideCond(PcCondOverride.ZONE_CONDITIONS)) {
 					return;
 				}
-				
+
 				// if the player just got disconnected/logged out, store the dc
 				// time so that
 				// decisions can be made later about allowing or not the player
@@ -242,15 +207,15 @@ public class L2BossZone extends L2ZoneType {
 		return _timeInvade;
 	}
 	
+	public List<Integer> getAllowedPlayers() {
+		return getSettings().getPlayersAllowed();
+	}
+	
 	public void setAllowedPlayers(List<Integer> players) {
 		if (players != null) {
 			getSettings().getPlayersAllowed().clear();
 			getSettings().getPlayersAllowed().addAll(players);
 		}
-	}
-	
-	public List<Integer> getAllowedPlayers() {
-		return getSettings().getPlayersAllowed();
 	}
 	
 	public boolean isPlayerAllowed(L2PcInstance player) {
@@ -277,7 +242,7 @@ public class L2BossZone extends L2ZoneType {
 		if (_characterList.isEmpty()) {
 			return;
 		}
-		
+
 		for (L2Character character : getCharactersInside()) {
 			if ((character != null) && character.isPlayer()) {
 				L2PcInstance player = character.getActingPlayer();
@@ -296,7 +261,7 @@ public class L2BossZone extends L2ZoneType {
 		if (_characterList.isEmpty()) {
 			return;
 		}
-		
+
 		for (L2Character character : getCharactersInside()) {
 			if ((character != null) && character.isPlayer()) {
 				L2PcInstance player = character.getActingPlayer();
@@ -338,7 +303,7 @@ public class L2BossZone extends L2ZoneType {
 		if ((_characterList == null) || _characterList.isEmpty()) {
 			return;
 		}
-		
+
 		Map<Integer, L2PcInstance> npcKnownPlayers = npc.getKnownList().getKnownPlayers();
 		for (L2Character character : getCharactersInside()) {
 			if ((character != null) && character.isPlayer()) {
@@ -347,6 +312,41 @@ public class L2BossZone extends L2ZoneType {
 					npcKnownPlayers.put(player.getObjectId(), player);
 				}
 			}
+		}
+	}
+	
+	public static final class Settings extends AbstractZoneSettings {
+		// track the times that players got disconnected. Players are allowed
+		// to log back into the zone as long as their log-out was within _timeInvade time...
+		// <player objectId, expiration time in milliseconds>
+		private final Map<Integer, Long> _playerAllowedReEntryTimes = new ConcurrentHashMap<>();
+
+		// track the players admitted to the zone who should be allowed back in
+		// after reboot/server downtime (outside of their control), within 30 of server restart
+		private final List<Integer> _playersAllowed = new CopyOnWriteArrayList<>();
+
+		private final List<L2Character> _raidList = new CopyOnWriteArrayList<>();
+
+		protected Settings() {
+		}
+
+		public Map<Integer, Long> getPlayerAllowedReEntryTimes() {
+			return _playerAllowedReEntryTimes;
+		}
+
+		public List<Integer> getPlayersAllowed() {
+			return _playersAllowed;
+		}
+
+		public List<L2Character> getRaidList() {
+			return _raidList;
+		}
+
+		@Override
+		public void clear() {
+			_playerAllowedReEntryTimes.clear();
+			_playersAllowed.clear();
+			_raidList.clear();
 		}
 	}
 }

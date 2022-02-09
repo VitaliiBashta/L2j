@@ -8,11 +8,13 @@ import java.util.logging.Logger;
 import com.l2jserver.gameserver.handler.IAdminCommandHandler;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
 /**
  * This class handles following admin commands: - invul = turns invulnerability on/off
  * @version $Revision: 1.2.4.4 $ $Date: 2007/07/31 10:06:02 $
  */
+@Service
 public class AdminInvul implements IAdminCommandHandler {
 	private static Logger _log = Logger.getLogger(AdminInvul.class.getName());
 	private static final String[] ADMIN_COMMANDS = {

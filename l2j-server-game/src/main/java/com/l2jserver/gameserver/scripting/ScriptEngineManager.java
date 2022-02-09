@@ -70,17 +70,6 @@ public final class ScriptEngineManager {
 
   private static final Class<?>[] ARG_MAIN = new Class[] {String[].class};
 
-  private static void runMain(Class<?> clazz)
-      throws InvocationTargetException, IllegalAccessException {
-    final var mainMethod = findMethod(clazz, MAIN, ARG_MAIN);
-    if (mainMethod == null) {
-      LOG.warn("Unable to find main method in class {}!", clazz);
-      return;
-    }
-
-    mainMethod.invoke(null, MAIN_METHOD_ARGS);
-  }
-
   private static Method findMethod(Class<?> clazz, String methodName, Class<?>[] args) {
     try {
       final var mainMethod = clazz.getMethod(methodName, args);
@@ -97,15 +86,31 @@ public final class ScriptEngineManager {
     return SingletonHolder.INSTANCE;
   }
 
-  public void executeScriptList() throws InvocationTargetException, IllegalAccessException {
+  public void runMainOnscripts() {
     for (Class<?> script : scripts) {
-      runMain(script);
+      runInit(script);
     }
   }
 
-  public void executeScript(Class<?> clazz)
-      throws InvocationTargetException, IllegalAccessException {
-    runMain(clazz);
+  private void runInit(Class<?> clazz) {
+    final var mainMethod = findMethod(clazz, MAIN, ARG_MAIN);
+    if (mainMethod == null) {
+      LOG.warn("Unable to find main method in class {}!", clazz);
+      return;
+    }
+    try {
+      clazz.getConstructor().newInstance();
+    } catch (InstantiationException
+        | NoSuchMethodException
+        | IllegalAccessException
+        | InvocationTargetException e) {
+      throw new IllegalStateException("Object cannot be instantiated:" + clazz, e);
+    }
+    //    mainMethod.invoke(null, MAIN_METHOD_ARGS);
+  }
+
+  public void executeScript(Class<?> clazz) {
+    runInit(clazz);
   }
 
   private static class SingletonHolder {

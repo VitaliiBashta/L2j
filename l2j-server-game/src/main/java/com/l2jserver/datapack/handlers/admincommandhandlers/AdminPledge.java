@@ -12,6 +12,7 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.GMViewPledgeInfo;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
 /**
  * <B>Pledge Manipulation:</B><BR>
@@ -23,6 +24,7 @@ import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
  * //pledge setlevel level<BR>
  * //pledge rep reputation_points<BR>
  */
+@Service
 public class AdminPledge implements IAdminCommandHandler {
 	private static final String[] ADMIN_COMMANDS = {
 		"admin_pledge"

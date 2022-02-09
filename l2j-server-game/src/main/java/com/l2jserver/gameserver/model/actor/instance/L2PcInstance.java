@@ -1,59 +1,7 @@
 package com.l2jserver.gameserver.model.actor.instance;
 
-import static com.l2jserver.gameserver.bbs.model.ForumType.MAIL;
-import static com.l2jserver.gameserver.bbs.model.ForumType.MEMO;
-import static com.l2jserver.gameserver.bbs.model.ForumVisibility.OWNER_ONLY;
-import static com.l2jserver.gameserver.config.Configuration.character;
-import static com.l2jserver.gameserver.config.Configuration.clan;
-import static com.l2jserver.gameserver.config.Configuration.customs;
-import static com.l2jserver.gameserver.config.Configuration.general;
-import static com.l2jserver.gameserver.config.Configuration.pvp;
-import static com.l2jserver.gameserver.config.Configuration.rates;
-import static com.l2jserver.gameserver.config.Configuration.vitality;
-import static com.l2jserver.gameserver.model.items.L2Item.SLOT_DECO;
-import static com.l2jserver.gameserver.model.items.L2Item.SLOT_MULTI_ALLWEAPON;
-import static com.l2jserver.gameserver.network.SystemMessageId.CANNOT_EQUIP_ITEM_DUE_TO_BAD_CONDITION;
-import static com.l2jserver.gameserver.network.SystemMessageId.EQUIPMENT_S1_S2_REMOVED;
-import static com.l2jserver.gameserver.network.SystemMessageId.S1_DISARMED;
-import static com.l2jserver.gameserver.network.SystemMessageId.S1_EQUIPPED;
-import static com.l2jserver.gameserver.network.SystemMessageId.S1_S2_EQUIPPED;
-import static java.util.concurrent.TimeUnit.SECONDS;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Queue;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.l2jserver.commons.util.Rnd;
-import com.l2jserver.gameserver.GameTimeController;
-import com.l2jserver.gameserver.GeoData;
-import com.l2jserver.gameserver.ItemsAutoDestroy;
-import com.l2jserver.gameserver.LoginServerThread;
-import com.l2jserver.gameserver.RecipeController;
-import com.l2jserver.gameserver.SevenSigns;
-import com.l2jserver.gameserver.SevenSignsFestival;
-import com.l2jserver.gameserver.ThreadPoolManager;
+import com.l2jserver.gameserver.*;
 import com.l2jserver.gameserver.agathion.repository.AgathionRepository;
 import com.l2jserver.gameserver.ai.CtrlIntention;
 import com.l2jserver.gameserver.ai.L2CharacterAI;
@@ -65,111 +13,23 @@ import com.l2jserver.gameserver.cache.WarehouseCacheManager;
 import com.l2jserver.gameserver.dao.factory.impl.DAOFactory;
 import com.l2jserver.gameserver.data.sql.impl.CharNameTable;
 import com.l2jserver.gameserver.data.sql.impl.CharSummonTable;
-import com.l2jserver.gameserver.data.xml.impl.AdminData;
-import com.l2jserver.gameserver.data.xml.impl.EnchantSkillGroupsData;
-import com.l2jserver.gameserver.data.xml.impl.FishData;
-import com.l2jserver.gameserver.data.xml.impl.NpcData;
-import com.l2jserver.gameserver.data.xml.impl.PetDataTable;
-import com.l2jserver.gameserver.data.xml.impl.PlayerTemplateData;
-import com.l2jserver.gameserver.data.xml.impl.PlayerXpPercentLostData;
-import com.l2jserver.gameserver.data.xml.impl.SkillTreesData;
+import com.l2jserver.gameserver.data.xml.impl.*;
 import com.l2jserver.gameserver.datatables.ItemTable;
 import com.l2jserver.gameserver.datatables.SkillData;
-import com.l2jserver.gameserver.enums.DuelState;
-import com.l2jserver.gameserver.enums.HtmlActionScope;
-import com.l2jserver.gameserver.enums.InstanceType;
-import com.l2jserver.gameserver.enums.MountType;
-import com.l2jserver.gameserver.enums.PartyDistributionType;
-import com.l2jserver.gameserver.enums.PlayerAction;
-import com.l2jserver.gameserver.enums.PrivateStoreType;
-import com.l2jserver.gameserver.enums.Race;
-import com.l2jserver.gameserver.enums.ShortcutType;
-import com.l2jserver.gameserver.enums.ShotType;
-import com.l2jserver.gameserver.enums.Team;
+import com.l2jserver.gameserver.enums.*;
 import com.l2jserver.gameserver.enums.audio.Music;
 import com.l2jserver.gameserver.handler.IItemHandler;
 import com.l2jserver.gameserver.handler.ItemHandler;
 import com.l2jserver.gameserver.idfactory.IdFactory;
-import com.l2jserver.gameserver.instancemanager.AntiFeedManager;
-import com.l2jserver.gameserver.instancemanager.CastleManager;
-import com.l2jserver.gameserver.instancemanager.CoupleManager;
-import com.l2jserver.gameserver.instancemanager.CursedWeaponsManager;
-import com.l2jserver.gameserver.instancemanager.DimensionalRiftManager;
-import com.l2jserver.gameserver.instancemanager.DuelManager;
-import com.l2jserver.gameserver.instancemanager.FortManager;
-import com.l2jserver.gameserver.instancemanager.FortSiegeManager;
-import com.l2jserver.gameserver.instancemanager.GrandBossManager;
-import com.l2jserver.gameserver.instancemanager.HandysBlockCheckerManager;
-import com.l2jserver.gameserver.instancemanager.InstanceManager;
-import com.l2jserver.gameserver.instancemanager.ItemsOnGroundManager;
-import com.l2jserver.gameserver.instancemanager.PunishmentManager;
-import com.l2jserver.gameserver.instancemanager.QuestManager;
-import com.l2jserver.gameserver.instancemanager.SiegeManager;
-import com.l2jserver.gameserver.instancemanager.TerritoryWarManager;
-import com.l2jserver.gameserver.instancemanager.ZoneManager;
-import com.l2jserver.gameserver.model.ArenaParticipantsHolder;
-import com.l2jserver.gameserver.model.BlockList;
-import com.l2jserver.gameserver.model.ClanPrivilege;
-import com.l2jserver.gameserver.model.L2AccessLevel;
-import com.l2jserver.gameserver.model.L2Clan;
-import com.l2jserver.gameserver.model.L2ClanMember;
-import com.l2jserver.gameserver.model.L2ContactList;
-import com.l2jserver.gameserver.model.L2EnchantSkillLearn;
-import com.l2jserver.gameserver.model.L2ManufactureItem;
-import com.l2jserver.gameserver.model.L2Object;
-import com.l2jserver.gameserver.model.L2Party;
+import com.l2jserver.gameserver.instancemanager.*;
+import com.l2jserver.gameserver.model.*;
 import com.l2jserver.gameserver.model.L2Party.messageType;
-import com.l2jserver.gameserver.model.L2PetLevelData;
-import com.l2jserver.gameserver.model.L2PremiumItem;
-import com.l2jserver.gameserver.model.L2Radar;
-import com.l2jserver.gameserver.model.L2RecipeList;
-import com.l2jserver.gameserver.model.L2Request;
-import com.l2jserver.gameserver.model.L2SkillLearn;
-import com.l2jserver.gameserver.model.L2World;
-import com.l2jserver.gameserver.model.L2WorldRegion;
-import com.l2jserver.gameserver.model.Location;
-import com.l2jserver.gameserver.model.Macro;
-import com.l2jserver.gameserver.model.MacroList;
-import com.l2jserver.gameserver.model.PartyMatchRoom;
-import com.l2jserver.gameserver.model.PartyMatchRoomList;
-import com.l2jserver.gameserver.model.PartyMatchWaitingList;
-import com.l2jserver.gameserver.model.PcCondOverride;
-import com.l2jserver.gameserver.model.ShortCuts;
-import com.l2jserver.gameserver.model.Shortcut;
-import com.l2jserver.gameserver.model.TeleportBookmark;
-import com.l2jserver.gameserver.model.TeleportWhereType;
-import com.l2jserver.gameserver.model.TerritoryWard;
-import com.l2jserver.gameserver.model.TradeList;
-import com.l2jserver.gameserver.model.UIKeysSettings;
-import com.l2jserver.gameserver.model.actor.L2Attackable;
-import com.l2jserver.gameserver.model.actor.L2Character;
-import com.l2jserver.gameserver.model.actor.L2Decoy;
-import com.l2jserver.gameserver.model.actor.L2Npc;
-import com.l2jserver.gameserver.model.actor.L2Playable;
-import com.l2jserver.gameserver.model.actor.L2Summon;
-import com.l2jserver.gameserver.model.actor.L2Vehicle;
+import com.l2jserver.gameserver.model.actor.*;
 import com.l2jserver.gameserver.model.actor.appearance.PcAppearance;
 import com.l2jserver.gameserver.model.actor.knownlist.PcKnownList;
 import com.l2jserver.gameserver.model.actor.stat.PcStat;
 import com.l2jserver.gameserver.model.actor.status.PcStatus;
-import com.l2jserver.gameserver.model.actor.tasks.player.DismountTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.FameTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.GameGuardCheckTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.InventoryEnableTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.LookingForFishTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.PetFeedTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.PvPFlagTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.RecoBonusTaskEnd;
-import com.l2jserver.gameserver.model.actor.tasks.player.RecoGiveTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.RentPetTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.ResetChargesTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.ResetSoulsTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.SitDownTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.StandUpTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.TeleportWatchdogTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.VitalityTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.WarnUserTakeBreakTask;
-import com.l2jserver.gameserver.model.actor.tasks.player.WaterTask;
+import com.l2jserver.gameserver.model.actor.tasks.player.*;
 import com.l2jserver.gameserver.model.actor.templates.L2PcTemplate;
 import com.l2jserver.gameserver.model.actor.transform.Transform;
 import com.l2jserver.gameserver.model.base.ClassId;
@@ -178,58 +38,20 @@ import com.l2jserver.gameserver.model.base.PlayerClass;
 import com.l2jserver.gameserver.model.base.SubClass;
 import com.l2jserver.gameserver.model.effects.EffectFlag;
 import com.l2jserver.gameserver.model.effects.L2EffectType;
-import com.l2jserver.gameserver.model.entity.Castle;
-import com.l2jserver.gameserver.model.entity.Duel;
-import com.l2jserver.gameserver.model.entity.Fort;
-import com.l2jserver.gameserver.model.entity.Instance;
-import com.l2jserver.gameserver.model.entity.L2Event;
-import com.l2jserver.gameserver.model.entity.Siege;
-import com.l2jserver.gameserver.model.entity.TvTEvent;
+import com.l2jserver.gameserver.model.entity.*;
 import com.l2jserver.gameserver.model.events.Containers;
 import com.l2jserver.gameserver.model.events.EventDispatcher;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerEquipItem;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerFameChanged;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerHennaRemove;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerKarmaChanged;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerLevelChanged;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerLogin;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerLogout;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerPKChanged;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerProfessionCancel;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerProfessionChange;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerPvPChanged;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerPvPKill;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerSit;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerStand;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerTransform;
+import com.l2jserver.gameserver.model.events.impl.character.player.*;
 import com.l2jserver.gameserver.model.events.returns.TerminateReturn;
 import com.l2jserver.gameserver.model.fishing.L2Fish;
 import com.l2jserver.gameserver.model.fishing.L2Fishing;
-import com.l2jserver.gameserver.model.holders.AdditionalSkillHolder;
-import com.l2jserver.gameserver.model.holders.ItemHolder;
-import com.l2jserver.gameserver.model.holders.PlayerEventHolder;
-import com.l2jserver.gameserver.model.holders.SkillHolder;
-import com.l2jserver.gameserver.model.holders.SkillUseHolder;
+import com.l2jserver.gameserver.model.holders.*;
 import com.l2jserver.gameserver.model.interfaces.IEventListener;
 import com.l2jserver.gameserver.model.interfaces.ILocational;
-import com.l2jserver.gameserver.model.itemcontainer.Inventory;
-import com.l2jserver.gameserver.model.itemcontainer.ItemContainer;
-import com.l2jserver.gameserver.model.itemcontainer.PcFreight;
-import com.l2jserver.gameserver.model.itemcontainer.PcInventory;
-import com.l2jserver.gameserver.model.itemcontainer.PcRefund;
-import com.l2jserver.gameserver.model.itemcontainer.PcWarehouse;
-import com.l2jserver.gameserver.model.itemcontainer.PetInventory;
-import com.l2jserver.gameserver.model.items.L2Armor;
-import com.l2jserver.gameserver.model.items.L2EtcItem;
-import com.l2jserver.gameserver.model.items.L2Henna;
-import com.l2jserver.gameserver.model.items.L2Item;
-import com.l2jserver.gameserver.model.items.L2Weapon;
+import com.l2jserver.gameserver.model.itemcontainer.*;
+import com.l2jserver.gameserver.model.items.*;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
-import com.l2jserver.gameserver.model.items.type.ActionType;
-import com.l2jserver.gameserver.model.items.type.ArmorType;
-import com.l2jserver.gameserver.model.items.type.EtcItemType;
-import com.l2jserver.gameserver.model.items.type.ItemType2;
-import com.l2jserver.gameserver.model.items.type.WeaponType;
+import com.l2jserver.gameserver.model.items.type.*;
 import com.l2jserver.gameserver.model.multisell.PreparedListContainer;
 import com.l2jserver.gameserver.model.olympiad.OlympiadGameManager;
 import com.l2jserver.gameserver.model.olympiad.OlympiadGameTask;
@@ -253,76 +75,29 @@ import com.l2jserver.gameserver.model.zone.ZoneId;
 import com.l2jserver.gameserver.model.zone.type.L2BossZone;
 import com.l2jserver.gameserver.network.L2GameClient;
 import com.l2jserver.gameserver.network.SystemMessageId;
-import com.l2jserver.gameserver.network.serverpackets.AbstractHtmlPacket;
-import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
-import com.l2jserver.gameserver.network.serverpackets.ChangeWaitType;
-import com.l2jserver.gameserver.network.serverpackets.CharInfo;
-import com.l2jserver.gameserver.network.serverpackets.ConfirmDlg;
-import com.l2jserver.gameserver.network.serverpackets.EtcStatusUpdate;
-import com.l2jserver.gameserver.network.serverpackets.ExAutoSoulShot;
-import com.l2jserver.gameserver.network.serverpackets.ExBR_AgathionEnergyInfo;
-import com.l2jserver.gameserver.network.serverpackets.ExBrExtraUserInfo;
-import com.l2jserver.gameserver.network.serverpackets.ExDominionWarStart;
-import com.l2jserver.gameserver.network.serverpackets.ExDuelUpdateUserInfo;
-import com.l2jserver.gameserver.network.serverpackets.ExFishingEnd;
-import com.l2jserver.gameserver.network.serverpackets.ExFishingStart;
-import com.l2jserver.gameserver.network.serverpackets.ExGetBookMarkInfoPacket;
-import com.l2jserver.gameserver.network.serverpackets.ExGetOnAirShip;
-import com.l2jserver.gameserver.network.serverpackets.ExOlympiadMode;
-import com.l2jserver.gameserver.network.serverpackets.ExPrivateStoreSetWholeMsg;
-import com.l2jserver.gameserver.network.serverpackets.ExSetCompassZoneCode;
-import com.l2jserver.gameserver.network.serverpackets.ExStartScenePlayer;
-import com.l2jserver.gameserver.network.serverpackets.ExStorageMaxCount;
-import com.l2jserver.gameserver.network.serverpackets.ExVoteSystemInfo;
-import com.l2jserver.gameserver.network.serverpackets.FriendStatusPacket;
-import com.l2jserver.gameserver.network.serverpackets.GameGuardQuery;
-import com.l2jserver.gameserver.network.serverpackets.GetOnVehicle;
-import com.l2jserver.gameserver.network.serverpackets.HennaInfo;
-import com.l2jserver.gameserver.network.serverpackets.InventoryUpdate;
-import com.l2jserver.gameserver.network.serverpackets.ItemList;
-import com.l2jserver.gameserver.network.serverpackets.L2GameServerPacket;
-import com.l2jserver.gameserver.network.serverpackets.LeaveWorld;
-import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
-import com.l2jserver.gameserver.network.serverpackets.MyTargetSelected;
-import com.l2jserver.gameserver.network.serverpackets.NicknameChanged;
-import com.l2jserver.gameserver.network.serverpackets.ObservationMode;
-import com.l2jserver.gameserver.network.serverpackets.ObservationReturn;
-import com.l2jserver.gameserver.network.serverpackets.PartySmallWindowUpdate;
-import com.l2jserver.gameserver.network.serverpackets.PetInventoryUpdate;
-import com.l2jserver.gameserver.network.serverpackets.PledgeShowMemberListDelete;
-import com.l2jserver.gameserver.network.serverpackets.PledgeShowMemberListUpdate;
-import com.l2jserver.gameserver.network.serverpackets.PrivateStoreListBuy;
-import com.l2jserver.gameserver.network.serverpackets.PrivateStoreListSell;
-import com.l2jserver.gameserver.network.serverpackets.PrivateStoreManageListBuy;
-import com.l2jserver.gameserver.network.serverpackets.PrivateStoreManageListSell;
-import com.l2jserver.gameserver.network.serverpackets.PrivateStoreMsgBuy;
-import com.l2jserver.gameserver.network.serverpackets.PrivateStoreMsgSell;
-import com.l2jserver.gameserver.network.serverpackets.RecipeShopMsg;
-import com.l2jserver.gameserver.network.serverpackets.RecipeShopSellList;
-import com.l2jserver.gameserver.network.serverpackets.RelationChanged;
-import com.l2jserver.gameserver.network.serverpackets.Ride;
-import com.l2jserver.gameserver.network.serverpackets.ServerClose;
-import com.l2jserver.gameserver.network.serverpackets.SetupGauge;
-import com.l2jserver.gameserver.network.serverpackets.ShortCutInit;
-import com.l2jserver.gameserver.network.serverpackets.SkillCoolTime;
-import com.l2jserver.gameserver.network.serverpackets.SkillList;
-import com.l2jserver.gameserver.network.serverpackets.Snoop;
-import com.l2jserver.gameserver.network.serverpackets.SocialAction;
-import com.l2jserver.gameserver.network.serverpackets.StatusUpdate;
-import com.l2jserver.gameserver.network.serverpackets.StopMove;
-import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
-import com.l2jserver.gameserver.network.serverpackets.TargetSelected;
-import com.l2jserver.gameserver.network.serverpackets.TargetUnselected;
-import com.l2jserver.gameserver.network.serverpackets.TradeDone;
-import com.l2jserver.gameserver.network.serverpackets.TradeOtherDone;
-import com.l2jserver.gameserver.network.serverpackets.TradeStart;
-import com.l2jserver.gameserver.network.serverpackets.UserInfo;
-import com.l2jserver.gameserver.network.serverpackets.ValidateLocation;
+import com.l2jserver.gameserver.network.serverpackets.*;
 import com.l2jserver.gameserver.taskmanager.AttackStanceTaskManager;
 import com.l2jserver.gameserver.util.Broadcast;
 import com.l2jserver.gameserver.util.EnumIntBitmask;
 import com.l2jserver.gameserver.util.FloodProtectors;
 import com.l2jserver.gameserver.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static com.l2jserver.gameserver.bbs.model.ForumType.MAIL;
+import static com.l2jserver.gameserver.bbs.model.ForumType.MEMO;
+import static com.l2jserver.gameserver.bbs.model.ForumVisibility.OWNER_ONLY;
+import static com.l2jserver.gameserver.config.Configuration.*;
+import static com.l2jserver.gameserver.model.items.L2Item.SLOT_DECO;
+import static com.l2jserver.gameserver.model.items.L2Item.SLOT_MULTI_ALLWEAPON;
+import static com.l2jserver.gameserver.network.SystemMessageId.*;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * This class represents all player characters in the world.<br>
@@ -1015,6 +790,10 @@ public class L2PcInstance extends L2Playable {
 		return getStat().getLevel();
 	}
 	
+	public void setLevel(int level) {
+		getSubStat().setLevel(Math.min(level, getMaxLevel()));
+	}
+	
 	public int getBaseLevel() {
 		return getStat().getLevel();
 	}
@@ -1051,10 +830,6 @@ public class L2PcInstance extends L2Playable {
 	 */
 	public void setNewbie(int newbieRewards) {
 		_newbie = newbieRewards;
-	}
-	
-	public void setBaseClass(int baseClass) {
-		_baseClass = baseClass;
 	}
 	
 	public boolean isInStoreMode() {
@@ -2008,10 +1783,6 @@ public class L2PcInstance extends L2Playable {
 		getSubStat().setExp(exp);
 	}
 	
-	public void setLevel(int level) {
-		getSubStat().setLevel(Math.min(level, getMaxLevel()));
-	}
-	
 	public int getMaxLevel() {
 		return getSubStat().getMaxLevel();
 	}
@@ -2029,13 +1800,13 @@ public class L2PcInstance extends L2Playable {
 		if ((getLevel() + value) > getMaxLevel()) {
 			return false;
 		}
-		
+
 		// Notify to scripts
 		EventDispatcher.getInstance().notifyEventAsync(new OnPlayerLevelChanged(this, getLevel(), getLevel() + value), this);
-		
+
 		boolean levelIncreased = getSubStat().addLevel(value);
 		onLevelChange(levelIncreased);
-		
+
 		return levelIncreased;
 	}
 	
@@ -2052,10 +1823,10 @@ public class L2PcInstance extends L2Playable {
 				checkPlayerSkills();
 			}
 		}
-		
+
 		// Give AutoGet skills and all normal skills if Auto-Learn is activated.
 		rewardSkills();
-		
+
 		if (getClan() != null) {
 			getClan().updateClanMember(this);
 			getClan().broadcastToOnlineMembers(new PledgeShowMemberListUpdate(this));
@@ -2063,11 +1834,11 @@ public class L2PcInstance extends L2Playable {
 		if (isInParty()) {
 			getParty().recalculatePartyLevel(); // Recalculate the party level
 		}
-		
+
 		if (isTransformed() || isInStance()) {
 			getTransformation().onLevelUp(this);
 		}
-		
+
 		// Synchronize level with pet if possible.
 		if (hasPet()) {
 			final L2PetInstance pet = (L2PetInstance) getSummon();
@@ -2080,14 +1851,14 @@ public class L2PcInstance extends L2Playable {
 				pet.updateAndBroadcastStatus(1);
 			}
 		}
-		
+
 		StatusUpdate su = new StatusUpdate(this);
 		su.addAttribute(StatusUpdate.LEVEL, getLevel());
 		su.addAttribute(StatusUpdate.MAX_CP, getMaxCp());
 		su.addAttribute(StatusUpdate.MAX_HP, getMaxHp());
 		su.addAttribute(StatusUpdate.MAX_MP, getMaxMp());
 		sendPacket(su);
-		
+
 		// Update the overloaded status of the L2PcInstance
 		refreshOverloaded();
 		// Update the expertise status of the L2PcInstance
@@ -2202,7 +1973,7 @@ public class L2PcInstance extends L2Playable {
 			L2Item temp = ItemTable.getInstance().getTemplate(247);
 			weaponItem = (L2Weapon) temp;
 		}
-		
+
 		return weaponItem;
 	}
 	
@@ -2216,7 +1987,7 @@ public class L2PcInstance extends L2Playable {
 		} else {
 			giveAvailableAutoGetSkills();
 		}
-		
+
 		checkPlayerSkills();
 		checkItemRestriction();
 		sendSkillList();
@@ -2227,22 +1998,22 @@ public class L2PcInstance extends L2Playable {
 	 */
 	public void regiveTemporarySkills() {
 		// Do not call this on enterworld or char load
-		
+
 		// Add noble skills if noble
 		if (isNoble()) {
 			setNoble(true);
 		}
-		
+
 		// Add Hero skills if hero
 		if (isHero()) {
 			setHero(true);
 		}
-		
+
 		// Add clan skills
 		if (getClan() != null) {
 			L2Clan clan = getClan();
 			clan.addSkillEffects(this);
-			
+
 			if ((clan.getLevel() >= SiegeManager.getInstance().getSiegeClanMinLevel()) && isClanLeader()) {
 				SiegeManager.getInstance().addSiegeSkills(this);
 			}
@@ -2253,10 +2024,10 @@ public class L2PcInstance extends L2Playable {
 				FortManager.getInstance().getFortByOwner(getClan()).giveResidentialSkills(this);
 			}
 		}
-		
+
 		// Reload passive skills from armors / jewels / weapons
 		getInventory().reloadEquippedItems();
-		
+
 		// Add Death Penalty Buff Level
 		restoreDeathPenaltyBuffLevel();
 	}
@@ -2272,27 +2043,27 @@ public class L2PcInstance extends L2Playable {
 		// Get available skills
 		Collection<Skill> skills = SkillTreesData.getInstance().getAllAvailableSkills(this, getClassId(), includedByFs, includeAutoGet);
 		List<Skill> skillsForStore = new ArrayList<>();
-		
+
 		for (Skill sk : skills) {
 			if (getKnownSkill(sk.getId()) == sk) {
 				continue;
 			}
-			
+
 			if (getSkillLevel(sk.getId()) == -1) {
 				skillCounter++;
 			}
-			
+
 			// fix when learning toggle skills
 			if (sk.isToggle() && isAffectedBySkill(sk.getId())) {
 				stopSkillEffects(true, sk.getId());
 			}
-			
+
 			addSkill(sk, false);
 			skillsForStore.add(sk);
 		}
-		
+
 		DAOFactory.getInstance().getSkillDAO().insert(this, -1, skillsForStore);
-		
+
 		if (character().autoLearnSkills() && (skillCounter > 0)) {
 			sendMessage("You have learned " + skillCounter + " new skills.");
 		}
@@ -2372,7 +2143,7 @@ public class L2PcInstance extends L2Playable {
 	 */
 	public boolean isCastleLord(int castleId) {
 		L2Clan clan = getClan();
-		
+
 		// player has clan and is the clan leader, check the castle info
 		if ((clan != null) && (clan.getLeader().getPlayerInstance() == this)) {
 			// if the clan has a castle and it is actually the queried castle, return true
@@ -2381,7 +2152,7 @@ public class L2PcInstance extends L2Playable {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 	
@@ -2400,7 +2171,7 @@ public class L2PcInstance extends L2Playable {
 		if (_clan != null) {
 			return _clan.getCrestId();
 		}
-		
+
 		return 0;
 	}
 	
@@ -2473,11 +2244,11 @@ public class L2PcInstance extends L2Playable {
 		if ((terminate != null) && terminate.terminate()) {
 			return;
 		}
-		
+
 		if (checkCast && isCastingNow()) {
 			return;
 		}
-		
+
 		if (!_waitTypeSitting && !isAttackingDisabled() && !isOutOfControl() && !isImmobilized() && !isMoving()) {
 			breakAttack();
 			setIsSitting(true);
@@ -2497,12 +2268,12 @@ public class L2PcInstance extends L2Playable {
 		if ((terminate != null) && terminate.terminate()) {
 			return;
 		}
-		
+
 		if (_waitTypeSitting && !isInStoreMode() && !isAlikeDead()) {
 			if (getEffectList().isAffected(EffectFlag.RELAXING)) {
 				stopEffects(L2EffectType.RELAXING);
 			}
-			
+
 			broadcastPacket(new ChangeWaitType(this, ChangeWaitType.WT_STANDING));
 			// Schedule a stand up task to wait for the animation to finish
 			ThreadPoolManager.getInstance().scheduleGeneral(new StandUpTask(this), 2500);
@@ -2594,10 +2365,10 @@ public class L2PcInstance extends L2Playable {
 			sm.addLong(count);
 			sendPacket(sm);
 		}
-		
+
 		if (count > 0) {
 			_inventory.addAdena(process, count, this, reference);
-			
+
 			// Send update packet
 			if (!general().forceInventoryUpdate()) {
 				InventoryUpdate iu = new InventoryUpdate();
@@ -2624,13 +2395,13 @@ public class L2PcInstance extends L2Playable {
 			}
 			return false;
 		}
-		
+
 		if (count > 0) {
 			L2ItemInstance adenaItem = _inventory.getAdenaInstance();
 			if (!_inventory.reduceAdena(process, count, this, reference)) {
 				return false;
 			}
-			
+
 			// Send update packet
 			if (!general().forceInventoryUpdate()) {
 				InventoryUpdate iu = new InventoryUpdate();
@@ -2639,14 +2410,14 @@ public class L2PcInstance extends L2Playable {
 			} else {
 				sendPacket(new ItemList(this, false));
 			}
-			
+
 			if (sendMessage) {
 				SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.S1_DISAPPEARED_ADENA);
 				sm.addLong(count);
 				sendPacket(sm);
 			}
 		}
-		
+
 		return true;
 	}
 	
@@ -2664,10 +2435,10 @@ public class L2PcInstance extends L2Playable {
 			sm.addLong(count);
 			sendPacket(sm);
 		}
-		
+
 		if (count > 0) {
 			_inventory.addAncientAdena(process, count, this, reference);
-			
+
 			if (!general().forceInventoryUpdate()) {
 				InventoryUpdate iu = new InventoryUpdate();
 				iu.addItem(_inventory.getAncientAdenaInstance());
@@ -2691,16 +2462,16 @@ public class L2PcInstance extends L2Playable {
 			if (sendMessage) {
 				sendPacket(SystemMessageId.YOU_NOT_ENOUGH_ADENA);
 			}
-			
+
 			return false;
 		}
-		
+
 		if (count > 0) {
 			L2ItemInstance ancientAdenaItem = _inventory.getAncientAdenaInstance();
 			if (!_inventory.reduceAncientAdena(process, count, this, reference)) {
 				return false;
 			}
-			
+
 			if (!general().forceInventoryUpdate()) {
 				InventoryUpdate iu = new InventoryUpdate();
 				iu.addItem(ancientAdenaItem);
@@ -2708,7 +2479,7 @@ public class L2PcInstance extends L2Playable {
 			} else {
 				sendPacket(new ItemList(this, false));
 			}
-			
+
 			if (sendMessage) {
 				if (count > 1) {
 					SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.S2_S1_DISAPPEARED);
@@ -2722,7 +2493,7 @@ public class L2PcInstance extends L2Playable {
 				}
 			}
 		}
-		
+
 		return true;
 	}
 	
@@ -2753,10 +2524,10 @@ public class L2PcInstance extends L2Playable {
 					sendPacket(sm);
 				}
 			}
-			
+
 			// Add the item to inventory
 			L2ItemInstance newitem = _inventory.addItem(process, item, this, reference);
-			
+
 			// Send inventory update packet
 			if (!general().forceInventoryUpdate()) {
 				InventoryUpdate playerIU = new InventoryUpdate();
@@ -2765,19 +2536,19 @@ public class L2PcInstance extends L2Playable {
 			} else {
 				sendPacket(new ItemList(this, false));
 			}
-			
+
 			// Update current load as well
 			StatusUpdate su = new StatusUpdate(this);
 			su.addAttribute(StatusUpdate.CUR_LOAD, getCurrentLoad());
 			sendPacket(su);
-			
+
 			// If over capacity, drop the item
 			if (!canOverrideCond(PcCondOverride.ITEM_CONDITIONS) && !_inventory.validateCapacity(0, item.isQuestItem()) && newitem.isDroppable() && (!newitem.isStackable() || (newitem.getLastChange() != L2ItemInstance.MODIFIED))) {
 				dropItem("InvDrop", newitem, null, true, true);
 			} else if (CursedWeaponsManager.getInstance().isCursed(newitem.getId())) {
 				CursedWeaponsManager.getInstance().activate(this, newitem);
 			}
-			
+
 			// Combat Flag
 			else if (FortSiegeManager.getInstance().isCombat(item.getId())) {
 				if (FortSiegeManager.getInstance().activateCombatFlag(this, item)) {
@@ -2863,7 +2634,7 @@ public class L2PcInstance extends L2Playable {
 					}
 				}
 			}
-			
+
 			// Auto-use herbs.
 			if (item.hasExImmediateEffect()) {
 				final IItemHandler handler = ItemHandler.getInstance().getHandler(item instanceof L2EtcItem ? (L2EtcItem) item : null);
@@ -2875,7 +2646,7 @@ public class L2PcInstance extends L2Playable {
 			} else {
 				// Add the item to inventory
 				L2ItemInstance createdItem = _inventory.addItem(process, itemId, count, enchantLevel, this, reference);
-				
+
 				// If over capacity, drop the item
 				if (!canOverrideCond(PcCondOverride.ITEM_CONDITIONS) && !_inventory.validateCapacity(0, item.isQuestItem()) && createdItem.isDroppable() && (!createdItem.isStackable() || (createdItem.getLastChange() != L2ItemInstance.MODIFIED))) {
 					dropItem("InvDrop", createdItem, null, true);
@@ -2928,14 +2699,14 @@ public class L2PcInstance extends L2Playable {
 	 */
 	public boolean destroyItem(String process, L2ItemInstance item, long count, L2Object reference, boolean sendMessage) {
 		item = _inventory.destroyItem(process, item, count, this, reference);
-		
+
 		if (item == null) {
 			if (sendMessage) {
 				sendPacket(SystemMessageId.NOT_ENOUGH_ITEMS);
 			}
 			return false;
 		}
-		
+
 		// Send inventory update packet
 		if (!general().forceInventoryUpdate()) {
 			InventoryUpdate playerIU = new InventoryUpdate();
@@ -2944,12 +2715,12 @@ public class L2PcInstance extends L2Playable {
 		} else {
 			sendPacket(new ItemList(this, false));
 		}
-		
+
 		// Update current load as well
 		StatusUpdate su = new StatusUpdate(this);
 		su.addAttribute(StatusUpdate.CUR_LOAD, getCurrentLoad());
 		sendPacket(su);
-		
+
 		// Sends message to client if requested
 		if (sendMessage) {
 			if (count > 1) {
@@ -2963,7 +2734,7 @@ public class L2PcInstance extends L2Playable {
 				sendPacket(sm);
 			}
 		}
-		
+
 		return true;
 	}
 	
@@ -2979,12 +2750,12 @@ public class L2PcInstance extends L2Playable {
 	@Override
 	public boolean destroyItem(String process, int objectId, long count, L2Object reference, boolean sendMessage) {
 		L2ItemInstance item = _inventory.getItemByObjectId(objectId);
-		
+
 		if (item == null) {
 			if (sendMessage) {
 				sendPacket(SystemMessageId.NOT_ENOUGH_ITEMS);
 			}
-			
+
 			return false;
 		}
 		return destroyItem(process, item, count, reference, sendMessage);
@@ -3001,15 +2772,15 @@ public class L2PcInstance extends L2Playable {
 	 */
 	public boolean destroyItemWithoutTrace(String process, int objectId, long count, L2Object reference, boolean sendMessage) {
 		L2ItemInstance item = _inventory.getItemByObjectId(objectId);
-		
+
 		if ((item == null) || (item.getCount() < count)) {
 			if (sendMessage) {
 				sendPacket(SystemMessageId.NOT_ENOUGH_ITEMS);
 			}
-			
+
 			return false;
 		}
-		
+
 		return destroyItem(null, item, count, reference, sendMessage);
 	}
 	
@@ -3027,17 +2798,17 @@ public class L2PcInstance extends L2Playable {
 		if (itemId == Inventory.ADENA_ID) {
 			return reduceAdena(process, count, reference, sendMessage);
 		}
-		
+
 		L2ItemInstance item = _inventory.getItemByItemId(itemId);
-		
+
 		if ((item == null) || (item.getCount() < count) || (_inventory.destroyItemByItemId(process, itemId, count, this, reference) == null)) {
 			if (sendMessage) {
 				sendPacket(SystemMessageId.NOT_ENOUGH_ITEMS);
 			}
-			
+
 			return false;
 		}
-		
+
 		// Send inventory update packet
 		if (!general().forceInventoryUpdate()) {
 			InventoryUpdate playerIU = new InventoryUpdate();
@@ -3046,12 +2817,12 @@ public class L2PcInstance extends L2Playable {
 		} else {
 			sendPacket(new ItemList(this, false));
 		}
-		
+
 		// Update current load as well
 		StatusUpdate su = new StatusUpdate(this);
 		su.addAttribute(StatusUpdate.CUR_LOAD, getCurrentLoad());
 		sendPacket(su);
-		
+
 		// Sends message to client if requested
 		if (sendMessage) {
 			if (count > 1) {
@@ -3065,7 +2836,7 @@ public class L2PcInstance extends L2Playable {
 				sendPacket(sm);
 			}
 		}
-		
+
 		return true;
 	}
 	
@@ -3087,58 +2858,58 @@ public class L2PcInstance extends L2Playable {
 		if (newItem == null) {
 			return null;
 		}
-		
+
 		// Send inventory update packet
 		if (!general().forceInventoryUpdate()) {
 			InventoryUpdate playerIU = new InventoryUpdate();
-			
+
 			if ((oldItem.getCount() > 0) && (oldItem != newItem)) {
 				playerIU.addModifiedItem(oldItem);
 			} else {
 				playerIU.addRemovedItem(oldItem);
 			}
-			
+
 			sendPacket(playerIU);
 		} else {
 			sendPacket(new ItemList(this, false));
 		}
-		
+
 		// Update current load as well
 		StatusUpdate playerSU = new StatusUpdate(this);
 		playerSU.addAttribute(StatusUpdate.CUR_LOAD, getCurrentLoad());
 		sendPacket(playerSU);
-		
+
 		// Send target update packet
 		if (target instanceof PcInventory) {
 			L2PcInstance targetPlayer = ((PcInventory) target).getOwner();
-			
+
 			if (!general().forceInventoryUpdate()) {
 				InventoryUpdate playerIU = new InventoryUpdate();
-				
+
 				if (newItem.getCount() > count) {
 					playerIU.addModifiedItem(newItem);
 				} else {
 					playerIU.addNewItem(newItem);
 				}
-				
+
 				targetPlayer.sendPacket(playerIU);
 			} else {
 				targetPlayer.sendPacket(new ItemList(targetPlayer, false));
 			}
-			
+
 			// Update current load as well
 			playerSU = new StatusUpdate(targetPlayer);
 			playerSU.addAttribute(StatusUpdate.CUR_LOAD, targetPlayer.getCurrentLoad());
 			targetPlayer.sendPacket(playerSU);
 		} else if (target instanceof PetInventory) {
 			PetInventoryUpdate petIU = new PetInventoryUpdate();
-			
+
 			if (newItem.getCount() > count) {
 				petIU.addModifiedItem(newItem);
 			} else {
 				petIU.addNewItem(newItem);
 			}
-			
+
 			((PetInventory) target).getOwner().sendPacket(petIU);
 		}
 		return newItem;
@@ -3164,14 +2935,14 @@ public class L2PcInstance extends L2Playable {
 			}
 			return false;
 		}
-		
+
 		if (!inv.validateWeightByItemId(rewardId, count)) {
 			if (sendMessage) {
 				sendPacket(SystemMessageId.WEIGHT_LIMIT_EXCEEDED);
 			}
 			return false;
 		}
-		
+
 		if (destroyItemByItemId(process, coinId, cost, reference, sendMessage)) {
 			addItem(process, rewardId, count, reference, sendMessage);
 			return true;
@@ -3190,23 +2961,23 @@ public class L2PcInstance extends L2Playable {
 	 */
 	public boolean dropItem(String process, L2ItemInstance item, L2Object reference, boolean sendMessage, boolean protectItem) {
 		item = _inventory.dropItem(process, item, this, reference);
-		
+
 		if (item == null) {
 			if (sendMessage) {
 				sendPacket(SystemMessageId.NOT_ENOUGH_ITEMS);
 			}
-			
+
 			return false;
 		}
-		
+
 		item.dropMe(this, (getX() + Rnd.get(50)) - 25, (getY() + Rnd.get(50)) - 25, getZ() + 20);
-		
+
 		if ((general().getAutoDestroyDroppedItemAfter() > 0) && general().destroyPlayerDroppedItem() && !general().getProtectedItems().contains(item.getId())) {
 			if ((item.isEquipable() && general().destroyEquipableItem()) || !item.isEquipable()) {
 				ItemsAutoDestroy.getInstance().addItem(item);
 			}
 		}
-		
+
 		// protection against auto destroy dropped item
 		if (general().destroyPlayerDroppedItem()) {
 			if (!item.isEquipable() || (item.isEquipable() && general().destroyEquipableItem())) {
@@ -3217,12 +2988,12 @@ public class L2PcInstance extends L2Playable {
 		} else {
 			item.setProtected(true);
 		}
-		
+
 		// retail drop protection
 		if (protectItem) {
 			item.getDropProtection().protect(this);
 		}
-		
+
 		// Send inventory update packet
 		if (!general().forceInventoryUpdate()) {
 			InventoryUpdate playerIU = new InventoryUpdate();
@@ -3231,19 +3002,19 @@ public class L2PcInstance extends L2Playable {
 		} else {
 			sendPacket(new ItemList(this, false));
 		}
-		
+
 		// Update current load as well
 		StatusUpdate su = new StatusUpdate(this);
 		su.addAttribute(StatusUpdate.CUR_LOAD, getCurrentLoad());
 		sendPacket(su);
-		
+
 		// Sends message to client if requested
 		if (sendMessage) {
 			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.YOU_DROPPED_S1);
 			sm.addItemName(item);
 			sendPacket(sm);
 		}
-		
+
 		return true;
 	}
 	
@@ -3267,17 +3038,17 @@ public class L2PcInstance extends L2Playable {
 	public L2ItemInstance dropItem(String process, int objectId, long count, int x, int y, int z, L2Object reference, boolean sendMessage, boolean protectItem) {
 		L2ItemInstance invitem = _inventory.getItemByObjectId(objectId);
 		L2ItemInstance item = _inventory.dropItem(process, objectId, count, this, reference);
-		
+
 		if (item == null) {
 			if (sendMessage) {
 				sendPacket(SystemMessageId.NOT_ENOUGH_ITEMS);
 			}
-			
+
 			return null;
 		}
-		
+
 		item.dropMe(this, x, y, z);
-		
+
 		if ((general().getAutoDestroyDroppedItemAfter() > 0) && general().destroyPlayerDroppedItem() && !general().getProtectedItems().contains(item.getId())) {
 			if ((item.isEquipable() && general().destroyEquipableItem()) || !item.isEquipable()) {
 				ItemsAutoDestroy.getInstance().addItem(item);
@@ -3292,12 +3063,12 @@ public class L2PcInstance extends L2Playable {
 		} else {
 			item.setProtected(true);
 		}
-		
+
 		// retail drop protection
 		if (protectItem) {
 			item.getDropProtection().protect(this);
 		}
-		
+
 		// Send inventory update packet
 		if (!general().forceInventoryUpdate()) {
 			InventoryUpdate playerIU = new InventoryUpdate();
@@ -3306,19 +3077,19 @@ public class L2PcInstance extends L2Playable {
 		} else {
 			sendPacket(new ItemList(this, false));
 		}
-		
+
 		// Update current load as well
 		StatusUpdate su = new StatusUpdate(this);
 		su.addAttribute(StatusUpdate.CUR_LOAD, getCurrentLoad());
 		sendPacket(su);
-		
+
 		// Sends message to client if requested
 		if (sendMessage) {
 			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.YOU_DROPPED_S1);
 			sm.addItemName(item);
 			sendPacket(sm);
 		}
-		
+
 		return item;
 	}
 	
@@ -3328,45 +3099,45 @@ public class L2PcInstance extends L2Playable {
 			LOG.warn("{} tried to {} item not available in L2World", this, action);
 			return null;
 		}
-		
+
 		L2ItemInstance item = getInventory().getItemByObjectId(objectId);
-		
+
 		if ((item == null) || (item.getOwnerId() != getObjectId())) {
 			LOG.warn("{} tried to {} item he is not owner of", this, action);
 			return null;
 		}
-		
+
 		if ((count < 0) || ((count > 1) && !item.isStackable())) {
 			LOG.warn("{} tried to {} item with invalid count: {}", this, action, count);
 			return null;
 		}
-		
+
 		if (count > item.getCount()) {
 			LOG.warn("{} tried to {} more items than he owns", this, action);
 			return null;
 		}
-		
+
 		// Pet is summoned and not the item that summoned the pet AND not the buggle from strider you're mounting
 		if ((hasSummon() && (getSummon().getControlObjectId() == objectId)) || (getMountObjectID() == objectId)) {
 			if (general().debug()) {
 				LOG.debug("{} tried to {} item controling pet", this, action);
 			}
-			
+
 			return null;
 		}
-		
+
 		if (getActiveEnchantItemId() == objectId) {
 			if (general().debug()) {
 				LOG.debug("{} tried to {} an enchant scroll he was using", this, action);
 			}
 			return null;
 		}
-		
+
 		// We cannot put a Weapon with Augmention in WH while casting (Possible Exploit)
 		if (item.isAugmented() && (isCastingNow() || isCastingSimultaneouslyNow())) {
 			return null;
 		}
-		
+
 		return item;
 	}
 	
@@ -3379,7 +3150,7 @@ public class L2PcInstance extends L2Playable {
 			LOG.debug("{}: Protection {} (currently {})", this, (protect ? "ON " + (GameTimeController.getInstance().getGameTicks() + //
 				(character().getPlayerSpawnProtection() * GameTimeController.TICKS_PER_SECOND)) : "OFF"), GameTimeController.getInstance().getGameTicks());
 		}
-		
+
 		_protectEndTime = protect ? GameTimeController.getInstance().getGameTicks() + (character().getPlayerSpawnProtection() * GameTimeController.TICKS_PER_SECOND) : 0;
 	}
 	
@@ -3388,7 +3159,7 @@ public class L2PcInstance extends L2Playable {
 			LOG.debug("{}: Tele Protection {} (currently {})", this, (protect ? "ON " + (GameTimeController.getInstance().getGameTicks() + //
 				(character().getPlayerTeleportProtection() * GameTimeController.TICKS_PER_SECOND)) : "OFF"), GameTimeController.getInstance().getGameTicks());
 		}
-		
+
 		_teleportProtectEndTime = protect ? GameTimeController.getInstance().getGameTicks() + (character().getPlayerTeleportProtection() * GameTimeController.TICKS_PER_SECOND) : 0;
 	}
 	
@@ -3476,16 +3247,16 @@ public class L2PcInstance extends L2Playable {
 		if (!super.checkDoCastConditions(skill)) {
 			return false;
 		}
-		
+
 		if (inObserverMode()) {
 			return false;
 		}
-		
+
 		if (isInOlympiadMode() && skill.isBlockedInOlympiad()) {
 			sendPacket(SystemMessageId.THIS_SKILL_IS_NOT_AVAILABLE_FOR_THE_OLYMPIAD_EVENT);
 			return false;
 		}
-		
+
 		// Check if the spell using charges or not in AirShip
 		if (((getCharges() < skill.getChargeConsume())) || (isInAirShip() && !skill.hasEffectType(L2EffectType.REFUEL_AIRSHIP))) {
 			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
@@ -3502,11 +3273,11 @@ public class L2PcInstance extends L2Playable {
 	 */
 	private boolean needCpUpdate() {
 		double currentCp = getCurrentCp();
-		
+
 		if ((currentCp <= 1.0) || (getMaxCp() < MAX_HP_BAR_PX)) {
 			return true;
 		}
-		
+
 		if ((currentCp <= _cpUpdateDecCheck) || (currentCp >= _cpUpdateIncCheck)) {
 			if (currentCp == getMaxCp()) {
 				_cpUpdateIncCheck = currentCp + 1;
@@ -3514,14 +3285,14 @@ public class L2PcInstance extends L2Playable {
 			} else {
 				double doubleMulti = currentCp / _cpUpdateInterval;
 				int intMulti = (int) doubleMulti;
-				
+
 				_cpUpdateDecCheck = _cpUpdateInterval * (doubleMulti < intMulti ? intMulti-- : intMulti);
 				_cpUpdateIncCheck = _cpUpdateDecCheck + _cpUpdateInterval;
 			}
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
 	
@@ -3531,11 +3302,11 @@ public class L2PcInstance extends L2Playable {
 	 */
 	private boolean needMpUpdate() {
 		double currentMp = getCurrentMp();
-		
+
 		if ((currentMp <= 1.0) || (getMaxMp() < MAX_HP_BAR_PX)) {
 			return true;
 		}
-		
+
 		if ((currentMp <= _mpUpdateDecCheck) || (currentMp >= _mpUpdateIncCheck)) {
 			if (currentMp == getMaxMp()) {
 				_mpUpdateIncCheck = currentMp + 1;
@@ -3543,14 +3314,14 @@ public class L2PcInstance extends L2Playable {
 			} else {
 				double doubleMulti = currentMp / _mpUpdateInterval;
 				int intMulti = (int) doubleMulti;
-				
+
 				_mpUpdateDecCheck = _mpUpdateInterval * (doubleMulti < intMulti ? intMulti-- : intMulti);
 				_mpUpdateIncCheck = _mpUpdateDecCheck + _mpUpdateInterval;
 			}
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
 	
@@ -3564,7 +3335,7 @@ public class L2PcInstance extends L2Playable {
 		// TODO We mustn't send these informations to other players
 		// Send the Server->Client packet StatusUpdate with current HP and MP to all L2PcInstance that must be informed of HP/MP updates of this L2PcInstance
 		// super.broadcastStatusUpdate();
-		
+
 		// Send the Server->Client packet StatusUpdate with current HP, MP and CP to this L2PcInstance
 		StatusUpdate su = new StatusUpdate(this);
 		su.addAttribute(StatusUpdate.MAX_HP, getMaxHp());
@@ -3574,22 +3345,22 @@ public class L2PcInstance extends L2Playable {
 		su.addAttribute(StatusUpdate.MAX_CP, getMaxCp());
 		su.addAttribute(StatusUpdate.CUR_CP, (int) getCurrentCp());
 		sendPacket(su);
-		
+
 		final boolean needCpUpdate = needCpUpdate();
 		final boolean needHpUpdate = needHpUpdate();
-		
+
 		// Check if a party is in progress and party window update is usefull
 		if (isInParty() && (needCpUpdate || needHpUpdate || needMpUpdate())) {
 			getParty().broadcastToPartyMembers(this, new PartySmallWindowUpdate(this));
 		}
-		
+
 		if (isInOlympiadMode() && isOlympiadStart() && (needCpUpdate || needHpUpdate)) {
 			final OlympiadGameTask game = OlympiadGameManager.getInstance().getOlympiadTask(getOlympiadGameId());
 			if ((game != null) && game.isBattleStarted()) {
 				game.getZone().broadcastStatusUpdate(this);
 			}
 		}
-		
+
 		// In duel MP updated only with CP or HP
 		if (isInDuel() && (needCpUpdate || needHpUpdate)) {
 			DuelManager.getInstance().broadcastToOpposingTeam(this, new ExDuelUpdateUserInfo(this));
@@ -3606,7 +3377,7 @@ public class L2PcInstance extends L2Playable {
 	public void broadcastUserInfo() {
 		// Send a Server->Client packet UserInfo to this L2PcInstance
 		sendPacket(new UserInfo(this));
-		
+
 		// Send a Server->Client packet CharInfo to all L2PcInstance in _KnownPlayers of the L2PcInstance
 		broadcastPacket(new CharInfo(this));
 		broadcastPacket(new ExBrExtraUserInfo(this));
@@ -3619,9 +3390,9 @@ public class L2PcInstance extends L2Playable {
 		// Send a Server->Client packet UserInfo to this L2PcInstance
 		sendPacket(new UserInfo(this));
 		sendPacket(new ExBrExtraUserInfo(this));
-		
+
 		// Send a Server->Client packet TitleUpdate to all L2PcInstance in _KnownPlayers of the L2PcInstance
-		
+
 		broadcastPacket(new NicknameChanged(this));
 	}
 	
@@ -3630,9 +3401,9 @@ public class L2PcInstance extends L2Playable {
 		if (!(mov instanceof CharInfo)) {
 			sendPacket(mov);
 		}
-		
+
 		mov.setInvisible(isInvisible());
-		
+
 		final Collection<L2PcInstance> plrs = getKnownList().getKnownPlayers().values();
 		for (L2PcInstance player : plrs) {
 			if ((player == null) || !isVisibleFor(player)) {
@@ -3657,9 +3428,9 @@ public class L2PcInstance extends L2Playable {
 		if (!(mov instanceof CharInfo)) {
 			sendPacket(mov);
 		}
-		
+
 		mov.setInvisible(isInvisible());
-		
+
 		Collection<L2PcInstance> plrs = getKnownList().getKnownPlayers().values();
 		for (L2PcInstance player : plrs) {
 			if (player == null) {
@@ -3742,7 +3513,7 @@ public class L2PcInstance extends L2Playable {
 		if (target instanceof L2PcInstance) {
 			L2PcInstance temp = (L2PcInstance) target;
 			sendPacket(ActionFailed.STATIC_PACKET);
-			
+
 			if ((temp.getPrivateStoreType() == PrivateStoreType.SELL) || (temp.getPrivateStoreType() == PrivateStoreType.PACKAGE_SELL)) {
 				sendPacket(new PrivateStoreListSell(this, temp));
 			} else if (temp.getPrivateStoreType() == PrivateStoreType.BUY) {
@@ -3750,7 +3521,7 @@ public class L2PcInstance extends L2Playable {
 			} else if (temp.getPrivateStoreType() == PrivateStoreType.MANUFACTURE) {
 				sendPacket(new RecipeShopSellList(this, temp));
 			}
-			
+
 		} else {
 			target.onAction(this);
 		}
@@ -3803,21 +3574,21 @@ public class L2PcInstance extends L2Playable {
 		if (isAlikeDead() || isFakeDeath() || isInvisible()) {
 			return;
 		}
-		
+
 		// Set the AI Intention to AI_INTENTION_IDLE
 		getAI().setIntention(CtrlIntention.AI_INTENTION_IDLE);
-		
+
 		// Check if the L2Object to pick up is a L2ItemInstance
 		if (!(object.isItem())) {
 			// dont try to pickup anything that is not an item :)
 			LOG.warn("{} trying to pickup wrong target.", this, getTarget());
 			return;
 		}
-		
+
 		L2ItemInstance target = (L2ItemInstance) object;
-		
+
 		sendPacket(new StopMove(this));
-		
+
 		SystemMessage smsg = null;
 		synchronized (target) {
 			// Check if the target to pick up is visible
@@ -3826,7 +3597,7 @@ public class L2PcInstance extends L2Playable {
 				sendPacket(ActionFailed.STATIC_PACKET);
 				return;
 			}
-			
+
 			if (!target.getDropProtection().tryPickUp(this)) {
 				sendPacket(ActionFailed.STATIC_PACKET);
 				smsg = SystemMessage.getSystemMessage(SystemMessageId.FAILED_TO_PICKUP_S1);
@@ -3834,17 +3605,17 @@ public class L2PcInstance extends L2Playable {
 				sendPacket(smsg);
 				return;
 			}
-			
+
 			if (((isInParty() && (getParty().getDistributionType() == PartyDistributionType.FINDERS_KEEPERS)) || !isInParty()) && !_inventory.validateCapacity(target)) {
 				sendPacket(ActionFailed.STATIC_PACKET);
 				sendPacket(SystemMessageId.SLOTS_FULL);
 				return;
 			}
-			
+
 			if (isInvisible() && !canOverrideCond(PcCondOverride.ITEM_CONDITIONS)) {
 				return;
 			}
-			
+
 			if ((target.getOwnerId() != 0) && (target.getOwnerId() != getObjectId()) && !isInLooterParty(target.getOwnerId())) {
 				if (target.getId() == Inventory.ADENA_ID) {
 					smsg = SystemMessage.getSystemMessage(SystemMessageId.FAILED_TO_PICKUP_S1_ADENA);
@@ -3861,25 +3632,25 @@ public class L2PcInstance extends L2Playable {
 				sendPacket(smsg);
 				return;
 			}
-			
+
 			// You can pickup only 1 combat flag
 			if (FortSiegeManager.getInstance().isCombat(target.getId())) {
 				if (!FortSiegeManager.getInstance().checkIfCanPickup(this)) {
 					return;
 				}
 			}
-			
+
 			if ((target.getItemLootSchedule() != null) && ((target.getOwnerId() == getObjectId()) || isInLooterParty(target.getOwnerId()))) {
 				target.resetOwnerTimer();
 			}
-			
+
 			// Remove the L2ItemInstance from the world and send server->client GetItem packets
 			target.pickupMe(this);
 			if (general().saveDroppedItem()) {
 				ItemsOnGroundManager.getInstance().removeObject(target);
 			}
 		}
-		
+
 		// Auto use herbs - pick up
 		if (target.getItem().hasExImmediateEffect()) {
 			IItemHandler handler = ItemHandler.getInstance().getHandler(target.getEtcItem());
@@ -3911,7 +3682,7 @@ public class L2PcInstance extends L2Playable {
 					broadcastPacket(smsg, 1400);
 				}
 			}
-			
+
 			// Check if a Party is in progress
 			if (isInParty()) {
 				getParty().distributeItem(this, target);
@@ -3986,7 +3757,7 @@ public class L2PcInstance extends L2Playable {
 			if ((getPrivateStoreType() == PrivateStoreType.SELL) || (getPrivateStoreType() == PrivateStoreType.SELL_MANAGE) || (getPrivateStoreType() == PrivateStoreType.PACKAGE_SELL)) {
 				setPrivateStoreType(PrivateStoreType.NONE);
 			}
-			
+
 			if (getPrivateStoreType() == PrivateStoreType.NONE) {
 				if (isSitting()) {
 					standUp();
@@ -4026,20 +3797,20 @@ public class L2PcInstance extends L2Playable {
 			sendPacket(msg);
 			return;
 		}
-		
+
 		setQueuedSkill(null, false, false);
 		if (isMounted()) {
 			// Get off the strider or something else if character is mounted
 			dismount();
 		}
-		
+
 		_transformation = transformation;
 		getEffectList().stopAllToggles();
 		transformation.onTransform(this);
 		sendSkillList();
 		sendPacket(new SkillCoolTime(this));
 		broadcastUserInfo();
-		
+
 		// Notify to scripts
 		EventDispatcher.getInstance().notifyEventAsync(new OnPlayerTransform(this, transformation.getId()), this);
 	}
@@ -4055,7 +3826,7 @@ public class L2PcInstance extends L2Playable {
 			sendSkillList();
 			sendPacket(new SkillCoolTime(this));
 			broadcastUserInfo();
-			
+
 			// Notify to scripts
 			EventDispatcher.getInstance().notifyEventAsync(new OnPlayerTransform(this, 0), this);
 		}
@@ -4091,26 +3862,26 @@ public class L2PcInstance extends L2Playable {
 	public void setTarget(L2Object newTarget) {
 		if (newTarget != null) {
 			boolean isInParty = (newTarget.isPlayer() && isInParty() && getParty().containsPlayer(newTarget.getActingPlayer()));
-			
+
 			// Prevents /target exploiting
 			if (!isInParty && (Math.abs(newTarget.getZ() - getZ()) > 1000)) {
 				newTarget = null;
 			}
-			
+
 			// Check if the new target is visible
 			if ((newTarget != null) && !isInParty && !newTarget.isVisible()) {
 				newTarget = null;
 			}
-			
+
 			// vehicles cant be targeted
 			if (!isGM() && (newTarget instanceof L2Vehicle)) {
 				newTarget = null;
 			}
 		}
-		
+
 		// Get the current target
 		L2Object oldTarget = getTarget();
-		
+
 		if (oldTarget != null) {
 			if (oldTarget.equals(newTarget)) // no target change?
 			{
@@ -4120,40 +3891,40 @@ public class L2PcInstance extends L2Playable {
 				}
 				return;
 			}
-			
+
 			// Remove the target from the status listener.
 			oldTarget.removeStatusListener(this);
 		}
-		
+
 		if (newTarget instanceof L2Character) {
 			final L2Character target = (L2Character) newTarget;
-			
+
 			// Validate location of the new target.
 			if (newTarget.getObjectId() != getObjectId()) {
 				sendPacket(new ValidateLocation(target));
 			}
-			
+
 			// Show the client his new target.
 			sendPacket(new MyTargetSelected(this, target));
-			
+
 			// Register target to listen for hp changes.
 			target.addStatusListener(this);
-			
+
 			// Send max/current hp.
 			final StatusUpdate su = new StatusUpdate(target);
 			su.addAttribute(StatusUpdate.MAX_HP, target.getMaxHp());
 			su.addAttribute(StatusUpdate.CUR_HP, (int) target.getCurrentHp());
 			sendPacket(su);
-			
+
 			// To others the new target, and not yourself!
 			Broadcast.toKnownPlayers(this, new TargetSelected(getObjectId(), newTarget.getObjectId(), getX(), getY(), getZ()));
 		}
-		
+
 		// Target was removed?
 		if ((newTarget == null) && (getTarget() != null)) {
 			broadcastPacket(new TargetUnselected(this));
 		}
-		
+
 		// Target the new L2Object (add the target to the L2PcInstance _target, _knownObject and L2PcInstance to _KnownObject of the L2Object)
 		super.setTarget(newTarget);
 	}
@@ -4172,11 +3943,11 @@ public class L2PcInstance extends L2Playable {
 	@Override
 	public L2Weapon getActiveWeaponItem() {
 		L2ItemInstance weapon = getActiveWeaponInstance();
-		
+
 		if (weapon == null) {
 			return getFistsWeaponItem();
 		}
-		
+
 		return (L2Weapon) weapon.getItem();
 	}
 	
@@ -4190,28 +3961,28 @@ public class L2PcInstance extends L2Playable {
 	
 	public L2Armor getActiveChestArmorItem() {
 		L2ItemInstance armor = getChestArmorInstance();
-		
+
 		if (armor == null) {
 			return null;
 		}
-		
+
 		return (L2Armor) armor.getItem();
 	}
 	
 	public L2Armor getActiveLegsArmorItem() {
 		L2ItemInstance legs = getLegsArmorInstance();
-		
+
 		if (legs == null) {
 			return null;
 		}
-		
+
 		return (L2Armor) legs.getItem();
 	}
 	
 	public boolean isWearingHeavyArmor() {
 		L2ItemInstance legs = getLegsArmorInstance();
 		L2ItemInstance armor = getChestArmorInstance();
-		
+
 		if ((armor != null) && (legs != null)) {
 			if ((legs.getItemType() == ArmorType.HEAVY) && (armor.getItemType() == ArmorType.HEAVY)) {
 				return true;
@@ -4228,7 +3999,7 @@ public class L2PcInstance extends L2Playable {
 	public boolean isWearingLightArmor() {
 		L2ItemInstance legs = getLegsArmorInstance();
 		L2ItemInstance armor = getChestArmorInstance();
-		
+
 		if ((armor != null) && (legs != null)) {
 			if ((legs.getItemType() == ArmorType.LIGHT) && (armor.getItemType() == ArmorType.LIGHT)) {
 				return true;
@@ -4245,7 +4016,7 @@ public class L2PcInstance extends L2Playable {
 	public boolean isWearingMagicArmor() {
 		L2ItemInstance legs = getLegsArmorInstance();
 		L2ItemInstance armor = getChestArmorInstance();
-		
+
 		if ((armor != null) && (legs != null)) {
 			if ((legs.getItemType() == ArmorType.MAGIC) && (armor.getItemType() == ArmorType.MAGIC)) {
 				return true;
@@ -4391,23 +4162,23 @@ public class L2PcInstance extends L2Playable {
 		if (!super.doDie(killer)) {
 			return false;
 		}
-		
+
 		if (killer != null) {
 			final L2PcInstance pk = killer.getActingPlayer();
 			if (pk != null) {
 				EventDispatcher.getInstance().notifyEventAsync(new OnPlayerPvPKill(pk, this), this);
-				
+
 				TvTEvent.onKill(killer, this);
-				
+
 				if (L2Event.isParticipant(pk)) {
 					pk.getEventStatus().getKills().add(this);
 				}
 			}
-			
+
 			broadcastStatusUpdate();
 			// Clear resurrect xp calculation
 			setExpBeforeDeath(0);
-			
+
 			// Issues drop of Cursed Weapon.
 			if (isCursedWeaponEquipped()) {
 				CursedWeaponsManager.getInstance().drop(_cursedWeaponEquippedId, killer);
@@ -4430,7 +4201,7 @@ public class L2PcInstance extends L2Playable {
 				final boolean insideSiegeZone = isInsideZone(ZoneId.SIEGE);
 				if ((pk == null) || !pk.isCursedWeaponEquipped()) {
 					onDieDropItem(killer); // Check if any item should be dropped
-					
+
 					if (!insidePvpZone && !insideSiegeZone) {
 						if ((pk != null) && (pk.getClan() != null) && (getClan() != null) && !isAcademyMember() && !(pk.isAcademyMember())) {
 							if ((_clan.isAtWarWith(pk.getClanId()) && pk.getClan().isAtWarWith(_clan.getId())) || (isInSiege() && pk.isInSiege())) {
@@ -4454,7 +4225,7 @@ public class L2PcInstance extends L2Playable {
 				}
 			}
 		}
-		
+
 		if (isMounted()) {
 			stopFeed();
 		}
@@ -4463,7 +4234,7 @@ public class L2PcInstance extends L2Playable {
 				stopFakeDeath(true);
 			}
 		}
-		
+
 		// Unsummon Cubics
 		if (!_cubics.isEmpty()) {
 			for (L2CubicInstance cubic : _cubics.values()) {
@@ -4472,27 +4243,27 @@ public class L2PcInstance extends L2Playable {
 			}
 			_cubics.clear();
 		}
-		
+
 		if (isChannelized()) {
 			getSkillChannelized().abortChannelization();
 		}
-		
+
 		if (isInParty() && getParty().isInDimensionalRift()) {
 			getParty().getDimensionalRift().getDeadMemberList().add(this);
 		}
-		
+
 		if (getAgathionId() != 0) {
 			setAgathionId(0);
 		}
-		
+
 		// calculate death penalty buff
 		calculateDeathPenaltyBuffLevel(killer);
-		
+
 		stopRentPet();
 		stopWaterTask();
-		
+
 		AntiFeedManager.getInstance().setLastDeathTime(getObjectId());
-		
+
 		return true;
 	}
 	
@@ -4500,25 +4271,25 @@ public class L2PcInstance extends L2Playable {
 		if (L2Event.isParticipant(this) || (killer == null)) {
 			return;
 		}
-		
+
 		L2PcInstance pk = killer.getActingPlayer();
 		if ((getKarma() <= 0) && (pk != null) && (pk.getClan() != null) && (getClan() != null) && (pk.getClan().isAtWarWith(getClanId())
 		// || getClan().isAtWarWith(((L2PcInstance)killer).getClanId())
 		)) {
 			return;
 		}
-		
+
 		if ((!isInsideZone(ZoneId.PVP) || (pk == null)) && (!isGM() || pvp().canGMDropEquipment())) {
 			boolean isKarmaDrop = false;
 			boolean isKillerNpc = (killer instanceof L2Npc);
 			int pkLimit = pvp().getMinimumPKRequiredToDrop();
-			
+
 			int dropEquip = 0;
 			int dropEquipWeapon = 0;
 			int dropItem = 0;
 			int dropLimit = 0;
 			int dropPercent = 0;
-			
+
 			if ((getKarma() > 0) && (getPkKills() >= pkLimit)) {
 				isKarmaDrop = true;
 				dropPercent = rates().getKarmaRateDrop();
@@ -4533,12 +4304,12 @@ public class L2PcInstance extends L2Playable {
 				dropItem = rates().getPlayerRateDropItem();
 				dropLimit = rates().getPlayerDropLimit();
 			}
-			
+
 			if ((dropPercent > 0) && (Rnd.get(100) < dropPercent)) {
 				int dropCount = 0;
-				
+
 				int itemDropPercent = 0;
-				
+
 				for (L2ItemInstance itemDrop : getInventory().getItems()) {
 					// Don't drop:
 					// Adena
@@ -4553,7 +4324,7 @@ public class L2PcInstance extends L2Playable {
 						pvp().getNonDroppableItems().contains(itemDrop.getId()) || pvp().getPetItems().contains(itemDrop.getId())) {
 						continue;
 					}
-					
+
 					if (itemDrop.isEquipped()) {
 						// Set proper chance according to Item type of equipped Item
 						itemDropPercent = itemDrop.getItem().getType2() == ItemType2.WEAPON ? dropEquipWeapon : dropEquip;
@@ -4561,17 +4332,17 @@ public class L2PcInstance extends L2Playable {
 					} else {
 						itemDropPercent = dropItem; // Item in inventory
 					}
-					
+
 					// NOTE: Each time an item is dropped, the chance of another item being dropped gets lesser (dropCount * 2)
 					if (Rnd.get(100) < itemDropPercent) {
 						dropItem("DieDrop", itemDrop, killer, true);
-						
+
 						if (isKarmaDrop) {
 							LOG.info("{} has karma and dropped id = {}, count = {}", this, itemDrop.getId(), itemDrop.getCount());
 						} else {
 							LOG.info("{} dropped id = {}, count = {}", this, itemDrop.getId(), itemDrop.getCount());
 						}
-						
+
 						if (++dropCount >= dropLimit) {
 							break;
 						}
@@ -4585,22 +4356,22 @@ public class L2PcInstance extends L2Playable {
 		if ((target == null) || !target.isPlayable()) {
 			return;
 		}
-		
+
 		L2PcInstance targetPlayer = target.getActingPlayer();
 		if ((targetPlayer == null) || (targetPlayer == this)) {
 			return;
 		}
-		
+
 		if (isCursedWeaponEquipped() && target.isPlayer()) {
 			CursedWeaponsManager.getInstance().increaseKills(_cursedWeaponEquippedId);
 			return;
 		}
-		
+
 		// If in duel and you kill (only can kill l2summon), do nothing
 		if (isInDuel() && targetPlayer.isInDuel()) {
 			return;
 		}
-		
+
 		// If in Arena, do nothing
 		if (isInsideZone(ZoneId.PVP) || targetPlayer.isInsideZone(ZoneId.PVP)) {
 			if ((getSiegeState() > 0) && (targetPlayer.getSiegeState() > 0) && (getSiegeState() != targetPlayer.getSiegeState())) {
@@ -4613,7 +4384,7 @@ public class L2PcInstance extends L2Playable {
 			}
 			return;
 		}
-		
+
 		// Check if it's pvp
 		if ((checkIfPvP(target) && (targetPlayer.getPvpFlag() != 0)) || (isInsideZone(ZoneId.PVP) && targetPlayer.isInsideZone(ZoneId.PVP))) {
 			increasePvpKills(target);
@@ -4624,7 +4395,7 @@ public class L2PcInstance extends L2Playable {
 				increasePvpKills(target);
 				return;
 			}
-			
+
 			// 'No war' or 'One way war' -> 'Normal PK'
 			if (targetPlayer.getKarma() > 0) {
 				// Target player has karma
@@ -4648,7 +4419,7 @@ public class L2PcInstance extends L2Playable {
 	public void increasePvpKills(L2Character target) {
 		if ((target instanceof L2PcInstance) && AntiFeedManager.getInstance().check(this, target)) {
 			setPvpKills(getPvpKills() + 1);
-			
+
 			// Send a Server->Client UserInfo packet to attacker with its Karma and PK Counter
 			sendPacket(new UserInfo(this));
 			sendPacket(new ExBrExtraUserInfo(this));
@@ -4664,15 +4435,15 @@ public class L2PcInstance extends L2Playable {
 		if ((target == null) || !target.isPlayable()) {
 			return;
 		}
-		
+
 		// Calculate new karma. (calculate karma before incrase pk count!)
 		setKarma(getKarma() + Formulas.calculateKarmaGain(getPkKills(), target.isSummon()));
-		
+
 		// PK Points are increased only if you kill a player.
 		if (target.isPlayer()) {
 			setPkKills(getPkKills() + 1);
 		}
-		
+
 		// Update player's UI.
 		sendPacket(new UserInfo(this));
 		sendPacket(new ExBrExtraUserInfo(this));
@@ -4682,9 +4453,9 @@ public class L2PcInstance extends L2Playable {
 		if (isInsideZone(ZoneId.PVP)) {
 			return;
 		}
-		
+
 		setPvpFlagLasts(System.currentTimeMillis() + pvp().getPvPVsNormalTime());
-		
+
 		if (getPvpFlag() == 0) {
 			startPvPFlag();
 		}
@@ -4692,11 +4463,11 @@ public class L2PcInstance extends L2Playable {
 	
 	public void updatePvPStatus(L2Character target) {
 		L2PcInstance player_target = target.getActingPlayer();
-		
+
 		if (player_target == null) {
 			return;
 		}
-		
+
 		if ((isInDuel() && (player_target.getDuelId() == getDuelId()))) {
 			return;
 		}
@@ -4747,7 +4518,7 @@ public class L2PcInstance extends L2Playable {
 			sm.addLong(addToExp);
 			sendPacket(sm);
 		}
-		
+
 		if (addToSp != 0) {
 			getSubStat().addSp(addToSp);
 			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.ACQUIRED_S1_SP);
@@ -4761,7 +4532,7 @@ public class L2PcInstance extends L2Playable {
 	public void removeExpAndSp(long removeFromExp, int removeFromSp) {
 		getSubStat().removeExp(removeFromExp);
 		getSubStat().removeSp(removeFromSp);
-		
+
 		sendPacket(new UserInfo(this));
 		sendPacket(new ExBrExtraUserInfo(this));
 	}
@@ -4772,50 +4543,50 @@ public class L2PcInstance extends L2Playable {
 			return;
 		}
 		changeKarma(addToExp);
-		
+
 		long baseExp = addToExp;
 		int baseSp = addToSp;
-		
+
 		if (useBonuses) {
 			addToExp *= getStat().getExpBonusMultiplier();
 			addToSp *= getStat().getSpBonusMultiplier();
 		}
-		
+
 		float ratioTakenByPlayer = 0;
-		
+
 		// if this player has a pet and it is in his range he takes from the owner's Exp, give the pet Exp now
 		if (hasPet() && Util.checkIfInShortRadius(character().getPartyRange(), this, getSummon(), false)) {
 			L2PetInstance pet = (L2PetInstance) getSummon();
 			ratioTakenByPlayer = pet.getPetLevelData().getOwnerExpTaken() / 100f;
-			
+
 			// only give exp/sp to the pet by taking from the owner if the pet has a non-zero, positive ratio
 			// allow possible customizations that would have the pet earning more than 100% of the owner's exp/sp
 			if (ratioTakenByPlayer > 1) {
 				ratioTakenByPlayer = 1;
 			}
-			
+
 			if (!pet.isDead()) {
 				pet.addExpAndSp((long) (addToExp * (1 - ratioTakenByPlayer)), (int) (addToSp * (1 - ratioTakenByPlayer)));
 			}
-			
+
 			// now adjust the max ratio to avoid the owner earning negative exp/sp
 			baseExp = (long) (addToExp * ratioTakenByPlayer);
 			baseSp = (int) (addToSp * ratioTakenByPlayer);
 			addToExp = (long) (addToExp * ratioTakenByPlayer);
 			addToSp = (int) (addToSp * ratioTakenByPlayer);
 		}
-		
+
 		getSubStat().addExp(addToExp);
 		getSubStat().addSp(addToSp);
-		
+
 		SystemMessage sm = null;
-		
+
 		sm = SystemMessage.getSystemMessage(SystemMessageId.YOU_EARNED_S1_EXP_BONUS_S2_AND_S3_SP_BONUS_S4);
 		sm.addLong(addToExp);
 		sm.addLong(addToExp - baseExp);
 		sm.addInt(addToSp);
 		sm.addInt(addToSp - baseSp);
-		
+
 		sendPacket(sm);
 		sendPacket(new UserInfo(this));
 		sendPacket(new ExBrExtraUserInfo(this));
@@ -4824,7 +4595,7 @@ public class L2PcInstance extends L2Playable {
 	public void removeExp(long exp) {
 		changeKarma(exp);
 		getSubStat().removeExp(exp);
-		
+
 		sendPacket(new UserInfo(this));
 		sendPacket(new ExBrExtraUserInfo(this));
 	}
@@ -4845,7 +4616,6 @@ public class L2PcInstance extends L2Playable {
 		return getSubStat().removeSp(sp);
 	}
 	
-	//
 	/**
 	 * Reduce the Experience (and level if necessary) of the L2PcInstance in function of the calculated Death Penalty.<BR>
 	 * <B><U> Actions</U> :</B>
@@ -4859,7 +4629,7 @@ public class L2PcInstance extends L2Playable {
 	public void calculateDeathExpPenalty(L2Character killer, boolean atWar) {
 		final int lvl = getLevel();
 		double percentLost = PlayerXpPercentLostData.getInstance().getXpPercent(getLevel());
-		
+
 		if (killer != null) {
 			if (killer.isRaid()) {
 				percentLost *= calcStat(Stats.REDUCE_EXP_LOST_BY_RAID, 1);
@@ -4869,11 +4639,11 @@ public class L2PcInstance extends L2Playable {
 				percentLost *= calcStat(Stats.REDUCE_EXP_LOST_BY_PVP, 1);
 			}
 		}
-		
+
 		if (getKarma() > 0) {
 			percentLost *= rates().getRateKarmaExpLost();
 		}
-		
+
 		// Calculate the Experience loss
 		long lostExp = 0;
 		if (!L2Event.isParticipant(this)) {
@@ -4883,16 +4653,18 @@ public class L2PcInstance extends L2Playable {
 				lostExp = Math.round(((getStat().getExpForLevel(character().getMaxPlayerLevel() + 1) - getStat().getExpForLevel(character().getMaxPlayerLevel())) * percentLost) / 100);
 			}
 		}
-		
+
 		if (isFestivalParticipant() || atWar) {
 			lostExp /= 4.0;
 		}
-		
+
 		setExpBeforeDeath(getExp());
-		
+
 		removeExp(lostExp);
 	}
 	
+	//
+
 	public boolean isPartyWaiting() {
 		return PartyMatchWaitingList.getInstance().getPlayers().contains(this);
 	}
@@ -5109,7 +4881,7 @@ public class L2PcInstance extends L2Playable {
 	public void onTradeStart(L2PcInstance partner) {
 		_activeTradeList = new TradeList(this);
 		_activeTradeList.setPartner(partner);
-		
+
 		SystemMessage msg = SystemMessage.getSystemMessage(SystemMessageId.BEGIN_TRADE_WITH_C1);
 		msg.addPcName(partner);
 		sendPacket(msg);
@@ -5127,10 +4899,10 @@ public class L2PcInstance extends L2Playable {
 		if (_activeTradeList == null) {
 			return;
 		}
-		
+
 		_activeTradeList.lock();
 		_activeTradeList = null;
-		
+
 		sendPacket(new TradeDone(0));
 		SystemMessage msg = SystemMessage.getSystemMessage(SystemMessageId.C1_CANCELED_TRADE);
 		msg.addPcName(partner);
@@ -5154,7 +4926,7 @@ public class L2PcInstance extends L2Playable {
 		if (_activeTradeList == null) {
 			return;
 		}
-		
+
 		L2PcInstance partner = _activeTradeList.getPartner();
 		if (partner != null) {
 			partner.onTradeCancel(this);
@@ -5243,7 +5015,7 @@ public class L2PcInstance extends L2Playable {
 	 */
 	public void setPrivateStoreType(PrivateStoreType privateStoreType) {
 		_privateStoreType = privateStoreType;
-		
+
 		if (customs().offlineDisconnectFinished() && (privateStoreType == PrivateStoreType.NONE) && ((getClient() == null) || getClient().isDetached())) {
 			deleteMe();
 		}
@@ -5274,13 +5046,13 @@ public class L2PcInstance extends L2Playable {
 			_activeWarehouse = null;
 			return;
 		}
-		
+
 		if (!clan.isMember(getObjectId())) {
 			// char has been kicked from clan
 			setClan(null);
 			return;
 		}
-		
+
 		_clanId = clan.getId();
 	}
 	
@@ -5300,7 +5072,7 @@ public class L2PcInstance extends L2Playable {
 	@Override
 	protected void reduceArrowCount(boolean bolts) {
 		L2ItemInstance arrows = getInventory().getPaperdollItem(Inventory.PAPERDOLL_LHAND);
-		
+
 		if (arrows == null) {
 			getInventory().unEquipItemInSlot(Inventory.PAPERDOLL_LHAND);
 			if (bolts) {
@@ -5311,13 +5083,13 @@ public class L2PcInstance extends L2Playable {
 			sendPacket(new ItemList(this, false));
 			return;
 		}
-		
+
 		// Adjust item quantity
 		if (arrows.getCount() > 1) {
 			synchronized (arrows) {
 				arrows.changeCountWithoutTrace(-1, this, null);
 				arrows.setLastChange(L2ItemInstance.MODIFIED);
-				
+
 				// could do also without saving, but let's save approx 1 of 10
 				if ((GameTimeController.getInstance().getGameTicks() % 10) == 0) {
 					arrows.updateDatabase();
@@ -5327,18 +5099,18 @@ public class L2PcInstance extends L2Playable {
 		} else {
 			// Destroy entire item and save to database
 			_inventory.destroyItem("Consume", arrows, this, null);
-			
+
 			getInventory().unEquipItemInSlot(Inventory.PAPERDOLL_LHAND);
 			if (bolts) {
 				_boltItem = null;
 			} else {
 				_arrowItem = null;
 			}
-			
+
 			sendPacket(new ItemList(this, false));
 			return;
 		}
-		
+
 		if (!general().forceInventoryUpdate()) {
 			InventoryUpdate iu = new InventoryUpdate();
 			iu.addModifiedItem(arrows);
@@ -5360,7 +5132,7 @@ public class L2PcInstance extends L2Playable {
 			if (_arrowItem != null) {
 				// Equip arrows needed in left hand
 				getInventory().setPaperdollItem(Inventory.PAPERDOLL_LHAND, _arrowItem);
-				
+
 				// Send a Server->Client packet ItemList to this L2PcINstance to update left hand equipement
 				ItemList il = new ItemList(this, false);
 				sendPacket(il);
@@ -5384,7 +5156,7 @@ public class L2PcInstance extends L2Playable {
 			if (_boltItem != null) {
 				// Equip arrows needed in left hand
 				getInventory().setPaperdollItem(Inventory.PAPERDOLL_LHAND, _boltItem);
-				
+
 				// Send a Server->Client packet ItemList to this L2PcINstance to update left hand equipement
 				ItemList il = new ItemList(this, false);
 				sendPacket(il);
@@ -5406,32 +5178,32 @@ public class L2PcInstance extends L2Playable {
 		if (wpn == null) {
 			return true;
 		}
-		
+
 		// Don't allow disarming a cursed weapon
 		if (isCursedWeaponEquipped()) {
 			return false;
 		}
-		
+
 		// Don't allow disarming a Combat Flag or Territory Ward.
 		if (isCombatFlagEquipped()) {
 			return false;
 		}
-		
+
 		// Don't allow disarming if the weapon is force equip.
 		if (wpn.getWeaponItem().isForceEquip()) {
 			return false;
 		}
-		
+
 		final L2ItemInstance[] unequiped = getInventory().unEquipItemInBodySlotAndRecord(wpn.getItem().getBodyPart());
 		final InventoryUpdate iu = new InventoryUpdate();
 		for (L2ItemInstance itm : unequiped) {
 			iu.addModifiedItem(itm);
 		}
-		
+
 		sendPacket(iu);
 		abortAttack();
 		broadcastUserInfo();
-		
+
 		// This can be 0 if the user pressed the right mousebutton twice very fast.
 		if (unequiped.length > 0) {
 			final SystemMessage sm;
@@ -5461,10 +5233,10 @@ public class L2PcInstance extends L2Playable {
 				iu.addModifiedItem(itm);
 			}
 			sendPacket(iu);
-			
+
 			abortAttack();
 			broadcastUserInfo();
-			
+
 			// this can be 0 if the user pressed the right mousebutton twice very fast
 			if (unequiped.length > 0) {
 				SystemMessage sm = null;
@@ -5486,16 +5258,16 @@ public class L2PcInstance extends L2Playable {
 		if (!disarmWeapons() || !disarmShield() || isTransformed()) {
 			return false;
 		}
-		
+
 		getEffectList().stopAllToggles();
 		setMount(pet.getId(), pet.getLevel());
 		setMountObjectID(pet.getControlObjectId());
 		startFeed(pet.getId());
 		broadcastPacket(new Ride(this));
-		
+
 		// Notify self and others about speed change
 		broadcastUserInfo();
-		
+
 		pet.unSummon(this);
 		return true;
 	}
@@ -5504,12 +5276,12 @@ public class L2PcInstance extends L2Playable {
 		if (!disarmWeapons() || !disarmShield() || isTransformed()) {
 			return false;
 		}
-		
+
 		getEffectList().stopAllToggles();
 		setMount(npcId, getLevel());
 		setMountObjectID(controlItemObjId);
 		broadcastPacket(new Ride(this));
-		
+
 		// Notify self and others about speed change
 		broadcastUserInfo();
 		if (useFood) {
@@ -5535,7 +5307,7 @@ public class L2PcInstance extends L2Playable {
 				sendPacket(ActionFailed.STATIC_PACKET);
 				sendPacket(SystemMessageId.STRIDER_IN_BATLLE_CANT_BE_RIDDEN);
 				return false;
-				
+
 			} else if (isInCombat()) {
 				// A strider cannot be ridden while in battle
 				sendPacket(ActionFailed.STATIC_PACKET);
@@ -5591,7 +5363,7 @@ public class L2PcInstance extends L2Playable {
 	
 	public boolean dismount() {
 		boolean wasFlying = isFlying();
-		
+
 		sendPacket(new SetupGauge(3, 0, 0));
 		int petId = _mountNpcId;
 		setMount(0, 0);
@@ -5709,13 +5481,13 @@ public class L2PcInstance extends L2Playable {
 	 */
 	public void setAccessLevel(int level) {
 		_accessLevel = AdminData.getInstance().getAccessLevel(level);
-		
+
 		getAppearance().setNameColor(_accessLevel.getNameColor());
 		getAppearance().setTitleColor(_accessLevel.getTitleColor());
 		broadcastUserInfo();
-		
+
 		CharNameTable.getInstance().addName(this);
-		
+
 		if (!AdminData.getInstance().hasAccessLevel(level)) {
 			LOG.warn("Tried to set unregistered access level {} for {}. Setting access level without privileges!", level, this);
 		} else if (level > 0) {
@@ -5763,7 +5535,7 @@ public class L2PcInstance extends L2Playable {
 		StatusUpdate su = new StatusUpdate(this);
 		su.addAttribute(StatusUpdate.KARMA, getKarma());
 		sendPacket(su);
-		
+
 		for (L2PcInstance player : getKnownList().getKnownPlayers().values()) {
 			player.sendPacket(new RelationChanged(this, getRelation(player), isAutoAttackable(player)));
 			if (hasSummon()) {
@@ -5781,7 +5553,7 @@ public class L2PcInstance extends L2Playable {
 		if (_isOnline != isOnline) {
 			_isOnline = isOnline;
 		}
-		
+
 		// Update the characters table of the database with online status and lastAccess (called when login and logout)
 		if (updateInDb) {
 			DAOFactory.getInstance().getPlayerDAO().updateOnlineStatus(this);
@@ -5834,29 +5606,29 @@ public class L2PcInstance extends L2Playable {
 	 */
 	public synchronized void store(boolean storeActiveEffects) {
 		DAOFactory.getInstance().getPlayerDAO().storeCharBase(this);
-		
+
 		DAOFactory.getInstance().getSubclassDAO().update(this);
-		
+
 		storeEffect(storeActiveEffects);
-		
+
 		DAOFactory.getInstance().getItemReuseDAO().insert(this);
-		
+
 		if (character().storeRecipeShopList()) {
 			DAOFactory.getInstance().getRecipeShopListDAO().delete(this);
 			DAOFactory.getInstance().getRecipeShopListDAO().insert(this);
 		}
-		
+
 		if (character().storeUISettings()) {
 			storeUISettings();
 		}
-		
+
 		SevenSigns.getInstance().saveSevenSignsData(getObjectId());
-		
+
 		final PlayerVariables vars = getScript(PlayerVariables.class);
 		if (vars != null) {
 			vars.storeMe();
 		}
-		
+
 		final AccountVariables aVars = getScript(AccountVariables.class);
 		if (aVars != null) {
 			aVars.storeMe();
@@ -5873,9 +5645,9 @@ public class L2PcInstance extends L2Playable {
 		if (!character().storeSkillCooltime()) {
 			return;
 		}
-		
+
 		DAOFactory.getInstance().getPlayerSkillSaveDAO().delete(this);
-		
+
 		DAOFactory.getInstance().getPlayerSkillSaveDAO().insert(this, storeEffects);
 	}
 	
@@ -5959,11 +5731,11 @@ public class L2PcInstance extends L2Playable {
 		if (oldSkill != null) {
 			DAOFactory.getInstance().getSkillDAO().delete(this, oldSkill);
 		}
-		
+
 		if ((getTransformationId() > 0) || isCursedWeaponEquipped()) {
 			return oldSkill;
 		}
-		
+
 		if (skill != null) {
 			for (Shortcut sc : getAllShortCuts()) {
 				if ((sc != null) && (sc.getId() == skill.getId()) && (sc.getType() == ShortcutType.SKILL) && !((skill.getId() >= 3080) && (skill.getId() <= 3259))) {
@@ -5998,7 +5770,7 @@ public class L2PcInstance extends L2Playable {
 	@Override
 	public void restoreEffects() {
 		DAOFactory.getInstance().getPlayerSkillSaveDAO().load(this);
-		
+
 		DAOFactory.getInstance().getPlayerSkillSaveDAO().delete(this);
 	}
 	
@@ -6012,17 +5784,17 @@ public class L2PcInstance extends L2Playable {
 		} else {
 			totalSlots = 3;
 		}
-		
+
 		for (int i = 0; i < 3; i++) {
 			if (_henna[i] != null) {
 				totalSlots--;
 			}
 		}
-		
+
 		if (totalSlots <= 0) {
 			return 0;
 		}
-		
+
 		return totalSlots;
 	}
 	
@@ -6035,37 +5807,37 @@ public class L2PcInstance extends L2Playable {
 		if ((slot < 1) || (slot > 3)) {
 			return false;
 		}
-		
+
 		slot--;
-		
+
 		L2Henna henna = _henna[slot];
 		if (henna == null) {
 			return false;
 		}
-		
+
 		_henna[slot] = null;
-		
+
 		DAOFactory.getInstance().getHennaDAO().delete(this, slot + 1);
-		
+
 		// Calculate Henna modifiers of this L2PcInstance
 		recalcHennaStats();
-		
+
 		// Send Server->Client HennaInfo packet to this L2PcInstance
 		sendPacket(new HennaInfo(this));
-		
+
 		// Send Server->Client UserInfo packet to this L2PcInstance
 		sendPacket(new UserInfo(this));
 		sendPacket(new ExBrExtraUserInfo(this));
 		// Add the recovered dyes to the player's inventory and notify them.
 		getInventory().addItem("Henna", henna.getDyeItemId(), henna.getCancelCount(), this, null);
 		reduceAdena("Henna", henna.getCancelFee(), this, false);
-		
+
 		final SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.EARNED_S2_S1_S);
 		sm.addItemName(henna.getDyeItemId());
 		sm.addLong(henna.getCancelCount());
 		sendPacket(sm);
 		sendPacket(SystemMessageId.SYMBOL_DELETED);
-		
+
 		// Notify to scripts
 		EventDispatcher.getInstance().notifyEventAsync(new OnPlayerHennaRemove(this, henna), this);
 		return true;
@@ -6080,19 +5852,19 @@ public class L2PcInstance extends L2Playable {
 		for (int i = 0; i < 3; i++) {
 			if (_henna[i] == null) {
 				_henna[i] = henna;
-				
+
 				// Calculate Henna modifiers of this L2PcInstance
 				recalcHennaStats();
-				
+
 				DAOFactory.getInstance().getHennaDAO().insert(this, henna, i + 1);
-				
+
 				// Send Server->Client HennaInfo packet to this L2PcInstance
 				sendPacket(new HennaInfo(this));
-				
+
 				// Send Server->Client UserInfo packet to this L2PcInstance
 				sendPacket(new UserInfo(this));
 				sendPacket(new ExBrExtraUserInfo(this));
-				
+
 				// Notify to scripts
 				EventDispatcher.getInstance().notifyEventAsync(new OnPlayerHennaRemove(this, henna), this);
 				return true;
@@ -6111,12 +5883,12 @@ public class L2PcInstance extends L2Playable {
 		_hennaMEN = 0;
 		_hennaWIT = 0;
 		_hennaDEX = 0;
-		
+
 		for (L2Henna h : _henna) {
 			if (h == null) {
 				continue;
 			}
-			
+
 			_hennaINT += ((_hennaINT + h.getStatINT()) > 5) ? 5 - _hennaINT : h.getStatINT();
 			_hennaSTR += ((_hennaSTR + h.getStatSTR()) > 5) ? 5 - _hennaSTR : h.getStatSTR();
 			_hennaMEN += ((_hennaMEN + h.getStatMEN()) > 5) ? 5 - _hennaMEN : h.getStatMEN();
@@ -6214,22 +5986,22 @@ public class L2PcInstance extends L2Playable {
 		if (attacker == null) {
 			return false;
 		}
-		
+
 		// Check if the attacker isn't the L2PcInstance Pet
 		if ((attacker == this) || (attacker == getSummon())) {
 			return false;
 		}
-		
+
 		// Friendly mobs doesnt attack players
 		if (attacker instanceof L2FriendlyMobInstance) {
 			return false;
 		}
-		
+
 		// Check if the attacker is a L2MonsterInstance
 		if (attacker.isMonster()) {
 			return true;
 		}
-		
+
 		// is AutoAttackable if both players are in the same duel and the duel is still going on
 		if (attacker.isPlayable() && (getDuelState() == DuelState.DUELLING) && (getDuelId() == attacker.getActingPlayer().getDuelId())) {
 			Duel duel = DuelManager.getInstance().getDuel(getDuelId());
@@ -6240,12 +6012,12 @@ public class L2PcInstance extends L2Playable {
 			}
 			return true;
 		}
-		
+
 		// Check if the attacker is not in the same party. NOTE: Party checks goes before oly checks in order to prevent patry member autoattack at oly.
 		if (isInParty() && getParty().getMembers().contains(attacker)) {
 			return false;
 		}
-		
+
 		// Check if the attacker is in olympia and olympia start
 		if (attacker.isPlayer() && attacker.getActingPlayer().isInOlympiadMode()) {
 			if (isInOlympiadMode() && isOlympiadStart() && (((L2PcInstance) attacker).getOlympiadGameId() == getOlympiadGameId())) {
@@ -6253,21 +6025,21 @@ public class L2PcInstance extends L2Playable {
 			}
 			return false;
 		}
-		
+
 		// Check if the attacker is in TvT and TvT is started
 		if (isOnEvent()) {
 			return true;
 		}
-		
+
 		// Check if the attacker is a L2Playable
 		if (attacker.isPlayable()) {
 			if (isInsideZone(ZoneId.PEACE)) {
 				return false;
 			}
-			
+
 			// Get L2PcInstance
 			L2PcInstance attackerPlayer = attacker.getActingPlayer();
-			
+
 			if (getClan() != null) {
 				Siege siege = SiegeManager.getInstance().getSiege(getX(), getY(), getZ());
 				if (siege != null) {
@@ -6275,35 +6047,35 @@ public class L2PcInstance extends L2Playable {
 					if (siege.checkIsDefender(attackerPlayer.getClan()) && siege.checkIsDefender(getClan())) {
 						return false;
 					}
-					
+
 					// Check if a siege is in progress and if attacker and the L2PcInstance aren't in the Attacker clan
 					if (siege.checkIsAttacker(attackerPlayer.getClan()) && siege.checkIsAttacker(getClan())) {
 						return false;
 					}
 				}
-				
+
 				// Check if clan is at war
 				if ((getClan() != null) && (attackerPlayer.getClan() != null) && getClan().isAtWarWith(attackerPlayer.getClanId()) && attackerPlayer.getClan().isAtWarWith(getClanId()) && (getWantsPeace() == 0) && (attackerPlayer.getWantsPeace() == 0) && !isAcademyMember()) {
 					return true;
 				}
 			}
-			
+
 			// Check if the L2PcInstance is in an arena, but NOT siege zone. NOTE: This check comes before clan/ally checks, but after party checks.
 			// This is done because in arenas, clan/ally members can autoattack if they arent in party.
 			if ((isInsideZone(ZoneId.PVP) && attackerPlayer.isInsideZone(ZoneId.PVP)) && !(isInsideZone(ZoneId.SIEGE) && attackerPlayer.isInsideZone(ZoneId.SIEGE))) {
 				return true;
 			}
-			
+
 			// Check if the attacker is not in the same clan
 			if ((getClan() != null) && getClan().isMember(attacker.getObjectId())) {
 				return false;
 			}
-			
+
 			// Check if the attacker is not in the same ally
 			if (attacker.isPlayer() && (getAllyId() != 0) && (getAllyId() == attackerPlayer.getAllyId())) {
 				return false;
 			}
-			
+
 			// Now check again if the L2PcInstance is in pvp zone, but this time at siege PvP zone, applying clan/ally checks
 			if ((isInsideZone(ZoneId.PVP) && attackerPlayer.isInsideZone(ZoneId.PVP)) && (isInsideZone(ZoneId.SIEGE) && attackerPlayer.isInsideZone(ZoneId.SIEGE))) {
 				return true;
@@ -6314,12 +6086,12 @@ public class L2PcInstance extends L2Playable {
 				return ((siege != null) && siege.checkIsAttacker(getClan()));
 			}
 		}
-		
+
 		// Check if the L2PcInstance has Karma
 		if ((getKarma() > 0) || (getPvpFlag() > 0)) {
 			return true;
 		}
-		
+
 		return false;
 	}
 	
@@ -6351,9 +6123,9 @@ public class L2PcInstance extends L2Playable {
 			sendPacket(ActionFailed.STATIC_PACKET);
 			return false;
 		}
-		
+
 		// ************************************* Check Casting in Progress *******************************************
-		
+
 		// If a skill is currently being used, queue this one if this is not the same
 		if (isCastingNow()) {
 			SkillUseHolder currentSkill = getCurrentSkill();
@@ -6365,7 +6137,7 @@ public class L2PcInstance extends L2Playable {
 				sendPacket(ActionFailed.STATIC_PACKET);
 				return false;
 			}
-			
+
 			// Create a new SkillDat object and queue it in the player _queuedSkill
 			setQueuedSkill(skill, forceUse, dontMove);
 			sendPacket(ActionFailed.STATIC_PACKET);
@@ -6376,11 +6148,11 @@ public class L2PcInstance extends L2Playable {
 		// This is used mainly to save & queue the button presses, since L2Character has
 		// _lastSkillCast which could otherwise replace it
 		setCurrentSkill(skill, forceUse, dontMove);
-		
+
 		if (getQueuedSkill() != null) {
 			setQueuedSkill(null, false, false);
 		}
-		
+
 		// Check if the target is correct and Notify the AI with AI_INTENTION_CAST and target
 		L2Object target = switch (skill.getTargetType()) {
 			// AURA, SELF should be cast even if no target has been found
@@ -6388,7 +6160,7 @@ public class L2PcInstance extends L2Playable {
 			// Get the first target of the list
 			default -> skill.getFirstOfTargetList(this);
 		};
-		
+
 		// Notify the AI with AI_INTENTION_CAST and target
 		getAI().setIntention(CtrlIntention.AI_INTENTION_CAST, skill, target);
 		return true;
@@ -6396,50 +6168,50 @@ public class L2PcInstance extends L2Playable {
 	
 	private boolean checkUseMagicConditions(Skill skill, boolean forceUse, boolean dontMove) {
 		// ************************************* Check Player State *******************************************
-		
+
 		// Abnormal effects(ex : Stun, Sleep...) are checked in L2Character useMagic()
 		if (isOutOfControl() || isParalyzed() || isStunned() || isSleeping()) {
 			sendPacket(ActionFailed.STATIC_PACKET);
 			return false;
 		}
-		
+
 		// Check if the player is dead
 		if (isDead()) {
 			// Send a Server->Client packet ActionFailed to the L2PcInstance
 			sendPacket(ActionFailed.STATIC_PACKET);
 			return false;
 		}
-		
+
 		if (isFishing() && !skill.hasEffectType(L2EffectType.FISHING, L2EffectType.FISHING_START)) {
 			// Only fishing skills are available
 			sendPacket(SystemMessageId.ONLY_FISHING_SKILLS_NOW);
 			return false;
 		}
-		
+
 		if (inObserverMode()) {
 			sendPacket(SystemMessageId.OBSERVERS_CANNOT_PARTICIPATE);
 			abortCast();
 			sendPacket(ActionFailed.STATIC_PACKET);
 			return false;
 		}
-		
+
 		// Check if the caster is sitting
 		if (isSitting()) {
 			// Send a System Message to the caster
 			sendPacket(SystemMessageId.CANT_MOVE_SITTING);
-			
+
 			// Send a Server->Client packet ActionFailed to the L2PcInstance
 			sendPacket(ActionFailed.STATIC_PACKET);
 			return false;
 		}
-		
+
 		// Check if the skill type is toggle.
 		if (skill.isToggle() && isAffectedBySkill(skill.getId())) {
 			stopSkillEffects(true, skill.getId());
 			sendPacket(ActionFailed.STATIC_PACKET);
 			return false;
 		}
-		
+
 		// Check if the player uses "Fake Death" skill
 		// Note: do not check this before TOGGLE reset
 		if (isFakeDeath()) {
@@ -6447,36 +6219,36 @@ public class L2PcInstance extends L2Playable {
 			sendPacket(ActionFailed.STATIC_PACKET);
 			return false;
 		}
-		
+
 		// ************************************* Check Target *******************************************
 		// Create and set a L2Object containing the target of the skill
 		L2Object target = null;
 		TargetType sklTargetType = skill.getTargetType();
 		Location worldPosition = getCurrentSkillWorldPosition();
-		
+
 		if ((sklTargetType == TargetType.GROUND) && (worldPosition == null)) {
 			LOG.warn("WorldPosition is null for {}, {}", skill.getName(), this);
 			sendPacket(ActionFailed.STATIC_PACKET);
 			return false;
 		}
-		
+
 		// Target the player if skill type is AURA, PARTY, CLAN or SELF
 		target = switch (sklTargetType) {
 			case AURA, FRONT_AURA, BEHIND_AURA, PARTY, CLAN, PARTY_CLAN, GROUND, SELF, AREA_SUMMON, AURA_CORPSE_MOB, COMMAND_CHANNEL, AURA_FRIENDLY, AURA_UNDEAD_ENEMY -> this;
 			case PET, SERVITOR, SUMMON -> getSummon();
 			default -> getTarget();
 		};
-		
+
 		// Check the validity of the target
 		if (target == null) {
 			sendPacket(ActionFailed.STATIC_PACKET);
 			return false;
 		}
-		
+
 		// skills can be used on Walls and Doors only during siege
 		if (target.isDoor()) {
 			final L2DoorInstance door = (L2DoorInstance) target;
-			
+
 			if ((door.getCastle() != null) && (door.getCastle().getResidenceId() > 0)) {
 				if (!door.getCastle().getSiege().isInProgress()) {
 					sendPacket(SystemMessageId.INCORRECT_TARGET);
@@ -6489,7 +6261,7 @@ public class L2PcInstance extends L2Playable {
 				}
 			}
 		}
-		
+
 		// Are the target and the player in the same duel?
 		if (isInDuel()) {
 			final L2PcInstance cha = target.getActingPlayer();
@@ -6499,9 +6271,9 @@ public class L2PcInstance extends L2Playable {
 				return false;
 			}
 		}
-		
+
 		// ************************************* Check skill availability *******************************************
-		
+
 		// Check if this skill is enabled (ex : reuse time)
 		if (isSkillDisabled(skill)) {
 			final SystemMessage sm;
@@ -6523,28 +6295,28 @@ public class L2PcInstance extends L2Playable {
 					sm = SystemMessage.getSystemMessage(SystemMessageId.S2_SECONDS_REMAINING_FOR_REUSE_S1);
 					sm.addSkillName(skill);
 				}
-				
+
 				sm.addInt(seconds);
 			} else {
 				sm = SystemMessage.getSystemMessage(SystemMessageId.S1_PREPARED_FOR_REUSE);
 				sm.addSkillName(skill);
 			}
-			
+
 			sendPacket(sm);
 			return false;
 		}
-		
+
 		// ************************************* Check casting conditions *******************************************
-		
+
 		// Check if all casting conditions are completed
 		if (!skill.checkCondition(this, target, false)) {
 			// Send a Server->Client packet ActionFailed to the L2PcInstance
 			sendPacket(ActionFailed.STATIC_PACKET);
 			return false;
 		}
-		
+
 		// ************************************* Check Skill Type *******************************************
-		
+
 		// Check if this is bad magic skill
 		if (skill.isBad()) {
 			if ((isInsidePeaceZone(this, target)) && !getAccessLevel().allowPeaceAttack()) {
@@ -6553,13 +6325,13 @@ public class L2PcInstance extends L2Playable {
 				sendPacket(ActionFailed.STATIC_PACKET);
 				return false;
 			}
-			
+
 			if (isInOlympiadMode() && !isOlympiadStart()) {
 				// if L2PcInstance is in Olympia and the match isn't already start, send a Server->Client packet ActionFailed
 				sendPacket(ActionFailed.STATIC_PACKET);
 				return false;
 			}
-			
+
 			if ((target.getActingPlayer() != null) && (getSiegeState() > 0) && isInsideZone(ZoneId.SIEGE) && (target.getActingPlayer().getSiegeState() == getSiegeState()) && (target.getActingPlayer() != this) && (target.getActingPlayer().getSiegeSide() == getSiegeSide())) {
 				if (TerritoryWarManager.getInstance().isTWInProgress()) {
 					sendPacket(SystemMessageId.YOU_CANNOT_ATTACK_A_MEMBER_OF_THE_SAME_TERRITORY);
@@ -6569,19 +6341,19 @@ public class L2PcInstance extends L2Playable {
 				sendPacket(ActionFailed.STATIC_PACKET);
 				return false;
 			}
-			
+
 			if (!target.canBeAttacked() && !getAccessLevel().allowPeaceAttack() && !target.isDoor()) {
 				// If target is not attackable, send a Server->Client packet ActionFailed
 				sendPacket(ActionFailed.STATIC_PACKET);
 				return false;
 			}
-			
+
 			// Check for Event Mob's
 			if ((target instanceof L2EventMonsterInstance) && ((L2EventMonsterInstance) target).eventSkillAttackBlocked()) {
 				sendPacket(ActionFailed.STATIC_PACKET);
 				return false;
 			}
-			
+
 			// Check if a Forced ATTACK is in progress on non-attackable target
 			if (!target.isAutoAttackable(this) && !forceUse) {
 				switch (sklTargetType) {
@@ -6603,7 +6375,7 @@ public class L2PcInstance extends L2Playable {
 						return false;
 				}
 			}
-			
+
 			// Check if the target is in the skill cast range
 			if (dontMove) {
 				// Calculate the distance between the L2PcInstance and the target
@@ -6611,7 +6383,7 @@ public class L2PcInstance extends L2Playable {
 					if (!isInsideRadius(worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), skill.getCastRange() + getTemplate().getCollisionRadius(), false, false)) {
 						// Send a System Message to the caster
 						sendPacket(SystemMessageId.TARGET_TOO_FAR);
-						
+
 						// Send a Server->Client packet ActionFailed to the L2PcInstance
 						sendPacket(ActionFailed.STATIC_PACKET);
 						return false;
@@ -6619,20 +6391,20 @@ public class L2PcInstance extends L2Playable {
 				} else if ((skill.getCastRange() > 0) && !isInsideRadius(target, skill.getCastRange() + getTemplate().getCollisionRadius(), false, false)) {
 					// Send a System Message to the caster
 					sendPacket(SystemMessageId.TARGET_TOO_FAR);
-					
+
 					// Send a Server->Client packet ActionFailed to the L2PcInstance
 					sendPacket(ActionFailed.STATIC_PACKET);
 					return false;
 				}
 			}
 		}
-		
+
 		// Check if the skill is a good magic, target is a monster and if force attack is set, if not then we don't want to cast.
 		if ((skill.getEffectPoint() > 0) && target.isMonster() && !forceUse) {
 			sendPacket(ActionFailed.STATIC_PACKET);
 			return false;
 		}
-		
+
 		// Check if this is a Pvp skill and target isn't a non-flagged/non-karma player
 		switch (sklTargetType) {
 			case PARTY:
@@ -6652,13 +6424,13 @@ public class L2PcInstance extends L2Playable {
 				if (target.isPlayable() && !getAccessLevel().allowPeaceAttack() && !checkPvpSkill(target, skill)) {
 					// Send a System Message to the player
 					sendPacket(SystemMessageId.INCORRECT_TARGET);
-					
+
 					// Send a Server->Client packet ActionFailed to the player
 					sendPacket(ActionFailed.STATIC_PACKET);
 					return false;
 				}
 		}
-		
+
 		// GeoData Los Check here
 		if (skill.getCastRange() > 0) {
 			if (sklTargetType == TargetType.GROUND) {
@@ -6673,28 +6445,28 @@ public class L2PcInstance extends L2Playable {
 				return false;
 			}
 		}
-		
+
 		if ((skill.isFlyType()) && !GeoData.getInstance().canMove(this, target)) {
 			sendPacket(SystemMessageId.THE_TARGET_IS_LOCATED_WHERE_YOU_CANNOT_CHARGE);
 			return false;
 		}
-		
+
 		// finally, after passing all conditions
 		return true;
 	}
 	
 	public boolean isInLooterParty(int LooterId) {
 		L2PcInstance looter = L2World.getInstance().getPlayer(LooterId);
-		
+
 		// if L2PcInstance is in a CommandChannel
 		if (isInParty() && getParty().isInCommandChannel() && (looter != null)) {
 			return getParty().getCommandChannel().getMembers().contains(looter);
 		}
-		
+
 		if (isInParty() && (looter != null)) {
 			return getParty().getMembers().contains(looter);
 		}
-		
+
 		return false;
 	}
 	
@@ -6708,25 +6480,25 @@ public class L2PcInstance extends L2Playable {
 		if ((skill == null) || (target == null)) {
 			return false;
 		}
-		
+
 		if (!target.isPlayable()) {
 			return true;
 		}
-		
+
 		if (skill.isDebuff() || skill.hasEffectType(L2EffectType.STEAL_ABNORMAL) || skill.isBad()) {
 			final L2PcInstance targetPlayer = target.getActingPlayer();
-			
+
 			if ((targetPlayer == null) || (this == target)) {
 				return false;
 			}
-			
+
 			final boolean isCtrlPressed = (getCurrentSkill() != null) && getCurrentSkill().isCtrlPressed();
-			
+
 			// Peace Zone
 			if (target.isInsideZone(ZoneId.PEACE)) {
 				return false;
 			}
-			
+
 			// Siege
 			if ((getSiegeState() != 0) && (targetPlayer.getSiegeState() != 0)) {
 				// Register for same siege
@@ -6738,14 +6510,14 @@ public class L2PcInstance extends L2Playable {
 					}
 				}
 			}
-			
+
 			// Duel
 			if (isInDuel() && targetPlayer.isInDuel()) {
 				if (getDuelId() == targetPlayer.getDuelId()) {
 					return true;
 				}
 			}
-			
+
 			// Party
 			if (isInParty() && targetPlayer.isInParty()) {
 				// Same Party
@@ -6765,22 +6537,22 @@ public class L2PcInstance extends L2Playable {
 					return false;
 				}
 			}
-			
+
 			// You can debuff anyone except party members while in an arena...
 			if (isInsideZone(ZoneId.PVP) && targetPlayer.isInsideZone(ZoneId.PVP)) {
 				return true;
 			}
-			
+
 			// Olympiad
 			if (isInOlympiadMode() && targetPlayer.isInOlympiadMode()) {
 				if (getOlympiadGameId() == targetPlayer.getOlympiadGameId()) {
 					return true;
 				}
 			}
-			
+
 			final L2Clan aClan = getClan();
 			final L2Clan tClan = targetPlayer.getClan();
-			
+
 			if ((aClan != null) && (tClan != null)) {
 				if (aClan.isAtWarWith(tClan.getId()) && tClan.isAtWarWith(aClan.getId())) {
 					// Check if skill can do damage
@@ -6796,7 +6568,7 @@ public class L2PcInstance extends L2Playable {
 					return false;
 				}
 			}
-			
+
 			// On retail, it is impossible to debuff a "peaceful" player.
 			if ((targetPlayer.getPvpFlag() == 0) && (targetPlayer.getKarma() == 0)) {
 				// Check if skill can do damage
@@ -6805,7 +6577,7 @@ public class L2PcInstance extends L2Playable {
 				}
 				return false;
 			}
-			
+
 			if ((targetPlayer.getPvpFlag() > 0) || (targetPlayer.getKarma() > 0)) {
 				return true;
 			}
@@ -6836,7 +6608,7 @@ public class L2PcInstance extends L2Playable {
 		if (isInsideZone(ZoneId.SIEGE) && !((getClan() != null) && (CastleManager.getInstance().getCastle(this) == CastleManager.getInstance().getCastleByOwner(getClan())) && (this == getClan().getLeader().getPlayerInstance()))) {
 			return true;
 		}
-		
+
 		return false;
 	}
 	
@@ -6852,7 +6624,7 @@ public class L2PcInstance extends L2Playable {
 			}
 			case WYVERN -> setIsFlying(true);
 		}
-		
+
 		_mountType = type;
 		_mountNpcId = npcId;
 		_mountLevel = npcLevel;
@@ -6983,11 +6755,11 @@ public class L2PcInstance extends L2Playable {
 	 */
 	public int getEnchantEffect() {
 		L2ItemInstance wpn = getActiveWeaponInstance();
-		
+
 		if (wpn == null) {
 			return 0;
 		}
-		
+
 		return Math.min(127, wpn.getEnchantLevel());
 	}
 	
@@ -7029,14 +6801,14 @@ public class L2PcInstance extends L2Playable {
 	public void rechargeShots(boolean physical, boolean magic) {
 		L2ItemInstance item;
 		IItemHandler handler;
-		
+
 		if ((_activeSoulShots == null) || _activeSoulShots.isEmpty()) {
 			return;
 		}
-		
+
 		for (int itemId : _activeSoulShots) {
 			item = getInventory().getItemByItemId(itemId);
-			
+
 			if (item != null) {
 				if (magic) {
 					if (item.getItem().getDefaultAction() == ActionType.SPIRITSHOT) {
@@ -7046,7 +6818,7 @@ public class L2PcInstance extends L2Playable {
 						}
 					}
 				}
-				
+
 				if (physical) {
 					if (item.getItem().getDefaultAction() == ActionType.SOULSHOT) {
 						handler = ItemHandler.getInstance().getHandler(item.getEtcItem());
@@ -7083,7 +6855,7 @@ public class L2PcInstance extends L2Playable {
 		if (_activeSoulShots.contains(itemId)) {
 			removeAutoSoulShot(itemId);
 			sendPacket(new ExAutoSoulShot(itemId, 0));
-			
+
 			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.AUTO_USE_OF_S1_CANCELLED);
 			sm.addItemName(itemId);
 			sendPacket(sm);
@@ -7168,10 +6940,10 @@ public class L2PcInstance extends L2Playable {
 	
 	public void enterObserverMode(Location loc) {
 		setLastLocation();
-		
+
 		// Remove Hide.
 		getEffectList().stopSkillEffects(true, AbnormalType.HIDE);
-		
+
 		_observerMode = true;
 		setTarget(null);
 		setIsParalyzed(true);
@@ -7179,9 +6951,9 @@ public class L2PcInstance extends L2Playable {
 		setIsInvul(true);
 		setInvisible(true);
 		sendPacket(new ObservationMode(loc));
-		
+
 		teleToLocation(loc, false);
-		
+
 		broadcastUserInfo();
 	}
 	
@@ -7197,10 +6969,10 @@ public class L2PcInstance extends L2Playable {
 		if (hasSummon()) {
 			getSummon().unSummon(this);
 		}
-		
+
 		// Remove Hide.
 		getEffectList().stopSkillEffects(true, AbnormalType.HIDE);
-		
+
 		if (!_cubics.isEmpty()) {
 			for (L2CubicInstance cubic : _cubics.values()) {
 				cubic.stopAction();
@@ -7208,11 +6980,11 @@ public class L2PcInstance extends L2Playable {
 			}
 			_cubics.clear();
 		}
-		
+
 		if (getParty() != null) {
 			getParty().removePartyMember(this, messageType.Expelled);
 		}
-		
+
 		_olympiadGameId = id;
 		if (isSitting()) {
 			standUp();
@@ -7220,24 +6992,24 @@ public class L2PcInstance extends L2Playable {
 		if (!_observerMode) {
 			setLastLocation();
 		}
-		
+
 		_observerMode = true;
 		setTarget(null);
 		setIsInvul(true);
 		setInvisible(true);
 		teleToLocation(loc, false);
 		sendPacket(new ExOlympiadMode(3));
-		
+
 		broadcastUserInfo();
 	}
 	
 	public void leaveObserverMode() {
 		setTarget(null);
-		
+
 		teleToLocation(_lastLoc, false);
 		unsetLastLocation();
 		sendPacket(new ObservationReturn(getLocation()));
-		
+
 		setIsParalyzed(false);
 		if (!isGM()) {
 			setInvisible(false);
@@ -7246,10 +7018,10 @@ public class L2PcInstance extends L2Playable {
 		if (hasAI()) {
 			getAI().setIntention(CtrlIntention.AI_INTENTION_IDLE);
 		}
-		
+
 		setFalling(); // prevent receive falling damage
 		_observerMode = false;
-		
+
 		broadcastUserInfo();
 	}
 	
@@ -7402,7 +7174,7 @@ public class L2PcInstance extends L2Playable {
 			}
 		}
 		_hero = hero;
-		
+
 		sendSkillList();
 	}
 	
@@ -7461,9 +7233,9 @@ public class L2PcInstance extends L2Playable {
 				removeSkill(skill, false, true);
 			}
 		}
-		
+
 		_noble = val;
-		
+
 		sendSkillList();
 	}
 	
@@ -7508,19 +7280,19 @@ public class L2PcInstance extends L2Playable {
 	public void sendSkillList() {
 		boolean isDisabled = false;
 		SkillList sl = new SkillList();
-		
+
 		for (Skill s : getAllSkills()) {
 			if (s == null) {
 				continue;
 			}
-			
+
 			if (((_transformation != null) && !s.isPassive()) || (hasTransformSkill(s.getId()) && s.isPassive())) {
 				continue;
 			}
 			if (getClan() != null) {
 				isDisabled = s.isClanSkill() && (getClan().getReputationScore() < 0);
 			}
-			
+
 			boolean isEnchantable = SkillData.getInstance().isEnchantable(s.getId());
 			if (isEnchantable) {
 				L2EnchantSkillLearn esl = EnchantSkillGroupsData.getInstance().getSkillEnchantmentBySkillId(s.getId());
@@ -7528,20 +7300,20 @@ public class L2PcInstance extends L2Playable {
 					isEnchantable = false;
 				}
 			}
-			
+
 			sl.addSkill(s.getDisplayId(), s.getDisplayLevel(), s.isPassive(), isDisabled, isEnchantable);
 		}
 		if (_transformation != null) {
 			Map<Integer, Integer> ts = new TreeMap<>();
-			
+
 			for (SkillHolder holder : _transformation.getTemplate(this).getSkills()) {
 				ts.putIfAbsent(holder.getSkillId(), holder.getSkillLvl());
-				
+
 				if (ts.get(holder.getSkillId()) < holder.getSkillLvl()) {
 					ts.put(holder.getSkillId(), holder.getSkillLvl());
 				}
 			}
-			
+
 			for (AdditionalSkillHolder holder : _transformation.getTemplate(this).getAdditionalSkills()) {
 				if (getLevel() >= holder.getMinLevel()) {
 					ts.putIfAbsent(holder.getSkillId(), holder.getSkillLvl());
@@ -7550,14 +7322,14 @@ public class L2PcInstance extends L2Playable {
 					}
 				}
 			}
-			
+
 			// Add collection skills.
 			for (L2SkillLearn skill : SkillTreesData.getInstance().getCollectSkillTree().values()) {
 				if (getKnownSkill(skill.getSkillId()) != null) {
 					addTransformSkill(SkillData.getInstance().getSkill(skill.getSkillId(), skill.getSkillLevel()));
 				}
 			}
-			
+
 			for (Entry<Integer, Integer> transformSkill : ts.entrySet()) {
 				Skill sk = SkillData.getInstance().getSkill(transformSkill.getKey(), transformSkill.getValue());
 				addTransformSkill(sk);
@@ -7578,29 +7350,29 @@ public class L2PcInstance extends L2Playable {
 		if (!_subclassLock.tryLock()) {
 			return false;
 		}
-		
+
 		try {
 			if ((getTotalSubClasses() == character().getMaxSubclass()) || (classIndex == 0)) {
 				return false;
 			}
-			
+
 			if (getSubClasses().containsKey(classIndex)) {
 				return false;
 			}
-			
+
 			// Note: Never change _classIndex in any method other than setActiveClass().
-			
+
 			SubClass newClass = new SubClass(this);
 			newClass.setClassId(classId);
 			newClass.setClassIndex(classIndex);
-			
+
 			if (!DAOFactory.getInstance().getSubclassDAO().insert(this, newClass)) {
 				return false;
 			}
-			
+
 			// Commit after database INSERT in case exception is thrown.
 			getSubClasses().put(newClass.getClassIndex(), newClass);
-			
+
 			final ClassId subTemplate = ClassId.getClassId(classId);
 			final Map<Integer, L2SkillLearn> skillTree = SkillTreesData.getInstance().getCompleteClassSkillTree(subTemplate);
 			final Map<Integer, Skill> prevSkillList = new HashMap<>();
@@ -7608,11 +7380,11 @@ public class L2PcInstance extends L2Playable {
 				if (skillInfo.getGetLevel() <= 40) {
 					Skill prevSkill = prevSkillList.get(skillInfo.getSkillId());
 					Skill newSkill = SkillData.getInstance().getSkill(skillInfo.getSkillId(), skillInfo.getSkillLevel());
-					
+
 					if ((prevSkill != null) && (prevSkill.getLevel() > newSkill.getLevel())) {
 						continue;
 					}
-					
+
 					prevSkillList.put(newSkill.getId(), newSkill);
 					storeSkill(newSkill, prevSkill, classIndex);
 				}
@@ -7635,27 +7407,27 @@ public class L2PcInstance extends L2Playable {
 		if (!_subclassLock.tryLock()) {
 			return false;
 		}
-		
+
 		try {
 			DAOFactory.getInstance().getHennaDAO().deleteAll(this, classIndex);
-			
+
 			DAOFactory.getInstance().getSkillDAO().deleteAll(this, classIndex);
-			
+
 			DAOFactory.getInstance().getShortcutDAO().delete(this, classIndex);
-			
+
 			DAOFactory.getInstance().getPlayerSkillSaveDAO().delete(this, classIndex);
-			
+
 			DAOFactory.getInstance().getSubclassDAO().delete(this, classIndex);
-			
+
 			// Notify to scripts
 			int classId = getSubClasses().get(classIndex).getClassId();
 			EventDispatcher.getInstance().notifyEventAsync(new OnPlayerProfessionCancel(this, classId), this);
-			
+
 			getSubClasses().remove(classIndex);
 		} finally {
 			_subclassLock.unlock();
 		}
-		
+
 		return addSubClass(newClassId, classIndex);
 	}
 	
@@ -7667,7 +7439,7 @@ public class L2PcInstance extends L2Playable {
 		if (_subClasses == null) {
 			_subClasses = new ConcurrentSkipListMap<>();
 		}
-		
+
 		return _subClasses;
 	}
 	
@@ -7677,6 +7449,10 @@ public class L2PcInstance extends L2Playable {
 	
 	public int getBaseClass() {
 		return _baseClass;
+	}
+	
+	public void setBaseClass(int baseClass) {
+		_baseClass = baseClass;
 	}
 	
 	public void setBaseClass(ClassId classId) {
@@ -10727,7 +10503,7 @@ public class L2PcInstance extends L2Playable {
 	 */
 	public PlayerVariables getVariables() {
 		final PlayerVariables vars = getScript(PlayerVariables.class);
-		return vars != null ? vars : addScript(new PlayerVariables(getObjectId()));
+		return (PlayerVariables) Objects.requireNonNullElseGet(vars, () -> addScript(new PlayerVariables(getObjectId())));
 	}
 	
 	/**
@@ -10737,25 +10513,17 @@ public class L2PcInstance extends L2Playable {
 		return getScript(AccountVariables.class) != null;
 	}
 	
-	/**
-	 * @return {@link AccountVariables} instance containing parameters regarding player.
-	 */
 	public AccountVariables getAccountVariables() {
 		final AccountVariables vars = getScript(AccountVariables.class);
-		return vars != null ? vars : addScript(new AccountVariables(getAccountName()));
+		return (AccountVariables) Objects.requireNonNullElseGet(vars, () -> addScript(new AccountVariables(getAccountName())));
 	}
 	
-	/**
-	 * Adds a event listener.
-	 * @param listener
-	 */
 	public void addEventListener(IEventListener listener) {
 		_eventListeners.add(listener);
 	}
 	
 	/**
 	 * Removes event listener
-	 * @param listener
 	 */
 	public void removeEventListener(IEventListener listener) {
 		_eventListeners.remove(listener);

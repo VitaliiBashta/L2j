@@ -7,7 +7,9 @@ import com.l2jserver.gameserver.model.L2World;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
+import org.springframework.stereotype.Service;
 
+@Service
 public class AdminDebug implements IAdminCommandHandler {
 	private static final String[] ADMIN_COMMANDS = {
 		"admin_debug"
