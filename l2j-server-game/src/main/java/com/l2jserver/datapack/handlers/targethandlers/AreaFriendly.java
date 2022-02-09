@@ -1,7 +1,7 @@
 package com.l2jserver.datapack.handlers.targethandlers;
 
 import com.l2jserver.gameserver.GeoData;
-import com.l2jserver.gameserver.handler.ITargetTypeHandler;
+import com.l2jserver.gameserver.handler.TargetTypeHandler;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class AreaFriendly implements ITargetTypeHandler {
+public class AreaFriendly implements TargetTypeHandler {
   private static final CharComparator CHAR_COMPARATOR = new CharComparator();
 
   @Override

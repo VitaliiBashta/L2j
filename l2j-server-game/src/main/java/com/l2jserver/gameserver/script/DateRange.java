@@ -1,17 +1,17 @@
 package com.l2jserver.gameserver.script;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Locale;
+import java.util.List;
+import java.util.Objects;
+
+import static java.time.format.DateTimeFormatter.ofPattern;
 
 public class DateRange {
-  private static final Logger _log = LogManager.getLogger(DateRange.class.getName());
-  private static final DateTimeFormatter DEFAULT_PATTERN =
-      DateTimeFormatter.ofPattern("dd MM yyyy", Locale.US);
+  private static final List<DateTimeFormatter> PATTERNs =
+      List.of(ofPattern("dd MM yyyy"), ofPattern("dd MMM yyyy"));
   private final LocalDateTime startDate;
   private final LocalDateTime endDate;
 
@@ -20,29 +20,23 @@ public class DateRange {
     endDate = to;
   }
 
-  public static DateRange parse(String dateRange, String format) {
-    var formatter = DateTimeFormatter.ofPattern(format, Locale.US);
-
-    return parse(dateRange, formatter);
-  }
-
   public static DateRange parse(String dateRange) {
-    return parse(dateRange, DEFAULT_PATTERN);
+    String[] date = dateRange.split("-");
+    return PATTERNs.stream()
+        .map(p -> tryParse(p, date))
+        .filter(Objects::nonNull)
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Illegal time interval:" + dateRange));
   }
 
-  public static DateRange parse(String dateRange, DateTimeFormatter formatter) {
-    String[] date = dateRange.split("-");
-    if (date.length == 2) {
-      try {
-        var start = LocalDateTime.parse(date[0], formatter);
-        var end = LocalDateTime.parse(date[1], formatter);
-
-        return new DateRange(start, end);
-      } catch (DateTimeParseException e) {
-        _log.warn("Invalid Date Format.", e);
-      }
+  private static DateRange tryParse(DateTimeFormatter pattern, String[] date) {
+    try {
+      var start = LocalDate.parse(date[0], pattern).atStartOfDay();
+      var end = LocalDate.parse(date[1], pattern).plusDays(1).atStartOfDay().minusSeconds(1);
+      return new DateRange(start, end);
+    } catch (DateTimeParseException e) {
+      return null;
     }
-    return new DateRange(null, null);
   }
 
   public boolean isValid() {

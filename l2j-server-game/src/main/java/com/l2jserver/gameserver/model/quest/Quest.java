@@ -61,7 +61,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
 
@@ -85,7 +84,7 @@ public class Quest extends AbstractScript implements Identifiable {
 	private volatile Map<Predicate<L2PcInstance>, String> _startCondition = null;
 	
 	private final int _questId;
-	private final String _name;
+  private final String name;
 	private final String _descr;
 	private final byte _initialState = State.CREATED;
 	protected boolean _onEnterWorld = false;
@@ -111,7 +110,7 @@ public class Quest extends AbstractScript implements Identifiable {
 	 */
 	public Quest(int questId, String name, String descr) {
 		_questId = questId;
-		_name = name;
+    this.name = name;
 		_descr = descr;
 		if (questId > 0) {
 			QuestManager.getInstance().addQuest(this);
@@ -185,7 +184,7 @@ public class Quest extends AbstractScript implements Identifiable {
 	 * @return the QuestState object for this quest or null if it doesn't exist
 	 */
 	public QuestState getQuestState(L2PcInstance player, boolean initIfNone) {
-		final QuestState qs = player.getQuestState(_name);
+    final QuestState qs = player.getQuestState(name);
 		if ((qs != null) || !initIfNone) {
 			return qs;
 		}
@@ -201,7 +200,7 @@ public class Quest extends AbstractScript implements Identifiable {
 	
 	@Override
 	public String getName() {
-		return _name;
+    return name;
 	}
 	
 	/**
@@ -528,7 +527,7 @@ public class Quest extends AbstractScript implements Identifiable {
 		String res;
 		try {
 			final String startConditionHtml = getStartConditionHtml(player);
-			if (!player.hasQuestState(_name) && (startConditionHtml != null)) {
+      if (!player.hasQuestState(name) && (startConditionHtml != null)) {
 				res = startConditionHtml;
 			} else {
 				res = onTalk(npc, player);
@@ -2570,6 +2569,6 @@ public class Quest extends AbstractScript implements Identifiable {
 	
 	@Override
 	public String toString() {
-		return _name + " (" + _questId + ")";
+    return name + " (" + _questId + ")";
 	}
 }

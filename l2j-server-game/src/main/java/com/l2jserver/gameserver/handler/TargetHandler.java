@@ -18,33 +18,31 @@
  */
 package com.l2jserver.gameserver.handler;
 
+import com.l2jserver.gameserver.model.skills.targets.TargetType;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import com.l2jserver.gameserver.model.skills.targets.TargetType;
+/** @author UnAfraid */
+public class TargetHandler implements IHandler<TargetTypeHandler, Enum<TargetType>> {
+  private final Map<Enum<TargetType>, TargetTypeHandler> _datatable;
 
-/**
- * @author UnAfraid
- */
-public class TargetHandler implements IHandler<ITargetTypeHandler, Enum<TargetType>> {
-	private final Map<Enum<TargetType>, ITargetTypeHandler> _datatable;
-	
 	protected TargetHandler() {
 		_datatable = new HashMap<>();
 	}
-	
-	@Override
-	public void registerHandler(ITargetTypeHandler handler) {
+
+  @Override
+  public void registerHandler(TargetTypeHandler handler) {
 		_datatable.put(handler.getTargetType(), handler);
 	}
-	
-	@Override
-	public synchronized void removeHandler(ITargetTypeHandler handler) {
+
+  @Override
+  public synchronized void removeHandler(TargetTypeHandler handler) {
 		_datatable.remove(handler.getTargetType());
 	}
-	
-	@Override
-	public ITargetTypeHandler getHandler(Enum<TargetType> targetType) {
+
+  @Override
+  public TargetTypeHandler getHandler(Enum<TargetType> targetType) {
 		return _datatable.get(targetType);
 	}
 	

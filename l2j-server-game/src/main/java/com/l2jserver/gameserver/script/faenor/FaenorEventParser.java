@@ -23,7 +23,7 @@ public class FaenorEventParser extends FaenorParser {
   @Override
   public void parseScript(final Node eventNode, ScriptContext context) {
     String id = attribute(eventNode, "ID");
-    _eventDates = DateRange.parse(attribute(eventNode, "Active"), "dd MMM yyyy");
+    _eventDates = DateRange.parse(attribute(eventNode, "Active"));
 
     var currentDate = LocalDateTime.now();
     if (_eventDates.getEndDate().isBefore(currentDate)) {

@@ -6,8 +6,8 @@ import com.l2jserver.gameserver.data.xml.impl.SkillTreesData;
 import com.l2jserver.gameserver.datatables.SkillData;
 import com.l2jserver.gameserver.enums.MountType;
 import com.l2jserver.gameserver.enums.ShotType;
-import com.l2jserver.gameserver.handler.ITargetTypeHandler;
 import com.l2jserver.gameserver.handler.TargetHandler;
+import com.l2jserver.gameserver.handler.TargetTypeHandler;
 import com.l2jserver.gameserver.instancemanager.HandysBlockCheckerManager;
 import com.l2jserver.gameserver.model.*;
 import com.l2jserver.gameserver.model.actor.L2Attackable;
@@ -86,27 +86,18 @@ public class Skill implements Identifiable {
 	private final AbnormalType _abnormalType;
 	/** Abnormal time: global effect duration time. */
 	private final int _abnormalTime;
-	/** Abnormal visual effect: the visual effect displayed in game. */
-	private AbnormalVisualEffect[] _abnormalVisualEffects = null;
-	/** Abnormal visual effect special: the visual effect displayed in game. */
-	private AbnormalVisualEffect[] _abnormalVisualEffectsSpecial = null;
-	/** Abnormal visual effect event: the visual effect displayed in game. */
-	private AbnormalVisualEffect[] _abnormalVisualEffectsEvent = null;
 	/** If {@code true} this skill's effect should stay after death. */
 	private final boolean _stayAfterDeath;
 	/** If {@code true} this skill's effect should stay after class-subclass change. */
 	private final boolean _stayOnSubclassChange;
 	/** If {@code true} this skill's effect recovery HP/MP or CP from herb. */
 	private final boolean _isRecoveryHerb;
-	
-	private int _refId;
 	// all times in milliseconds
 	private final int hitTime;
 	private final int hitCancelTime;
 	private final int _coolTime;
 	private final int _reuseHashCode;
 	private final int _reuseDelay;
-	
 	private final TargetType targetType;
 	// base success chance
 	private final int _magicLevel;
@@ -114,7 +105,6 @@ public class Skill implements Identifiable {
 	private final int _activateRate;
 	private final int _minChance;
 	private final int _maxChance;
-	
 	private final int[] affectLimit;
 	private final AffectObject affectObject;
 	// Effecting area of the skill, in radius.
@@ -122,51 +112,43 @@ public class Skill implements Identifiable {
 	// "caster" if targetType = AURA/PARTY/CLAN or "target" if targetType = AREA
 	private final int affectRange;
 	private final AffectScope affectScope;
-	
 	private final boolean _nextActionIsAttack;
-	
 	private final boolean _blockedInOlympiad;
-	
 	private final AttributeType _attributeType;
 	private final int _attributePower;
-	
 	private final BaseStats _basicProperty;
-	
 	private final boolean _overhit;
-	
 	private final int _minPledgeClass;
 	private final int _chargeConsume;
 	private final int _soulMaxConsume;
-	
 	private final boolean _directHpDmg; // If true then damage is being make directly
 	private final int _effectPoint;
+	private final Map<EffectScope, List<AbstractEffect>> _effectLists = new EnumMap<>(EffectScope.class);
+	private final boolean _isDebuff;
+	private final boolean _isSuicideAttack;
+	private final boolean _irreplaceableBuff;
+	private final boolean _excludedFromCheck;
+	private final boolean _simultaneousCast;
+	private final String icon;
+	// Channeling data
+	private final int _channelingSkillId;
+	private final int _channelingTickInitialDelay;
+	private final int _channelingTickInterval;
+	/** Abnormal visual effect: the visual effect displayed in game. */
+	private AbnormalVisualEffect[] _abnormalVisualEffects = null;
+	/** Abnormal visual effect special: the visual effect displayed in game. */
+	private AbnormalVisualEffect[] _abnormalVisualEffectsSpecial = null;
+	/** Abnormal visual effect event: the visual effect displayed in game. */
+	private AbnormalVisualEffect[] _abnormalVisualEffectsEvent = null;
+	private int _refId;
 	// Condition lists
 	private List<Condition> _preCondition;
 	private List<Condition> _itemPreCondition;
 	private Set<MountType> _rideState;
 	// Function lists
 	private List<FuncTemplate> _funcTemplates;
-	
-	private final Map<EffectScope, List<AbstractEffect>> _effectLists = new EnumMap<>(EffectScope.class);
-	
-	private final boolean _isDebuff;
-	
-	private final boolean _isSuicideAttack;
-	private final boolean _irreplaceableBuff;
-	
-	private final boolean _excludedFromCheck;
-	private final boolean _simultaneousCast;
-	
 	private L2ExtractableSkill _extractableItems = null;
-	
-	private final String _icon;
-	
 	private volatile Byte[] _effectTypes;
-	
-	// Channeling data
-	private final int _channelingSkillId;
-	private final int _channelingTickInitialDelay;
-	private final int _channelingTickInterval;
 	
 	public Skill(StatsSet set) {
 		_id = set.getInt("skill_id");
@@ -285,11 +267,99 @@ public class Skill implements Identifiable {
 			_extractableItems = parseExtractableSkill(_id, _level, capsuled_items);
 		}
 		
-		_icon = set.getString("icon", "icon.skill0000");
+		icon = set.getString("icon", "icon.skill0000");
 		
 		_channelingSkillId = set.getInt("channelingSkillId", 0);
 		_channelingTickInterval = set.getInt("channelingTickInterval", 2) * 1000;
 		_channelingTickInitialDelay = set.getInt("channelingTickInitialDelay", _channelingTickInterval / 1000) * 1000;
+	}
+	
+	/**
+	 * Check if should be target added to the target list false if target is dead, target same as caster,<br>
+	 * target inside peace zone, target in the same party with caster, caster can see target Additional checks if not in PvP zones (arena, siege):<br>
+	 * target in not the same clan and alliance with caster, and usual skill PvP check. If TvT event is active - performing additional checks. Caution: distance is not checked.
+	 * @param caster
+	 * @param target
+	 * @param skill
+	 * @param sourceInArena
+	 * @return
+	 */
+	public static boolean checkForAreaOffensiveSkills(L2Character caster, L2Character target, Skill skill, boolean sourceInArena) {
+		if ((target == null) || target.isDead() || (target == caster)) {
+			return false;
+		}
+
+		final L2PcInstance player = caster.getActingPlayer();
+		final L2PcInstance targetPlayer = target.getActingPlayer();
+		if (player != null) {
+			if (targetPlayer != null) {
+				if ((targetPlayer == caster) || (targetPlayer == player)) {
+					return false;
+				}
+
+				if (targetPlayer.inObserverMode()) {
+					return false;
+				}
+
+				if (skill.isBad() && (player.getSiegeState() > 0) && player.isInsideZone(ZoneId.SIEGE) && (player.getSiegeState() == targetPlayer.getSiegeState()) && (player.getSiegeSide() == targetPlayer.getSiegeSide())) {
+					return false;
+				}
+
+				if (skill.isBad() && target.isInsideZone(ZoneId.PEACE)) {
+					return false;
+				}
+
+				if (player.isInParty() && targetPlayer.isInParty()) {
+					// Same party
+					if (player.getParty().getLeaderObjectId() == targetPlayer.getParty().getLeaderObjectId()) {
+						return false;
+					}
+
+					// Same command channel
+					if (player.getParty().isInCommandChannel() && (player.getParty().getCommandChannel() == targetPlayer.getParty().getCommandChannel())) {
+						return false;
+					}
+				}
+
+				if (!TvTEvent.checkForTvTSkill(player, targetPlayer, skill)) {
+					return false;
+				}
+
+				if (!sourceInArena && !(targetPlayer.isInsideZone(ZoneId.PVP) && !targetPlayer.isInsideZone(ZoneId.SIEGE))) {
+					if ((player.getAllyId() != 0) && (player.getAllyId() == targetPlayer.getAllyId())) {
+						return false;
+					}
+
+					if ((player.getClanId() != 0) && (player.getClanId() == targetPlayer.getClanId())) {
+						return false;
+					}
+
+					if (!player.checkPvpSkill(targetPlayer, skill)) {
+						return false;
+					}
+				}
+			}
+		} else {
+			// target is mob
+			if ((targetPlayer == null) && (target instanceof L2Attackable) && (caster instanceof L2Attackable)) {
+				return false;
+			}
+		}
+		return GeoData.getInstance().canSeeTarget(caster, target);
+	}
+	
+	public static boolean addSummon(L2Character caster, L2PcInstance owner, int radius, boolean isDead) {
+		if (!owner.hasSummon()) {
+			return false;
+		}
+		return addCharacter(caster, owner.getSummon(), radius, isDead);
+	}
+	
+	public static boolean addCharacter(L2Character caster, L2Character target, int radius, boolean isDead) {
+		if (isDead != target.isDead()) {
+			return false;
+		}
+		return (radius <= 0) || Util.checkIfInRange(radius, caster, target, true);
 	}
 	
 	public TraitType getTraitType() {
@@ -731,19 +801,19 @@ public class Skill implements Identifiable {
 		if (activeChar.canOverrideCond(PcCondOverride.SKILL_CONDITIONS) && !general().gmSkillRestriction()) {
 			return true;
 		}
-		
+
 		if (activeChar.isPlayer() && !canBeUseWhileRiding((L2PcInstance) activeChar)) {
 			final SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
 			sm.addSkillName(_id);
 			activeChar.sendPacket(sm);
 			return false;
 		}
-		
+
 		final List<Condition> preCondition = itemOrWeapon ? _itemPreCondition : _preCondition;
 		if ((preCondition == null) || preCondition.isEmpty()) {
 			return true;
 		}
-		
+
 		final L2Character target = (object instanceof L2Character) ? (L2Character) object : null;
 		for (Condition cond : preCondition) {
 			if (!cond.test(activeChar, target, this)) {
@@ -776,14 +846,14 @@ public class Skill implements Identifiable {
 	public List<L2Object> getTargetList(L2Character activeChar, boolean onlyFirst) {
 		// Init to null the target of the skill
 		L2Character target = null;
-		
+
 		// Get the object targeted by the user of the skill at this moment
 		L2Object objTarget = activeChar.getTarget();
 		// If the L2Object targeted is a L2Character, it becomes the L2Character target
 		if (objTarget instanceof L2Character) {
 			target = (L2Character) objTarget;
 		}
-		
+
 		return getTargetList(activeChar, onlyFirst, target);
 	}
 	
@@ -803,13 +873,9 @@ public class Skill implements Identifiable {
 	 * <li>UNLOCKABLE</li>
 	 * <li>ITEM</li>
 	 * <ul>
-	 * @param activeChar The L2Character who use the skill
-	 * @param onlyFirst
-	 * @param target
-	 * @return
 	 */
 	public List<L2Object> getTargetList(L2Character activeChar, boolean onlyFirst, L2Character target) {
-		final ITargetTypeHandler handler = TargetHandler.getInstance().getHandler(getTargetType());
+		final TargetTypeHandler handler = TargetHandler.getInstance().getHandler(getTargetType());
 		if (handler != null) {
 			try {
 				return handler.getTargetList(this, activeChar, onlyFirst, target);
@@ -829,94 +895,6 @@ public class Skill implements Identifiable {
 		return  getTargetList(activeChar, true)
 				.stream().findFirst()
 				.orElse(null);
-	}
-	
-	/**
-	 * Check if should be target added to the target list false if target is dead, target same as caster,<br>
-	 * target inside peace zone, target in the same party with caster, caster can see target Additional checks if not in PvP zones (arena, siege):<br>
-	 * target in not the same clan and alliance with caster, and usual skill PvP check. If TvT event is active - performing additional checks. Caution: distance is not checked.
-	 * @param caster
-	 * @param target
-	 * @param skill
-	 * @param sourceInArena
-	 * @return
-	 */
-	public static boolean checkForAreaOffensiveSkills(L2Character caster, L2Character target, Skill skill, boolean sourceInArena) {
-		if ((target == null) || target.isDead() || (target == caster)) {
-			return false;
-		}
-		
-		final L2PcInstance player = caster.getActingPlayer();
-		final L2PcInstance targetPlayer = target.getActingPlayer();
-		if (player != null) {
-			if (targetPlayer != null) {
-				if ((targetPlayer == caster) || (targetPlayer == player)) {
-					return false;
-				}
-				
-				if (targetPlayer.inObserverMode()) {
-					return false;
-				}
-				
-				if (skill.isBad() && (player.getSiegeState() > 0) && player.isInsideZone(ZoneId.SIEGE) && (player.getSiegeState() == targetPlayer.getSiegeState()) && (player.getSiegeSide() == targetPlayer.getSiegeSide())) {
-					return false;
-				}
-				
-				if (skill.isBad() && target.isInsideZone(ZoneId.PEACE)) {
-					return false;
-				}
-				
-				if (player.isInParty() && targetPlayer.isInParty()) {
-					// Same party
-					if (player.getParty().getLeaderObjectId() == targetPlayer.getParty().getLeaderObjectId()) {
-						return false;
-					}
-					
-					// Same command channel
-					if (player.getParty().isInCommandChannel() && (player.getParty().getCommandChannel() == targetPlayer.getParty().getCommandChannel())) {
-						return false;
-					}
-				}
-				
-				if (!TvTEvent.checkForTvTSkill(player, targetPlayer, skill)) {
-					return false;
-				}
-				
-				if (!sourceInArena && !(targetPlayer.isInsideZone(ZoneId.PVP) && !targetPlayer.isInsideZone(ZoneId.SIEGE))) {
-					if ((player.getAllyId() != 0) && (player.getAllyId() == targetPlayer.getAllyId())) {
-						return false;
-					}
-					
-					if ((player.getClanId() != 0) && (player.getClanId() == targetPlayer.getClanId())) {
-						return false;
-					}
-					
-					if (!player.checkPvpSkill(targetPlayer, skill)) {
-						return false;
-					}
-				}
-			}
-		} else {
-			// target is mob
-			if ((targetPlayer == null) && (target instanceof L2Attackable) && (caster instanceof L2Attackable)) {
-				return false;
-			}
-		}
-		return GeoData.getInstance().canSeeTarget(caster, target);
-	}
-	
-	public static boolean addSummon(L2Character caster, L2PcInstance owner, int radius, boolean isDead) {
-		if (!owner.hasSummon()) {
-			return false;
-		}
-		return addCharacter(caster, owner.getSummon(), radius, isDead);
-	}
-	
-	public static boolean addCharacter(L2Character caster, L2Character target, int radius, boolean isDead) {
-		if (isDead != target.isDead()) {
-			return false;
-		}
-		return (radius <= 0) || Util.checkIfInRange(radius, caster, target, true);
 	}
 	
 	public List<AbstractFunction> getStatFuncs(AbstractEffect effect, L2Character player) {
@@ -1407,11 +1385,8 @@ public class Skill implements Identifiable {
 		return false;
 	}
 	
-	/**
-	 * @return icon of the current skill.
-	 */
 	public String getIcon() {
-		return _icon;
+		return icon;
 	}
 	
 	public int getChannelingTickInterval() {

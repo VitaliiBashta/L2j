@@ -1,6 +1,6 @@
 package com.l2jserver.datapack.handlers.targethandlers;
 
-import com.l2jserver.gameserver.handler.ITargetTypeHandler;
+import com.l2jserver.gameserver.handler.TargetTypeHandler;
 import com.l2jserver.gameserver.instancemanager.DuelManager;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.L2Character;
@@ -14,7 +14,7 @@ import static com.l2jserver.gameserver.model.skills.targets.TargetType.ENEMY_ONL
 import static com.l2jserver.gameserver.model.zone.ZoneId.PVP;
 import static com.l2jserver.gameserver.network.SystemMessageId.INCORRECT_TARGET;
 
-public class EnemyOnly implements ITargetTypeHandler {
+public class EnemyOnly implements TargetTypeHandler {
   @Override
   public List<L2Object> getTargetList(
       Skill skill, L2Character activeChar, boolean onlyFirst, L2Character target) {
