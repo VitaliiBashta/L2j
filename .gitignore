@@ -30,3 +30,4 @@ build/
 
 ### VS Code ###
 .vscode/
+/l2j-server-commons/target/
