@@ -264,6 +264,11 @@ public class ZoneManager implements IXmlReader {
   }
 
   @Override
+  public void parseDocument(Document doc) {
+    throw new IllegalArgumentException("not implemented");
+  }
+
+  @Override
   public void load() {
     _classZones.clear();
     _spawnTerritories.clear();

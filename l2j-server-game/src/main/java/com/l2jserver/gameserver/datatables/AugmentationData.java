@@ -315,7 +315,12 @@ public class AugmentationData implements IXmlReader {
 			}
 		}
 	}
-	
+
+	@Override
+	public void parseDocument(Document doc) {
+		throw new IllegalArgumentException("not implemented parser");
+	}
+
 	/**
 	 * Generate a new random augmentation
 	 * @param lifeStoneLevel

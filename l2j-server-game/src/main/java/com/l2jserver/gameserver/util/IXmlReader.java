@@ -133,9 +133,10 @@ public interface IXmlReader {
    *
    * @param doc the current document to parse
    */
-  default void parseDocument(Document doc) {
-    LOG.error("{}: Parser not implemented!", getClass().getSimpleName());
-  }
+  void parseDocument(Document doc);
+  //  {
+  //    LOG.error("{}: Parser not implemented!", getClass().getSimpleName());
+  //  }
 
   /**
    * Parses a boolean value.

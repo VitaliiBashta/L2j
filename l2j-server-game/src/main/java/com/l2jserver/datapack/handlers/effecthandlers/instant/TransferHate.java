@@ -10,10 +10,6 @@ import com.l2jserver.gameserver.model.skills.BuffInfo;
 import com.l2jserver.gameserver.model.stats.Formulas;
 import com.l2jserver.gameserver.util.Util;
 
-/**
- * Transfer Hate effect implementation.
- * @author Adry_85
- */
 public final class TransferHate extends AbstractEffect {
 	private final int _chance;
 	

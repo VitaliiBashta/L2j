@@ -140,6 +140,11 @@ public final class BuyListData implements IXmlReader {
   }
 
   @Override
+  public void parseDocument(Document doc) {
+    throw new IllegalArgumentException("not implemented");
+  }
+
+  @Override
   public FileFilter getCurrentFileFilter() {
     return NUMERIC_FILTER;
   }

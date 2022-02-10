@@ -46,6 +46,7 @@ public class NpcData implements IXmlReader {
 		this.skillLearnData = skillLearnData;
 		this.minionData = minionData;
 		this.skillData = skillData;
+		load();
 	}
 	
 	public static NpcData getInstance() {
@@ -430,7 +431,12 @@ public class NpcData implements IXmlReader {
 			}
 		}
 	}
-	
+
+	@Override
+	public void parseDocument(Document doc) {
+		throw new IllegalArgumentException("not implemented parser");
+	}
+
 	private void parseDropList(File f, Node dropListNode, DropListScope dropListScope, List<IDropItem> drops) {
 		for (Node dropNode = dropListNode.getFirstChild(); dropNode != null; dropNode = dropNode.getNextSibling()) {
 			NamedNodeMap attrs = dropNode.getAttributes();

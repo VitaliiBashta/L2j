@@ -1,12 +1,18 @@
 package com.l2jserver.gameserver.handler;
 
+import com.l2jserver.datapack.handlers.EffectMasterHandler;
+import com.l2jserver.gameserver.model.StatsSet;
+import com.l2jserver.gameserver.model.conditions.Condition;
+import com.l2jserver.gameserver.model.effects.AbstractEffect;
+import com.l2jserver.gameserver.scripting.ScriptEngineManager;
+import org.springframework.stereotype.Service;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.l2jserver.datapack.handlers.EffectMasterHandler;
-import com.l2jserver.gameserver.model.effects.AbstractEffect;
-import com.l2jserver.gameserver.scripting.ScriptEngineManager;
-
+@Service
 public class EffectHandler implements IHandler<Class<? extends AbstractEffect>, String> {
 	private final Map<String, Class<? extends AbstractEffect>> _handlers;
 	
@@ -41,7 +47,55 @@ public class EffectHandler implements IHandler<Class<? extends AbstractEffect>, 
 	public static EffectHandler getInstance() {
 		return SingletonHolder.INSTANCE;
 	}
-	
+
+  /**
+   * Creates an effect given the parameters.
+   *
+   * @param attachCond the attach condition
+   * @param applyCond the apply condition
+   * @param set the attributes
+   * @param params the parameters
+   * @return the new effect
+   */
+  public AbstractEffect createEffect(
+      Condition attachCond, Condition applyCond, StatsSet set, StatsSet params) {
+    final String name = set.getString("name");
+    final Class<? extends AbstractEffect> handler = getHandler(name);
+    if (handler == null) {
+      throw new IllegalArgumentException(
+          " Requested unexistent effect handler: " + name + " in skill[" + set.getInt("id") + "]");
+    }
+
+    final Constructor<?> constructor;
+    try {
+      constructor =
+          handler.getConstructor(Condition.class, Condition.class, StatsSet.class, StatsSet.class);
+    } catch (NoSuchMethodException | SecurityException e) {
+      throw new IllegalArgumentException(
+          " Requested unexistent constructor for effect handler: "
+              + name
+              + " in skill["
+              + set.getInt("id")
+              + "] : "
+              + e.getMessage());
+    }
+
+    try {
+      return (AbstractEffect) constructor.newInstance(attachCond, applyCond, set, params);
+    } catch (InstantiationException
+        | IllegalAccessException
+        | IllegalArgumentException
+        | InvocationTargetException e) {
+      throw new IllegalArgumentException(
+          "Unable to initialize effect handler: "
+              + name
+              + " in skill["
+              + set.getInt("id")
+              + "] : "
+              + e.getMessage());
+    }
+  }
+
 	private static final class SingletonHolder {
 		protected static final EffectHandler INSTANCE = new EffectHandler();
 	}
