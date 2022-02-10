@@ -27,10 +27,6 @@ public class TransformData implements IXmlReader {
 	
 	private final Map<Integer, Transform> _transformData = new HashMap<>();
 	
-	protected TransformData() {
-		load();
-	}
-	
 	@Override
 	public synchronized void load() {
 		_transformData.clear();

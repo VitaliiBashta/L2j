@@ -18,7 +18,6 @@ import com.l2jserver.gameserver.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -40,21 +39,10 @@ public class AdminBuffs implements IAdminCommandHandler {
   // Misc
   private static final String FONT_RED1 = "<font color=\"FF0000\">";
   private static final String FONT_RED2 = "</font>";
+  private final SkillTreesData skillTreesData;
 
-  /**
-   * @param gmchar the player to switch the Game Master skills.
-   * @param toAuraSkills if {@code true} it will remove "GM Aura" skills and add "GM regular"
-   *     skills, vice versa if {@code false}.
-   */
-  public static void switchSkills(L2PcInstance gmchar, boolean toAuraSkills) {
-    final Collection<Skill> skills =
-        toAuraSkills
-            ? SkillTreesData.getInstance().getGMSkillTree().values()
-            : SkillTreesData.getInstance().getGMAuraSkillTree().values();
-    for (Skill skill : skills) {
-      gmchar.removeSkill(skill, false); // Don't Save GM skills to database
-    }
-    SkillTreesData.getInstance().addSkills(gmchar, toAuraSkills);
+  public AdminBuffs(SkillTreesData skillTreesData) {
+    this.skillTreesData = skillTreesData;
   }
 
   public static void showBuffs(
@@ -230,6 +218,22 @@ public class AdminBuffs implements IAdminCommandHandler {
             "");
       }
     }
+  }
+
+  /**
+   * @param gmchar the player to switch the Game Master skills.
+   * @param toAuraSkills if {@code true} it will remove "GM Aura" skills and add "GM regular"
+   *     skills, vice versa if {@code false}.
+   */
+  public void switchSkills(L2PcInstance gmchar, boolean toAuraSkills) {
+    var skills =
+        toAuraSkills
+            ? skillTreesData.getGMSkillTree().values()
+            : skillTreesData.getGMAuraSkillTree().values();
+    for (Skill skill : skills) {
+      gmchar.removeSkill(skill, false); // Don't Save GM skills to database
+    }
+    skillTreesData.addSkills(gmchar, toAuraSkills);
   }
 
   @Override

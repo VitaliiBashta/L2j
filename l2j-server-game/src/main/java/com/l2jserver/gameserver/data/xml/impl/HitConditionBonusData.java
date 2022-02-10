@@ -16,21 +16,15 @@ public  class HitConditionBonusData implements IXmlReader {
 	private static final Logger LOG = LoggerFactory.getLogger(HitConditionBonusData.class);
 	
 	private int frontBonus = 0;
-	
 	private int sideBonus = 0;
-	
 	private int backBonus = 0;
-	
 	private int highBonus = 0;
-	
 	private int lowBonus = 0;
-	
 	private int darkBonus = 0;
-	
 	private int rainBonus = 0;
 	
-	protected HitConditionBonusData() {
-		load();
+	public static HitConditionBonusData getInstance() {
+		return SingletonHolder.INSTANCE;
 	}
 	
 	@Override
@@ -76,14 +70,14 @@ public  class HitConditionBonusData implements IXmlReader {
 		} else if ((attacker.getZ() - target.getZ()) < -50) {
 			mod += lowBonus;
 		}
-		
+
 		// Get weather bonus
 		if (GameTimeController.getInstance().isNight()) {
 			mod += darkBonus;
 			// else if () No rain support yet.
 			// chance += hitConditionBonus.rainBonus;
 		}
-		
+
 		// Get side bonus
 		if (attacker.isBehindTarget()) {
 			mod += backBonus;
@@ -92,13 +86,9 @@ public  class HitConditionBonusData implements IXmlReader {
 		} else {
 			mod += sideBonus;
 		}
-		
+
 		// If (mod / 100) is less than 0, return 0, because we can't lower more than 100%.
 		return Math.max(mod / 100, 0);
-	}
-	
-	public static HitConditionBonusData getInstance() {
-		return SingletonHolder.INSTANCE;
 	}
 	
 	private static class SingletonHolder {

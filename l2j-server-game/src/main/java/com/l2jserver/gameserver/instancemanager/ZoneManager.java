@@ -44,59 +44,12 @@ public class ZoneManager implements IXmlReader {
 
   private List<L2ItemInstance> _debugItems;
 
-  protected ZoneManager() {
-    load();
-  }
-
-  /**
-   * Gets the settings.
-   *
-   * @param name the name
-   * @return the settings
-   */
   public static AbstractZoneSettings getSettings(String name) {
     return _settings.get(name);
   }
 
   public static ZoneManager getInstance() {
     return SingletonHolder.INSTANCE;
-  }
-
-  public void reload() {
-    // Get the world regions
-    int count = 0;
-    final L2WorldRegion[][] worldRegions = L2World.getInstance().getWorldRegions();
-
-    // Backup old zone settings
-    for (Map<Integer, ? extends L2ZoneType> map : _classZones.values()) {
-      for (L2ZoneType zone : map.values()) {
-        if (zone.getSettings() != null) {
-          _settings.put(zone.getName(), zone.getSettings());
-        }
-      }
-    }
-
-    // Clear zones
-    for (L2WorldRegion[] worldRegion : worldRegions) {
-      for (L2WorldRegion element : worldRegion) {
-        element.getZones().clear();
-        count++;
-      }
-    }
-
-    GrandBossManager.getInstance().getZones().clear();
-    LOG.info("Removed zones in {} regions.", count);
-
-    // Load the zones
-    load();
-
-    // Re-validate all characters in zones
-    for (L2Object obj : L2World.getInstance().getVisibleObjects()) {
-      if (obj instanceof L2Character) {
-        ((L2Character) obj).revalidateZone(true);
-      }
-    }
-    _settings.clear();
   }
 
   @Override
@@ -543,8 +496,7 @@ public class ZoneManager implements IXmlReader {
       return null;
     }
 
-    for (L2ZoneType temp :
-        ZoneManager.getInstance().getZones(character.getX(), character.getY(), character.getZ())) {
+    for (L2ZoneType temp : getZones(character.getX(), character.getY(), character.getZ())) {
       if ((temp instanceof L2ArenaZone) && temp.isCharacterInZone(character)) {
         return ((L2ArenaZone) temp);
       }
@@ -553,19 +505,13 @@ public class ZoneManager implements IXmlReader {
     return null;
   }
 
-  /**
-   * Gets the olympiad stadium.
-   *
-   * @param character the character
-   * @return the olympiad stadium
-   */
+  /** Gets the olympiad stadium. */
   public L2OlympiadStadiumZone getOlympiadStadium(L2Character character) {
     if (character == null) {
       return null;
     }
 
-    for (L2ZoneType temp :
-        ZoneManager.getInstance().getZones(character.getX(), character.getY(), character.getZ())) {
+    for (L2ZoneType temp : getZones(character.getX(), character.getY(), character.getZ())) {
       if ((temp instanceof L2OlympiadStadiumZone) && temp.isCharacterInZone(character)) {
         return ((L2OlympiadStadiumZone) temp);
       }

@@ -32,10 +32,6 @@ public class AdminData implements IXmlReader {
 
   private int _highestLevel = 0;
 
-  protected AdminData() {
-    load();
-  }
-
   public static AdminData getInstance() {
     return SingletonHolder.INSTANCE;
   }

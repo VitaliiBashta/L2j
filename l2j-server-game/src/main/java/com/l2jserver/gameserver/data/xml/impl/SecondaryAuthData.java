@@ -26,10 +26,6 @@ public class SecondaryAuthData implements IXmlReader {
 	
 	private String _recoveryLink = "";
 	
-	protected SecondaryAuthData() {
-		load();
-	}
-	
 	@Override
 	public synchronized void load() {
 		_forbiddenPasswords.clear();

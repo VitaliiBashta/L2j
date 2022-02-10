@@ -129,22 +129,17 @@ public class GameServer {
     BuyListData.getInstance();
     MultisellData.getInstance();
     RecipeData.getInstance();
-    ArmorSetsData.getInstance();
     FishData.getInstance();
-    FishingMonstersData.getInstance();
     FishingRodsData.getInstance();
     HennaData.getInstance();
 
     printSection("Characters");
     ClassListData.getInstance();
-    InitialEquipmentData.getInstance();
     InitialShortcutData.getInstance();
     ExperienceData.getInstance();
     PlayerXpPercentLostData.getInstance();
     KarmaData.getInstance();
-    HitConditionBonusData.getInstance();
     PlayerTemplateData.getInstance();
-    PlayerCreationPointData.getInstance();
     CharNameTable.getInstance();
     AdminData.getInstance();
     RaidBossPointsManager.getInstance();
@@ -198,7 +193,6 @@ public class GameServer {
     PartyMatchWaitingList.getInstance();
     PartyMatchRoomList.getInstance();
     PetitionManager.getInstance();
-    AugmentationData.getInstance();
     CursedWeaponsManager.getInstance();
     TransformData.getInstance();
     BotReportTable.getInstance();
@@ -229,7 +223,6 @@ public class GameServer {
     printSection("Scripts");
     ScriptEngineManager.getInstance().runMainOnscripts();
 
-    SpawnTable.getInstance().load();
     DayNightSpawnManager.getInstance().trim().notifyChangeMode();
     FourSepulchersManager.getInstance().init();
     DimensionalRiftManager.getInstance();
@@ -241,7 +234,6 @@ public class GameServer {
     FortManager.getInstance().loadInstances();
     FortManager.getInstance().activateInstances();
     FortSiegeManager.getInstance();
-    SiegeScheduleData.getInstance();
     MerchantPriceConfigTable.getInstance().updateReferences();
     TerritoryWarManager.getInstance();
     CastleManorManager.getInstance();

@@ -212,18 +212,6 @@ public interface IXmlReader {
   }
 
   /**
-   * Parses a byte value.
-   *
-   * @param attrs the attributes
-   * @param name the name of the attribute to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
-   */
-  default Byte parseByte(NamedNodeMap attrs, String name, Byte defaultValue) {
-    return parseByte(attrs.getNamedItem(name), defaultValue);
-  }
-
-  /**
    * Parses a short value.
    *
    * @param node the node to parse
@@ -561,36 +549,16 @@ public interface IXmlReader {
     return parseEnum(attrs.getNamedItem(name), clazz);
   }
 
-  /**
-   * Parses an enumerated value.
-   *
-   * @param <T> the enumerated type
-   * @param attrs the attributes
-   * @param clazz the class of the enumerated
-   * @param name the name of the attribute to parse
-   * @param defaultValue the default value
-   * @return if the node is not null and the node value is valid the parsed value, otherwise the
-   *     default value
-   */
   default <T extends Enum<T>> T parseEnum(
       NamedNodeMap attrs, Class<T> clazz, String name, T defaultValue) {
     return parseEnum(attrs.getNamedItem(name), clazz, defaultValue);
   }
 
-  /**
-   * Gets the current file filter.
-   *
-   * @return the current file filter
-   */
   default FileFilter getCurrentFileFilter() {
     return XML_FILTER;
   }
 
-  /**
-   * Simple XML error handler.
-   *
-   * @author Zoey76
-   */
+
   class XMLErrorHandler implements ErrorHandler {
     @Override
     public void warning(SAXParseException e) throws SAXParseException {

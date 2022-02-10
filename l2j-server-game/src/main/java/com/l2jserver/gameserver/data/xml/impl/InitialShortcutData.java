@@ -38,10 +38,6 @@ public class InitialShortcutData implements IXmlReader {
 	
 	private final Map<Integer, Macro> _macroPresets = new HashMap<>();
 	
-	protected InitialShortcutData() {
-		load();
-	}
-	
 	public static InitialShortcutData getInstance() {
 		return SingletonHolder.INSTANCE;
 	}

@@ -43,7 +43,6 @@ public class InstanceManager implements IXmlReader {
     // Creates the universe.
     INSTANCES.put(0, new Instance(0, "universe"));
     LOG.info("Universe Instance created.");
-    load();
   }
 
   public static InstanceManager getInstance() {

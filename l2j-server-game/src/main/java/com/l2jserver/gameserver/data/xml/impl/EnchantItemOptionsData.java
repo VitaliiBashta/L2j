@@ -17,16 +17,12 @@ import java.util.Map;
 public class EnchantItemOptionsData implements IXmlReader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EnchantItemOptionsData.class);
-	
-	private final Map<Integer, Map<Integer, EnchantOptions>> _data = new HashMap<>();
-	
-	protected EnchantItemOptionsData() {
-		load();
-	}
-	
+
+  private final Map<Integer, Map<Integer, EnchantOptions>> data = new HashMap<>();
+
 	@Override
 	public synchronized void load() {
-		_data.clear();
+    data.clear();
 		parseDatapackFile("data/enchantItemOptions.xml");
 	}
 	
@@ -38,14 +34,14 @@ public class EnchantItemOptionsData implements IXmlReader {
 				for (Node d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
 					if ("item".equalsIgnoreCase(d.getNodeName())) {
 						int itemId = parseInteger(d.getAttributes(), "id");
-						if (!_data.containsKey(itemId)) {
-							_data.put(itemId, new HashMap<>());
+            if (!data.containsKey(itemId)) {
+              data.put(itemId, new HashMap<>());
 						}
 						for (Node cd = d.getFirstChild(); cd != null; cd = cd.getNextSibling()) {
 							if ("options".equalsIgnoreCase(cd.getNodeName())) {
 								final EnchantOptions op = new EnchantOptions(parseInteger(cd.getAttributes(), "level"));
-								_data.get(itemId).put(op.getLevel(), op);
-								
+                data.get(itemId).put(op.getLevel(), op);
+
 								for (byte i = 0; i < 3; i++) {
 									final Node att = cd.getAttributes().getNamedItem("option" + (i + 1));
 									if ((att != null) && Util.isDigit(att.getNodeValue())) {
@@ -59,14 +55,14 @@ public class EnchantItemOptionsData implements IXmlReader {
 				}
 			}
 		}
-		LOG.info("Loaded {} items and {} options.", _data.size(), counter);
+    LOG.info("Loaded {} items and {} options.", data.size(), counter);
 	}
 	
 	public EnchantOptions getOptions(int itemId, int enchantLevel) {
-		if (!_data.containsKey(itemId) || !_data.get(itemId).containsKey(enchantLevel)) {
+    if (!data.containsKey(itemId) || !data.get(itemId).containsKey(enchantLevel)) {
 			return null;
 		}
-		return _data.get(itemId).get(enchantLevel);
+    return data.get(itemId).get(enchantLevel);
 	}
 	
 	public EnchantOptions getOptions(L2ItemInstance item) {

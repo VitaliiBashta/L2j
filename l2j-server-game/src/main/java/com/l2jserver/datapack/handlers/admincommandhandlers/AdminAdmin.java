@@ -1,14 +1,6 @@
 
 package com.l2jserver.datapack.handlers.admincommandhandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.character;
-import static com.l2jserver.gameserver.config.Configuration.rates;
-
-import java.util.StringTokenizer;
-import java.util.logging.Logger;
-
-import org.aeonbits.owner.Mutable;
-
 import com.l2jserver.gameserver.config.Configuration;
 import com.l2jserver.gameserver.data.xml.impl.AdminData;
 import com.l2jserver.gameserver.handler.IAdminCommandHandler;
@@ -17,7 +9,14 @@ import com.l2jserver.gameserver.model.entity.Hero;
 import com.l2jserver.gameserver.model.olympiad.Olympiad;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
+import org.aeonbits.owner.Mutable;
 import org.springframework.stereotype.Service;
+
+import java.util.StringTokenizer;
+import java.util.logging.Logger;
+
+import static com.l2jserver.gameserver.config.Configuration.character;
+import static com.l2jserver.gameserver.config.Configuration.rates;
 
 /**
  * This class handles following admin commands: - admin|admin1/admin2/admin3/admin4/admin5 = slots for the 5 starting admin menus - gmliston/gmlistoff = includes/excludes active character from /gmlist results - silence = toggles private messages acceptance mode - diet = toggles weight penalty mode -
@@ -52,7 +51,15 @@ public class AdminAdmin implements IAdminCommandHandler {
 		"admin_config_server",
 		"admin_gmon"
 	};
-	
+
+  private final AdminData adminData;
+  private final AdminHtml adminHtml;
+
+  public AdminAdmin(AdminData adminData, AdminHtml adminHtml) {
+    this.adminData = adminData;
+    this.adminHtml = adminHtml;
+  }
+
 	@Override
 	public boolean useAdminCommand(String command, L2PcInstance activeChar) {
 		if (command.startsWith("admin_admin")) {
@@ -60,13 +67,13 @@ public class AdminAdmin implements IAdminCommandHandler {
 		} else if (command.equals("admin_config_server")) {
 			showConfigPage(activeChar);
 		} else if (command.startsWith("admin_gmliston")) {
-			AdminData.getInstance().showGm(activeChar);
+      adminData.showGm(activeChar);
 			activeChar.sendMessage("Registered into gm list");
-			AdminHtml.showAdminHtml(activeChar, "gm_menu.htm");
+      adminHtml.showAdminHtml(activeChar, "gm_menu.htm");
 		} else if (command.startsWith("admin_gmlistoff")) {
-			AdminData.getInstance().hideGm(activeChar);
+      adminData.hideGm(activeChar);
 			activeChar.sendMessage("Removed from gm list");
-			AdminHtml.showAdminHtml(activeChar, "gm_menu.htm");
+      adminHtml.showAdminHtml(activeChar, "gm_menu.htm");
 		} else if (command.startsWith("admin_silence")) {
 			if (activeChar.isSilenceMode()) // already in message refusal mode
 			{
@@ -76,7 +83,7 @@ public class AdminAdmin implements IAdminCommandHandler {
 				activeChar.setSilenceMode(true);
 				activeChar.sendPacket(SystemMessageId.MESSAGE_REFUSAL_MODE);
 			}
-			AdminHtml.showAdminHtml(activeChar, "gm_menu.htm");
+      adminHtml.showAdminHtml(activeChar, "gm_menu.htm");
 		} else if (command.startsWith("admin_saveolymp")) {
 			Olympiad.getInstance().saveOlympiadStatus();
 			activeChar.sendMessage("olympiad system saved.");

@@ -20,10 +20,6 @@ public class NpcBuffersData implements IXmlReader {
 
   private final Map<Integer, NpcBufferData> _npcBuffers = new HashMap<>();
 
-  protected NpcBuffersData() {
-    load();
-  }
-
   @Override
   public void load() {
     parseDatapackFile("data/ai/npc/buffer/NpcBuffersData.xml");

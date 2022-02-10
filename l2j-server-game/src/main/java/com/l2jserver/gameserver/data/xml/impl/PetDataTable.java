@@ -19,18 +19,14 @@ import java.util.Map;
 public class PetDataTable implements IXmlReader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PetDataTable.class);
-	
-	private final Map<Integer, L2PetData> _pets = new HashMap<>();
-	
-	protected PetDataTable() {
-		load();
-	}
-	
+
+  private final Map<Integer, L2PetData> pets = new HashMap<>();
+
 	@Override
 	public void load() {
-		_pets.clear();
+    pets.clear();
 		parseDatapackDirectory("data/stats/pets");
-		LOG.info("Loaded {} Pets.", _pets.size());
+    LOG.info("Loaded {} Pets.", pets.size());
 	}
 	
 	@Override
@@ -93,13 +89,13 @@ public class PetDataTable implements IXmlReader {
 						}
 					}
 				}
-				_pets.put(npcId, data);
+        pets.put(npcId, data);
 			}
 		}
 	}
 	
 	public L2PetData getPetDataByItemId(int itemId) {
-		for (L2PetData data : _pets.values()) {
+    for (L2PetData data : pets.values()) {
 			if (data.getItemId() == itemId) {
 				return data;
 			}
@@ -127,10 +123,10 @@ public class PetDataTable implements IXmlReader {
 	 * @return the pet data
 	 */
 	public L2PetData getPetData(int petId) {
-		if (!_pets.containsKey(petId)) {
+    if (!pets.containsKey(petId)) {
 			LOG.warn("Missing pet data for NPC Id {}!", petId);
 		}
-		return _pets.get(petId);
+    return pets.get(petId);
 	}
 	
 	/**
@@ -139,7 +135,7 @@ public class PetDataTable implements IXmlReader {
 	 * @return the pet min level
 	 */
 	public int getPetMinLevel(int petId) {
-		return _pets.get(petId).getMinLevel();
+    return pets.get(petId).getMinLevel();
 	}
 	
 	/**
@@ -148,7 +144,7 @@ public class PetDataTable implements IXmlReader {
 	 * @return summoning item for the given NPC ID
 	 */
 	public int getPetItemsByNpc(int npcId) {
-		return _pets.get(npcId).getItemId();
+    return pets.get(npcId).getItemId();
 	}
 	
 	/**

@@ -23,10 +23,7 @@ public class PlayerTemplateData implements IXmlReader {
 	
 	private int _dataCount = 0;
 	
-	protected PlayerTemplateData() {
-		load();
-	}
-	
+
 	@Override
 	public void load() {
 		_playerTemplates.clear();

@@ -25,10 +25,6 @@ public class TarBeetleSpawn implements IXmlReader {
 	private ScheduledFuture<?> spawnTask;
 	private ScheduledFuture<?> shotTask;
 	
-	public TarBeetleSpawn() {
-		load();
-	}
-	
 	@Override
 	public void load() {
 		parseDatapackFile("data/spawnZones/tar_beetle.xml");
@@ -100,8 +96,8 @@ public class TarBeetleSpawn implements IXmlReader {
 		zones.get(npc.getVariables().getInt("zoneIndex", 0)).removeSpawn(npc);
 		npc.deleteMe();
 	}
-	
-	private final class Zone extends L2Territory {
+
+  private static final class Zone extends L2Territory {
 		private List<Zone> _bannedZones;
 		
 		public Zone() {

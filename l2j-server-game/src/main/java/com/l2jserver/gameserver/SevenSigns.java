@@ -1,35 +1,5 @@
 package com.l2jserver.gameserver;
 
-import static com.l2jserver.gameserver.config.Configuration.npc;
-import static com.l2jserver.gameserver.config.Configuration.sevenSigns;
-import static com.l2jserver.gameserver.network.SystemMessageId.COMPETITION_PERIOD_BEGUN;
-import static com.l2jserver.gameserver.network.SystemMessageId.DAWN_OBTAINED_AVARICE;
-import static com.l2jserver.gameserver.network.SystemMessageId.DAWN_OBTAINED_GNOSIS;
-import static com.l2jserver.gameserver.network.SystemMessageId.DAWN_OBTAINED_STRIFE;
-import static com.l2jserver.gameserver.network.SystemMessageId.DAWN_WON;
-import static com.l2jserver.gameserver.network.SystemMessageId.DUSK_OBTAINED_AVARICE;
-import static com.l2jserver.gameserver.network.SystemMessageId.DUSK_OBTAINED_GNOSIS;
-import static com.l2jserver.gameserver.network.SystemMessageId.DUSK_OBTAINED_STRIFE;
-import static com.l2jserver.gameserver.network.SystemMessageId.DUSK_WON;
-import static com.l2jserver.gameserver.network.SystemMessageId.PREPARATIONS_PERIOD_BEGUN;
-import static com.l2jserver.gameserver.network.SystemMessageId.QUEST_EVENT_PERIOD_BEGUN;
-import static com.l2jserver.gameserver.network.SystemMessageId.QUEST_EVENT_PERIOD_ENDED;
-import static com.l2jserver.gameserver.network.SystemMessageId.RESULTS_PERIOD_BEGUN;
-import static com.l2jserver.gameserver.network.SystemMessageId.SEAL_OF_STRIFE_FORBIDS_SUMMONING;
-import static com.l2jserver.gameserver.network.SystemMessageId.SEAL_VALIDATION_PERIOD_BEGUN;
-import static com.l2jserver.gameserver.network.SystemMessageId.SEAL_VALIDATION_PERIOD_ENDED;
-import static com.l2jserver.gameserver.network.SystemMessageId.VALIDATION_PERIOD_BEGUN;
-
-import java.sql.SQLException;
-import java.util.Calendar;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.instancemanager.CastleManager;
 import com.l2jserver.gameserver.model.AutoSpawnHandler;
@@ -44,7 +14,22 @@ import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SSQInfo;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Broadcast;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static com.l2jserver.gameserver.config.Configuration.npc;
+import static com.l2jserver.gameserver.config.Configuration.sevenSigns;
+import static com.l2jserver.gameserver.network.SystemMessageId.*;
+
+@Service
 public class SevenSigns {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SevenSigns.class);

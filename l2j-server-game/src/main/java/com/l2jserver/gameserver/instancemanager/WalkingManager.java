@@ -49,10 +49,6 @@ public final class WalkingManager implements IXmlReader {
 	private final Map<Integer, WalkInfo> _activeRoutes = new HashMap<>(); // each record represents NPC, moving by predefined route from _routes, and moving progress
 	private final Map<Integer, NpcRoutesHolder> _routesToAttach = new HashMap<>(); // each record represents NPC and all available routes for it
 	
-	protected WalkingManager() {
-		load();
-	}
-	
 	public static WalkingManager getInstance() {
 		return SingletonHolder.INSTANCE;
 	}

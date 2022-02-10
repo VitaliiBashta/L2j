@@ -32,14 +32,16 @@ public class ClanHallManager {
 	private static final Map<Integer, ClanHall> _allClanHalls = new HashMap<>();
 	
 	private boolean _loaded = false;
-	
+  private final AuctionManager auctionManager;
+
 	public boolean loaded() {
 		return _loaded;
 	}
 
   private final Context context;
 
-  protected ClanHallManager(Context context) {
+  protected ClanHallManager(AuctionManager auctionManager, Context context) {
+    this.auctionManager = auctionManager;
     this.context = context;
 		load();
 	}
@@ -74,8 +76,8 @@ public class ClanHallManager {
 					continue;
 				}
 				_freeClanHall.put(id, ch);
-				
-				Auction auc = AuctionManager.getInstance().getAuction(id);
+
+        Auction auc = auctionManager.getAuction(id);
 				if ((auc == null) && (lease > 0)) {
 					AuctionManager.getInstance().initNPC(id);
 				}
@@ -211,6 +213,6 @@ public class ClanHallManager {
 	}
 	
 	private static class SingletonHolder {
-    protected static final ClanHallManager INSTANCE = new ClanHallManager(null);
+    protected static final ClanHallManager INSTANCE = new ClanHallManager(null, null);
 	}
 }

@@ -20,10 +20,6 @@ public class FishingMonstersData implements IXmlReader {
 	
 	private final Map<Integer, L2FishingMonster> _fishingMonstersData = new HashMap<>();
 	
-	protected FishingMonstersData() {
-		load();
-	}
-	
 	@Override
 	public void load() {
 		_fishingMonstersData.clear();

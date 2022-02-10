@@ -1,49 +1,29 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.model.items.enchant;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
 
 import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.data.xml.impl.EnchantItemGroupsData;
 import com.l2jserver.gameserver.model.StatsSet;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import com.l2jserver.gameserver.model.items.L2Item;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.model.items.type.EtcItemType;
 import com.l2jserver.gameserver.model.items.type.ItemType;
 import com.l2jserver.gameserver.network.Debug;
 import com.l2jserver.gameserver.util.Util;
 
-/**
- * @author UnAfraid
- */
-public final class EnchantScroll extends AbstractEnchantItem {
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
+
+public class EnchantScroll extends AbstractEnchantItem {
 	private final boolean _isWeapon;
 	private final boolean _isBlessed;
 	private final boolean _isSafe;
 	private final int _scrollGroupId;
 	private Set<Integer> _items;
-	
-	public EnchantScroll(StatsSet set) {
-		super(set);
+
+  public EnchantScroll(StatsSet set, L2Item l2Item) {
+    super(set, l2Item);
 		_scrollGroupId = set.getInt("scrollGroupId", 0);
 		
 		final ItemType type = getItem().getItemType();

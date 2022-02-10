@@ -39,10 +39,11 @@ public class NpcData implements IXmlReader {
 	
 	private final Map<String, Integer> _clans = new ConcurrentHashMap<>();
 	private final SkillLearnData skillLearnData;
-	private MinionData _minionData;
-	protected NpcData(SkillLearnData skillLearnData) {
+	private final MinionData minionData;
+
+	protected NpcData(SkillLearnData skillLearnData, MinionData minionData) {
 		this.skillLearnData = skillLearnData;
-		load();
+		this.minionData = minionData;
 	}
 	
 	public static NpcData getInstance() {
@@ -51,8 +52,6 @@ public class NpcData implements IXmlReader {
 	
 	@Override
 	public synchronized void load() {
-		_minionData = new MinionData();
-
 		parseDatapackDirectory("data/stats/npcs");
 		LOG.info("Loaded {} NPCs.", _npcs.size());
 
@@ -62,7 +61,6 @@ public class NpcData implements IXmlReader {
 			LOG.info("Loaded {} custom NPCs.", (_npcs.size() - npcCount));
 		}
 
-		_minionData = null;
 		loadNpcsSkillLearn();
 	}
 	
@@ -337,11 +335,11 @@ public class NpcData implements IXmlReader {
 							template.set(set);
 						}
 
-						if (_minionData._tempMinions.containsKey(npcId)) {
+						if (minionData._tempMinions.containsKey(npcId)) {
 							if (parameters == null) {
 								parameters = new HashMap<>();
 							}
-							parameters.putIfAbsent("Privates", _minionData._tempMinions.get(npcId));
+							parameters.putIfAbsent("Privates", minionData._tempMinions.get(npcId));
 						}
 
 						if (parameters != null) {
@@ -573,52 +571,9 @@ public class NpcData implements IXmlReader {
 		});
 	}
 	
-	/**
-	 * This class handles minions from Spawn System<br>
-	 * Once Spawn System gets reworked delete this class<br>
-	 * @author Zealar
-	 */
-	private static class MinionData implements IXmlReader {
 
-		private static final Logger LOG = LoggerFactory.getLogger(MinionData.class);
-
-		public final Map<Integer, List<MinionHolder>> _tempMinions = new HashMap<>();
-
-		protected MinionData() {
-			load();
-		}
-
-		@Override
-		public void load() {
-			_tempMinions.clear();
-			parseDatapackFile("data/minionData.xml");
-			LOG.info("Loaded {} minions data.", _tempMinions.size());
-		}
-
-		@Override
-		public void parseDocument(Document doc) {
-			for (Node node = doc.getFirstChild(); node != null; node = node.getNextSibling()) {
-				if ("list".equals(node.getNodeName())) {
-					for (Node listNode = node.getFirstChild(); listNode != null; listNode = listNode.getNextSibling()) {
-						if ("npc".equals(listNode.getNodeName())) {
-							final List<MinionHolder> minions = new ArrayList<>(1);
-							NamedNodeMap attrs = listNode.getAttributes();
-							int id = parseInteger(attrs, "id");
-							for (Node npcNode = listNode.getFirstChild(); npcNode != null; npcNode = npcNode.getNextSibling()) {
-								if ("minion".equals(npcNode.getNodeName())) {
-									attrs = npcNode.getAttributes();
-									minions.add(new MinionHolder(parseInteger(attrs, "id"), parseInteger(attrs, "count"), parseInteger(attrs, "respawnTime"), 0));
-								}
-							}
-							_tempMinions.put(id, minions);
-						}
-					}
-				}
-			}
-		}
-	}
 	
 	private static class SingletonHolder {
-		protected static final NpcData INSTANCE = new NpcData(null);
+		protected static final NpcData INSTANCE = new NpcData(null, null);
 	}
 }

@@ -31,17 +31,13 @@ public class IPConfigData implements IXmlReader {
 
   private final List<String> _hosts = new ArrayList<>(5);
 
-  public IPConfigData() {
-    load();
-  }
-
   @Override
   public void load() {
     GameServer.printSection("Network Configuration");
     final File f = new File(IP_CONFIG_FILE);
     if (f.exists()) {
       LOG.info("Using existing ipconfig.xml.");
-      parseFile(new File(IP_CONFIG_FILE));
+      parseFile(f);
     } else {
       LOG.info("Using automatic network configuration.");
       autoIpConfig();

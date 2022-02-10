@@ -18,20 +18,18 @@ import java.util.Map;
 
 @Service
 public  class HennaData implements IXmlReader {
-	
 	private static final Logger LOG = LoggerFactory.getLogger(HennaData.class);
 	
-	private final Map<Integer, L2Henna> _hennaList = new HashMap<>();
+	private final Map<Integer, L2Henna> hennaList = new HashMap<>();
 	
-	protected HennaData() {
-		load();
+	public static HennaData getInstance() {
+		return SingletonHolder.INSTANCE;
 	}
 	
 	@Override
 	public void load() {
-		_hennaList.clear();
 		parseDatapackFile("data/stats/hennaList.xml");
-		LOG.info("Loaded {} Henna data.", _hennaList.size());
+		LOG.info("Loaded {} Henna data.", hennaList.size());
 	}
 	
 	@Override
@@ -60,7 +58,7 @@ public  class HennaData implements IXmlReader {
 			attr = attrs.item(i);
 			set.set(attr.getNodeName(), attr.getNodeValue());
 		}
-		
+
 		for (Node c = d.getFirstChild(); c != null; c = c.getNextSibling()) {
 			final String name = c.getNodeName();
 			attrs = c.getAttributes();
@@ -88,7 +86,7 @@ public  class HennaData implements IXmlReader {
 		}
 		final L2Henna henna = new L2Henna(set);
 		henna.setWearClassIds(wearClassIds);
-		_hennaList.put(henna.getDyeId(), henna);
+		hennaList.put(henna.getDyeId(), henna);
 	}
 	
 	/**
@@ -97,7 +95,7 @@ public  class HennaData implements IXmlReader {
 	 * @return the dye with that id.
 	 */
 	public L2Henna getHenna(int id) {
-		return _hennaList.get(id);
+		return hennaList.get(id);
 	}
 	
 	/**
@@ -107,16 +105,12 @@ public  class HennaData implements IXmlReader {
 	 */
 	public List<L2Henna> getHennaList(ClassId classId) {
 		final List<L2Henna> list = new ArrayList<>();
-		for (L2Henna henna : _hennaList.values()) {
+		for (L2Henna henna : hennaList.values()) {
 			if (henna.isAllowedClass(classId)) {
 				list.add(henna);
 			}
 		}
 		return list;
-	}
-	
-	public static HennaData getInstance() {
-		return SingletonHolder.INSTANCE;
 	}
 	
 	private static class SingletonHolder {

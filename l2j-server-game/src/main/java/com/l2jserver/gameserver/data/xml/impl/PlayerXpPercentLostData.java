@@ -13,11 +13,10 @@ import static com.l2jserver.gameserver.config.Configuration.character;
 @Service
 public class PlayerXpPercentLostData implements IXmlReader {
 
-	private final double[] _playerXpPercentLost = new double[character().getMaxPlayerLevel() + 1];
-	
+  private final double[] playerXpPercentLost = new double[character().getMaxPlayerLevel() + 1];
+
 	protected PlayerXpPercentLostData() {
-		Arrays.fill(_playerXpPercentLost, 1.);
-		load();
+    Arrays.fill(playerXpPercentLost, 1.);
 	}
 	
 	@Override
@@ -32,7 +31,7 @@ public class PlayerXpPercentLostData implements IXmlReader {
 				for (Node d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
 					if ("xpLost".equalsIgnoreCase(d.getNodeName())) {
 						NamedNodeMap attrs = d.getAttributes();
-						_playerXpPercentLost[parseInteger(attrs, "level")] = parseDouble(attrs, "val");
+            playerXpPercentLost[parseInteger(attrs, "level")] = parseDouble(attrs, "val");
 					}
 				}
 			}
@@ -42,9 +41,9 @@ public class PlayerXpPercentLostData implements IXmlReader {
 	public double getXpPercent(final int level) {
 		if (level > character().getMaxPlayerLevel()) {
 			LOG.warn("Require to high level inside PlayerXpPercentLostData ({})", level);
-			return _playerXpPercentLost[character().getMaxPlayerLevel()];
+      return playerXpPercentLost[character().getMaxPlayerLevel()];
 		}
-		return _playerXpPercentLost[level];
+    return playerXpPercentLost[level];
 	}
 	
 	/**

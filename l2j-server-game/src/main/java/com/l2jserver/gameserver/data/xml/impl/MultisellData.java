@@ -45,10 +45,7 @@ public class MultisellData implements IXmlReader {
 	
 	private final Map<Integer, ListContainer> _entries = new HashMap<>();
 	
-	protected MultisellData() {
-		load();
-	}
-	
+
 	@Override
 	public void load() {
 		_entries.clear();

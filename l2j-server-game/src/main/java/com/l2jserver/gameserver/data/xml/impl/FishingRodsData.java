@@ -17,18 +17,14 @@ import java.util.Map;
 public final class FishingRodsData implements IXmlReader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FishingRodsData.class);
-	
-	private final Map<Integer, L2FishingRod> _fishingRods = new HashMap<>();
-	
-	protected FishingRodsData() {
-		load();
-	}
-	
+
+  private final Map<Integer, L2FishingRod> fishingRods = new HashMap<>();
+
 	@Override
 	public void load() {
-		_fishingRods.clear();
+    fishingRods.clear();
 		parseDatapackFile("data/stats/fishing/fishingRods.xml");
-		LOG.info("Loaded {} fishing rods.", _fishingRods.size());
+    LOG.info("Loaded {} fishing rods.", fishingRods.size());
 	}
 	
 	@Override
@@ -45,7 +41,7 @@ public final class FishingRodsData implements IXmlReader {
 						}
 						
 						final L2FishingRod fishingRod = new L2FishingRod(set);
-						_fishingRods.put(fishingRod.getFishingRodItemId(), fishingRod);
+            fishingRods.put(fishingRod.getFishingRodItemId(), fishingRod);
 					}
 				}
 			}
@@ -58,7 +54,7 @@ public final class FishingRodsData implements IXmlReader {
 	 * @return A fishing Rod by Item Id
 	 */
 	public L2FishingRod getFishingRod(int itemId) {
-		return _fishingRods.get(itemId);
+    return fishingRods.get(itemId);
 	}
 	
 	public static FishingRodsData getInstance() {

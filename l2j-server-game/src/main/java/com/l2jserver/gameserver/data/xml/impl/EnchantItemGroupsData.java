@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public final class EnchantItemGroupsData implements IXmlReader {
+public class EnchantItemGroupsData implements IXmlReader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EnchantItemGroupsData.class);
 	
@@ -27,10 +27,7 @@ public final class EnchantItemGroupsData implements IXmlReader {
 	
 	private final Map<Integer, EnchantScrollGroup> _scrollGroups = new HashMap<>();
 	
-	protected EnchantItemGroupsData() {
-		load();
-	}
-	
+
 	@Override
 	public synchronized void load() {
 		_itemGroups.clear();

@@ -22,10 +22,7 @@ public class UIData implements IXmlReader {
 	
 	private final Map<Integer, List<Integer>> _storedCategories = new HashMap<>();
 	
-	protected UIData() {
-		load();
-	}
-	
+
 	/**
 	 * Add a category to the stored categories.
 	 * @param map the map to store the category

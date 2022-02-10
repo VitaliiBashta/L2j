@@ -23,10 +23,6 @@ public class SiegeScheduleData implements IXmlReader {
 
   private final List<SiegeScheduleDate> _scheduleData = new ArrayList<>();
 
-  protected SiegeScheduleData() {
-    load();
-  }
-
   public static SiegeScheduleData getInstance() {
     return SingletonHolder.INSTANCE;
   }

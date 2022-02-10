@@ -24,10 +24,6 @@ public class OptionData implements IXmlReader {
 	
 	private final Map<Integer, Options> _optionData = new HashMap<>();
 	
-	protected OptionData() {
-		load();
-	}
-	
 	@Override
 	public synchronized void load() {
 		_optionData.clear();

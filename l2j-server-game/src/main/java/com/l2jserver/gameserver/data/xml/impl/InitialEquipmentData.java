@@ -29,10 +29,6 @@ public class InitialEquipmentData implements IXmlReader {
 
   private final Map<ClassId, List<PcItemTemplate>> _initialEquipmentList = new HashMap<>();
 
-  protected InitialEquipmentData() {
-    load();
-  }
-
   public static InitialEquipmentData getInstance() {
     return SingletonHolder.INSTANCE;
   }

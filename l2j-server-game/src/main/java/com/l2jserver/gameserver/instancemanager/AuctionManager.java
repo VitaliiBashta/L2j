@@ -80,7 +80,8 @@ public final class AuctionManager {
         var s = con.createStatement();
         var rs = s.executeQuery("SELECT id FROM auction ORDER BY id")) {
       while (rs.next()) {
-        _auctions.add(new Auction(rs.getInt("id")));
+        int id = rs.getInt("id");
+        _auctions.add(new Auction(context.connectionFactory, id));
       }
       LOG.info("Loaded {} auction(s).", _auctions.size());
     } catch (Exception ex) {
@@ -126,7 +127,7 @@ public final class AuctionManager {
     try (var con = context.connectionFactory.getConnection();
         var s = con.createStatement()) {
       s.executeUpdate("INSERT INTO `auction` VALUES " + ITEM_INIT_DATA[i]);
-      _auctions.add(new Auction(id));
+      _auctions.add(new Auction(context.connectionFactory, id));
       LOG.info("Created auction for clan hall Id {}.", id);
     } catch (Exception ex) {
       LOG.error("There has been an error storing auction!", ex);

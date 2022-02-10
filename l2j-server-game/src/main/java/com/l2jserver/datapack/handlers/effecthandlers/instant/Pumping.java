@@ -18,10 +18,6 @@ import com.l2jserver.gameserver.model.stats.Stats;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
 
-/**
- * Pumping effect implementation.
- * @author UnAfraid
- */
 public final class Pumping extends AbstractEffect {
 	private final double _power;
 	

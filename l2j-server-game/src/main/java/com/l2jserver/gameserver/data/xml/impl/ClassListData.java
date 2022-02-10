@@ -20,10 +20,6 @@ public class ClassListData implements IXmlReader {
 
   private final Map<ClassId, ClassInfo> _classData = new HashMap<>();
 
-  protected ClassListData() {
-    load();
-  }
-
   public static ClassListData getInstance() {
     return SingletonHolder.INSTANCE;
   }

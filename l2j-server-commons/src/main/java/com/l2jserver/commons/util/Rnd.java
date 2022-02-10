@@ -415,14 +415,4 @@ public class Rnd {
     return rnd.nextLong();
   }
 
-  /**
-   * Gets a random element from a given array.
-   *
-   * @param <T> the type of the elements
-   * @param array the array of elements
-   * @return A random element in this array
-   */
-  public static <T> T randomElement(T[] array) {
-    return array[Rnd.get(array.length)];
-  }
 }

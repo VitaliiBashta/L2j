@@ -32,11 +32,6 @@ public class CastleManorManager implements IXmlReader, IStorable {
 	private static final String INSERT_PRODUCT = "INSERT INTO castle_manor_production VALUES (?, ?, ?, ?, ?, ?)";
 	
 	private static final String INSERT_CROP = "INSERT INTO castle_manor_procure VALUES (?, ?, ?, ?, ?, ?, ?)";
-	
-	// Current manor status
-	private ManorMode _mode = ManorMode.APPROVED;
-	// Temporary date
-	private Calendar _nextModeChange = null;
 	// Seeds holder
 	private static final Map<Integer, L2Seed> _seeds = new HashMap<>();
 	// Manor period settings
@@ -44,32 +39,46 @@ public class CastleManorManager implements IXmlReader, IStorable {
 	private final Map<Integer, List<CropProcure>> _procureNext = new HashMap<>();
 	private final Map<Integer, List<SeedProduction>> _production = new HashMap<>();
 	private final Map<Integer, List<SeedProduction>> _productionNext = new HashMap<>();
+	// Current manor status
+	private ManorMode _mode = ManorMode.APPROVED;
+	// Temporary date
+	private Calendar _nextModeChange = null;
 	
-	public CastleManorManager() {
+	public static CastleManorManager getInstance() {
+		return SingletonHolder.INSTANCE;
+	}
+
+	@Override
+	public void load() {
+		parseDatapackFile("data/seeds.xml");
+		LOG.info("Loaded {} seeds.", _seeds.size());
+		init();
+	}
+
+	private void init() {
 		if (general().allowManor()) {
-			load(); // Load seed data (XML)
 			loadDb(); // Load castle manor data (DB)
-			
+
 			// Set mode and start timer
 			final Calendar currentTime = Calendar.getInstance();
 			final int hour = currentTime.get(Calendar.HOUR_OF_DAY);
 			final int min = currentTime.get(Calendar.MINUTE);
 			final int maintenanceMin = general().getManorRefreshMin() + general().getManorMaintenanceMin();
-			
+
 			if (((hour >= general().getManorRefreshTime()) && (min >= maintenanceMin)) || (hour < general().getManorApproveTime()) || ((hour == general().getManorApproveTime()) && (min <= general().getManorApproveMin()))) {
 				_mode = ManorMode.MODIFIABLE;
 			} else if ((hour == general().getManorRefreshTime()) && ((min >= general().getManorRefreshMin()) && (min < maintenanceMin))) {
 				_mode = ManorMode.MAINTENANCE;
 			}
-			
+
 			// Schedule mode change
 			scheduleModeChange();
-			
+
 			// Schedule autosave
 			if (!general().manorSaveAllActions()) {
 				ThreadPoolManager.getInstance().scheduleGeneralAtFixedRate(this::storeMe, general().getManorSavePeriodRate(), general().getManorSavePeriodRate(), TimeUnit.HOURS);
 			}
-			
+
 			// Send debug message
 			if (general().debug()) {
 				LOG.info("Current mode {}.", _mode);
@@ -78,12 +87,6 @@ public class CastleManorManager implements IXmlReader, IStorable {
 			_mode = ManorMode.DISABLED;
 			LOG.info("Manor system is deactivated.");
 		}
-	}
-	
-	@Override
-	public void load() {
-		parseDatapackFile("data/seeds.xml");
-		LOG.info("Loaded {} seeds.", _seeds.size());
 	}
 	
 	@Override
@@ -100,7 +103,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 							if ("crop".equalsIgnoreCase(c.getNodeName())) {
 								set = new StatsSet();
 								set.set("castleId", castleId);
-								
+
 								attrs = c.getAttributes();
 								for (int i = 0; i < attrs.getLength(); i++) {
 									att = attrs.item(i);
@@ -115,17 +118,21 @@ public class CastleManorManager implements IXmlReader, IStorable {
 		}
 	}
 	
+	// -------------------------------------------------------
+	// Manor methods
+	// -------------------------------------------------------
+	
 	private void loadDb() {
 		try (var con = ConnectionFactory.getInstance().getConnection();
 			var stProduction = con.prepareStatement("SELECT * FROM castle_manor_production WHERE castle_id=?");
 			var stProcure = con.prepareStatement("SELECT * FROM castle_manor_procure WHERE castle_id=?")) {
 			for (Castle castle : CastleManager.getInstance().getCastles()) {
 				final int castleId = castle.getResidenceId();
-				
+
 				// Clear params
 				stProduction.clearParameters();
 				stProcure.clearParameters();
-				
+
 				// Seed production
 				final List<SeedProduction> pCurrent = new ArrayList<>();
 				final List<SeedProduction> pNext = new ArrayList<>();
@@ -148,7 +155,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 				}
 				_production.put(castleId, pCurrent);
 				_productionNext.put(castleId, pNext);
-				
+
 				// Seed procure
 				final List<CropProcure> current = new ArrayList<>();
 				final List<CropProcure> next = new ArrayList<>();
@@ -178,10 +185,6 @@ public class CastleManorManager implements IXmlReader, IStorable {
 			LOG.warn("Unable to load manor data!", ex);
 		}
 	}
-	
-	// -------------------------------------------------------
-	// Manor methods
-	// -------------------------------------------------------
 	
 	private void scheduleModeChange() {
 		// Calculate next mode change
@@ -213,14 +216,14 @@ public class CastleManorManager implements IXmlReader, IStorable {
 			case APPROVED: {
 				// Change mode
 				_mode = ManorMode.MAINTENANCE;
-				
+
 				// Update manor period
 				for (Castle castle : CastleManager.getInstance().getCastles()) {
 					final L2Clan owner = castle.getOwner();
 					if (owner == null) {
 						continue;
 					}
-					
+
 					final int castleId = castle.getResidenceId();
 					final ItemContainer cwh = owner.getWarehouse();
 					for (CropProcure crop : _procure.get(castleId)) {
@@ -231,7 +234,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 								if ((count < 1) && (Rnd.nextInt(99) < 90)) {
 									count = 1;
 								}
-								
+
 								if (count > 0) {
 									cwh.addItem("Manor", getSeedByCrop(crop.getId()).getMatureId(), count, null, null);
 								}
@@ -242,14 +245,14 @@ public class CastleManorManager implements IXmlReader, IStorable {
 							}
 						}
 					}
-					
+
 					// Change next period to current and prepare next period data
 					final List<SeedProduction> _nextProduction = _productionNext.get(castleId);
 					final List<CropProcure> _nextProcure = _procureNext.get(castleId);
-					
+
 					_production.put(castleId, _nextProduction);
 					_procure.put(castleId, _nextProcure);
-					
+
 					if (castle.getTreasury() < getManorCost(castleId, false)) {
 						_productionNext.put(castleId, Collections.emptyList());
 						_procureNext.put(castleId, Collections.emptyList());
@@ -259,7 +262,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 							s.setAmount(s.getStartAmount());
 						}
 						_productionNext.put(castleId, production);
-						
+
 						final List<CropProcure> procure = new ArrayList<>(_nextProcure);
 						for (CropProcure cr : procure) {
 							cr.setAmount(cr.getStartAmount());
@@ -267,7 +270,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 						_procureNext.put(castleId, procure);
 					}
 				}
-				
+
 				// Save changes
 				storeMe();
 				break;
@@ -288,13 +291,13 @@ public class CastleManorManager implements IXmlReader, IStorable {
 			}
 			case MODIFIABLE: {
 				_mode = ManorMode.APPROVED;
-				
+
 				for (Castle castle : CastleManager.getInstance().getCastles()) {
 					final L2Clan owner = castle.getOwner();
 					if (owner == null) {
 						continue;
 					}
-					
+
 					int slots = 0;
 					final int castleId = castle.getResidenceId();
 					final ItemContainer cwh = owner.getWarehouse();
@@ -303,12 +306,12 @@ public class CastleManorManager implements IXmlReader, IStorable {
 							slots++;
 						}
 					}
-					
+
 					final long manorCost = getManorCost(castleId, true);
 					if (!cwh.validateCapacity(slots) && (castle.getTreasury() < manorCost)) {
 						_productionNext.get(castleId).clear();
 						_procureNext.get(castleId).clear();
-						
+
 						// Notify clan leader
 						final L2ClanMember clanLeader = owner.getLeader();
 						if ((clanLeader != null) && clanLeader.isOnline()) {
@@ -318,7 +321,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 						castle.addToTreasuryNoTax(-manorCost);
 					}
 				}
-				
+
 				// Store changes
 				if (general().manorSaveAllActions()) {
 					storeMe();
@@ -341,7 +344,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 				// Delete old data
 				dps.setInt(1, castleId);
 				dps.executeUpdate();
-				
+
 				// Insert new data
 				if (!list.isEmpty()) {
 					for (SeedProduction sp : list) {
@@ -370,7 +373,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 				// Delete old data
 				dps.setInt(1, castleId);
 				dps.executeUpdate();
-				
+
 				// Insert new data
 				if (!list.isEmpty()) {
 					for (CropProcure cp : list) {
@@ -450,7 +453,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 	public long getManorCost(int castleId, boolean nextPeriod) {
 		final List<CropProcure> procure = getCropProcure(castleId, nextPeriod);
 		final List<SeedProduction> production = getSeedProduction(castleId, nextPeriod);
-		
+
 		long total = 0;
 		for (SeedProduction seed : production) {
 			final L2Seed s = getSeed(seed.getId());
@@ -471,7 +474,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 			var ip = con.prepareStatement(INSERT_CROP)) {
 			// Delete old seeds
 			ds.executeUpdate();
-			
+
 			// Current production
 			for (Map.Entry<Integer, List<SeedProduction>> entry : _production.entrySet()) {
 				for (SeedProduction sp : entry.getValue()) {
@@ -484,7 +487,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 					is.addBatch();
 				}
 			}
-			
+
 			// Next production
 			for (Map.Entry<Integer, List<SeedProduction>> entry : _productionNext.entrySet()) {
 				for (SeedProduction sp : entry.getValue()) {
@@ -497,13 +500,13 @@ public class CastleManorManager implements IXmlReader, IStorable {
 					is.addBatch();
 				}
 			}
-			
+
 			// Execute production batch
 			is.executeBatch();
-			
+
 			// Delete old procure
 			dp.executeUpdate();
-			
+
 			// Current procure
 			for (Map.Entry<Integer, List<CropProcure>> entry : _procure.entrySet()) {
 				for (CropProcure cp : entry.getValue()) {
@@ -517,7 +520,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 					ip.addBatch();
 				}
 			}
-			
+
 			// Next procure
 			for (Map.Entry<Integer, List<CropProcure>> entry : _procureNext.entrySet()) {
 				for (CropProcure cp : entry.getValue()) {
@@ -531,10 +534,10 @@ public class CastleManorManager implements IXmlReader, IStorable {
 					ip.addBatch();
 				}
 			}
-			
+
 			// Execute procure batch
 			ip.executeBatch();
-			
+
 			return true;
 		} catch (Exception ex) {
 			LOG.warn("Unable to store manor data!", ex);
@@ -546,12 +549,12 @@ public class CastleManorManager implements IXmlReader, IStorable {
 		if (!general().allowManor()) {
 			return;
 		}
-		
+
 		_procure.get(castleId).clear();
 		_procureNext.get(castleId).clear();
 		_production.get(castleId).clear();
 		_productionNext.get(castleId).clear();
-		
+
 		if (general().allowManor()) {
 			try (var con = ConnectionFactory.getInstance().getConnection();
 				var ds = con.prepareStatement("DELETE FROM castle_manor_production WHERE castle_id = ?");
@@ -559,7 +562,7 @@ public class CastleManorManager implements IXmlReader, IStorable {
 				// Delete seeds
 				ds.setInt(1, castleId);
 				ds.executeUpdate();
-				
+
 				// Delete procure
 				dc.setInt(1, castleId);
 				dc.executeUpdate();
@@ -585,13 +588,13 @@ public class CastleManorManager implements IXmlReader, IStorable {
 		return _mode.toString();
 	}
 	
-	public String getNextModeChange() {
-		return new SimpleDateFormat("dd/MM HH:mm:ss").format(_nextModeChange.getTime());
-	}
-	
 	// -------------------------------------------------------
 	// Seed methods
 	// -------------------------------------------------------
+	
+	public String getNextModeChange() {
+		return new SimpleDateFormat("dd/MM HH:mm:ss").format(_nextModeChange.getTime());
+	}
 	
 	public List<L2Seed> getCrops() {
 		final List<L2Seed> seeds = new ArrayList<>();
@@ -638,10 +641,6 @@ public class CastleManorManager implements IXmlReader, IStorable {
 			}
 		}
 		return null;
-	}
-	
-	public static CastleManorManager getInstance() {
-		return SingletonHolder.INSTANCE;
 	}
 	
 	private static class SingletonHolder {

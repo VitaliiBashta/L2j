@@ -20,8 +20,8 @@ public class ArmorSetsData implements IXmlReader {
 	
 	private final Map<Integer, L2ArmorSet> _armorSets = new HashMap<>();
 	
-	protected ArmorSetsData() {
-		load();
+	public static ArmorSetsData getInstance() {
+		return SingletonHolder.INSTANCE;
 	}
 	
 	@Override
@@ -81,10 +81,6 @@ public class ArmorSetsData implements IXmlReader {
 	 */
 	public L2ArmorSet getSet(int chestId) {
 		return _armorSets.get(chestId);
-	}
-	
-	public static ArmorSetsData getInstance() {
-		return SingletonHolder.INSTANCE;
 	}
 	
 	private static class SingletonHolder {

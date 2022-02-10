@@ -100,13 +100,6 @@ public class SkillTreesData implements IXmlReader {
 	/** Parent class IDs are read from XML and stored in this map, to allow easy customization. */
 	private final Map<ClassId, ClassId> _parentClassMap = new LinkedHashMap<>();
 	
-	/**
-	 * Instantiates a new skill trees data.
-	 */
-	protected SkillTreesData() {
-		load();
-	}
-	
 	@Override
 	public void load() {
 		_loading = true;

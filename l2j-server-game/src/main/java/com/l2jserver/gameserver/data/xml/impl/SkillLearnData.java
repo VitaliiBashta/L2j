@@ -18,10 +18,6 @@ public class SkillLearnData implements IXmlReader {
   private static final Logger LOG = LoggerFactory.getLogger(SkillLearnData.class);
   private final Map<Integer, List<ClassId>> skillLearn = new HashMap<>();
 
-  protected SkillLearnData() {
-    load();
-  }
-
   @Override
   public synchronized void load() {
     skillLearn.clear();
@@ -50,10 +46,6 @@ public class SkillLearnData implements IXmlReader {
     }
   }
 
-  /**
-   * @param npcId
-   * @return {@link List} of {@link ClassId}'s that this npcId can teach.
-   */
   public List<ClassId> getSkillLearnData(int npcId) {
     return skillLearn.get(npcId);
   }

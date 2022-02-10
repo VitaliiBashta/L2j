@@ -34,10 +34,6 @@ public class EnchantSkillGroupsData implements IXmlReader {
 	
 	private final Map<Integer, L2EnchantSkillLearn> _enchantSkillTrees = new HashMap<>();
 	
-	protected EnchantSkillGroupsData() {
-		load();
-	}
-	
 	@Override
 	public void load() {
 		_enchantSkillGroups.clear();

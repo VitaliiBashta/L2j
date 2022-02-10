@@ -1,37 +1,6 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.model.actor.instance;
 
-import static com.l2jserver.gameserver.config.Configuration.character;
-import static com.l2jserver.gameserver.config.Configuration.general;
-import static java.util.concurrent.TimeUnit.DAYS;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.enums.InstanceType;
 import com.l2jserver.gameserver.instancemanager.AuctionManager;
 import com.l2jserver.gameserver.instancemanager.ClanHallManager;
@@ -43,8 +12,21 @@ import com.l2jserver.gameserver.model.entity.Auction;
 import com.l2jserver.gameserver.model.entity.Auction.Bidder;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public final class L2AuctioneerInstance extends L2Npc {
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static com.l2jserver.gameserver.config.Configuration.character;
+import static com.l2jserver.gameserver.config.Configuration.general;
+import static java.util.concurrent.TimeUnit.DAYS;
+
+public class L2AuctioneerInstance extends L2Npc {
 	private static final Logger LOG = LoggerFactory.getLogger(L2AuctioneerInstance.class);
 	
 	private static final int COND_ALL_FALSE = 0;
@@ -52,9 +34,11 @@ public final class L2AuctioneerInstance extends L2Npc {
 	private static final int COND_REGULAR = 3;
 	
 	private final Map<Integer, Auction> _pendingAuctions = new ConcurrentHashMap<>();
-	
-	public L2AuctioneerInstance(L2NpcTemplate template) {
+
+	private final ConnectionFactory connectionFactory;
+	public L2AuctioneerInstance(ConnectionFactory connectionFactory, L2NpcTemplate template) {
 		super(template);
+		this.connectionFactory = connectionFactory;
 		setInstanceType(InstanceType.L2AuctioneerInstance);
 	}
 	
@@ -95,7 +79,7 @@ public final class L2AuctioneerInstance extends L2Npc {
 							bid = Math.min(Long.parseLong(st.nextToken()), character().getMaxAdena());
 						}
 						
-						Auction a = new Auction(player.getClan().getHideoutId(), player.getClan(), DAYS.toMillis(days), bid, ClanHallManager.getInstance().getClanHallByOwner(player.getClan()).getName());
+						Auction a = new Auction(connectionFactory, player.getClan().getHideoutId(), player.getClan(), DAYS.toMillis(days), bid, ClanHallManager.getInstance().getClanHallByOwner(player.getClan()).getName());
 						if (_pendingAuctions.get(a.getId()) != null) {
 							_pendingAuctions.remove(a.getId());
 						}

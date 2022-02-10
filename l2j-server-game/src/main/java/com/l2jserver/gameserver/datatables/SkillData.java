@@ -1,8 +1,8 @@
 package com.l2jserver.gameserver.datatables;
 
-import com.l2jserver.gameserver.data.xml.impl.SkillTreesData;
 import com.l2jserver.gameserver.engines.DocumentEngine;
 import com.l2jserver.gameserver.model.skills.Skill;
+import com.l2jserver.gameserver.util.IXmlReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.Set;
 import static com.l2jserver.gameserver.config.Configuration.general;
 
 @Service
-public final class SkillData {
+public final class SkillData implements IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(SkillData.class);
 
@@ -26,7 +26,6 @@ public final class SkillData {
 
   protected SkillData(DocumentEngine documentEngine) {
     this.documentEngine = documentEngine;
-    load();
   }
 
   /**
@@ -54,13 +53,7 @@ public final class SkillData {
     return SingletonHolder._instance;
   }
 
-  public void reload() {
-    load();
-    // Reload Skill Tree as well.
-    SkillTreesData.getInstance().load();
-  }
-
-  private void load() {
+  public void load() {
     final Map<Integer, Skill> _temp = new HashMap<>();
     documentEngine.loadAllSkills(_temp);
 

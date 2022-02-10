@@ -18,15 +18,6 @@
  */
 package com.l2jserver.gameserver.model.entity;
 
-import static com.l2jserver.gameserver.config.Configuration.character;
-import static com.l2jserver.gameserver.model.itemcontainer.Inventory.ADENA_ID;
-
-import java.util.Calendar;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.data.sql.impl.ClanTable;
@@ -39,6 +30,15 @@ import com.l2jserver.gameserver.model.L2World;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.itemcontainer.ItemContainer;
 import com.l2jserver.gameserver.network.SystemMessageId;
+
+import java.util.Calendar;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.l2jserver.gameserver.config.Configuration.character;
+import static com.l2jserver.gameserver.model.itemcontainer.Inventory.ADENA_ID;
 
 public class Auction {
 	
@@ -132,14 +132,24 @@ public class Auction {
 			}
 		}
 	}
-	
-	public Auction(int auctionId) {
+
+  private final ConnectionFactory connectionFactory;
+
+  public Auction(ConnectionFactory connectionFactory, int auctionId) {
 		_id = auctionId;
+    this.connectionFactory = connectionFactory;
 		load();
 		startAutoTask();
 	}
-	
-	public Auction(int itemId, L2Clan Clan, long delay, long bid, String name) {
+
+  public Auction(
+      ConnectionFactory connectionFactory,
+      int itemId,
+      L2Clan Clan,
+      long delay,
+      long bid,
+      String name) {
+    this.connectionFactory = connectionFactory;
 		_id = itemId;
 		_endDate = System.currentTimeMillis() + delay;
 		_itemId = itemId;
@@ -152,8 +162,8 @@ public class Auction {
 	}
 	
 	private void load() {
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("Select * from auction where id = ?")) {
+    try (var con = connectionFactory.getConnection();
+        var ps = con.prepareStatement("Select * from auction where id = ?")) {
 			ps.setInt(1, getId());
 			try (var rs = ps.executeQuery()) {
 				while (rs.next()) {
@@ -179,9 +189,11 @@ public class Auction {
 		_highestBidderId = 0;
 		_highestBidderName = "";
 		_highestBidderMaxBid = 0;
-		
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("SELECT bidderId, bidderName, maxBid, clan_name, time_bid FROM auction_bid WHERE auctionId = ? ORDER BY maxBid DESC")) {
+
+    try (var con = connectionFactory.getConnection();
+        var ps =
+            con.prepareStatement(
+                "SELECT bidderId, bidderName, maxBid, clan_name, time_bid FROM auction_bid WHERE auctionId = ? ORDER BY maxBid DESC")) {
 			ps.setInt(1, getId());
 			try (var rs = ps.executeQuery()) {
 				while (rs.next()) {
@@ -216,8 +228,8 @@ public class Auction {
 	}
 	
 	private void saveAuctionDate() {
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("Update auction set endDate = ? where id = ?")) {
+    try (var con = connectionFactory.getConnection();
+        var ps = con.prepareStatement("Update auction set endDate = ? where id = ?")) {
 			ps.setLong(1, _endDate);
 			ps.setInt(2, _id);
 			ps.execute();
@@ -299,7 +311,7 @@ public class Auction {
 	 * @param bid
 	 */
 	private void updateInDB(L2PcInstance bidder, long bid) {
-		try (var con = ConnectionFactory.getInstance().getConnection()) {
+    try (var con = connectionFactory.getConnection()) {
 			if (_bidders.get(bidder.getClanId()) != null) {
 				try (var ps = con.prepareStatement("UPDATE auction_bid SET bidderId=?, bidderName=?, maxBid=?, time_bid=? WHERE auctionId=? AND bidderId=?")) {
 					ps.setInt(1, bidder.getClanId());

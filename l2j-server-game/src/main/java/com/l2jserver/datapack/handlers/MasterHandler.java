@@ -18,7 +18,6 @@ import com.l2jserver.datapack.handlers.voicedcommandhandlers.*;
 import com.l2jserver.gameserver.handler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -223,7 +222,6 @@ public class MasterHandler {
           DebugHandler.class,
           HelpHandler.class,
           PlayerHandler.class,
-          ReloadHandler.class,
           ServerHandler.class,
           StatusHandler.class,
           ThreadHandler.class);

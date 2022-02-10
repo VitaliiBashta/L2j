@@ -18,8 +18,6 @@
  */
 package com.l2jserver.gameserver.network.clientpackets;
 
-import com.l2jserver.gameserver.datatables.AugmentationData;
-import com.l2jserver.gameserver.model.L2Augmentation;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
@@ -104,15 +102,17 @@ public final class RequestRefine extends AbstractRefinePacket {
 		if (!activeChar.destroyItem("RequestRefine", gemStoneItem, _gemStoneCount, null, false)) {
 			return;
 		}
-		
-		final L2Augmentation aug = AugmentationData.getInstance().generateRandomAugmentation(lifeStoneLevel, lifeStoneGrade, targetItem.getItem().getBodyPart(), refinerItem.getId(), targetItem);
-		targetItem.setAugmentation(aug);
-		
-		final int stat12 = 0x0000FFFF & aug.getAugmentationId();
-		final int stat34 = aug.getAugmentationId() >> 16;
-		activeChar.sendPacket(new ExVariationResult(stat12, stat34, 1));
-		
-		InventoryUpdate iu = new InventoryUpdate();
+
+    //		final L2Augmentation aug =
+    // AugmentationData.getInstance().generateRandomAugmentation(lifeStoneLevel, lifeStoneGrade,
+    // targetItem.getItem().getBodyPart(), refinerItem.getId(), targetItem);
+    //		targetItem.setAugmentation(aug);
+
+    //		final int stat12 = 0x0000FFFF & aug.getAugmentationId();
+    //		final int stat34 = aug.getAugmentationId() >> 16;
+    //		activeChar.sendPacket(new ExVariationResult(stat12, stat34, 1));
+
+    InventoryUpdate iu = new InventoryUpdate();
 		iu.addModifiedItem(targetItem);
 		activeChar.sendPacket(iu);
 		

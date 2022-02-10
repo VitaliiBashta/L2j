@@ -1,5 +1,6 @@
 package com.l2jserver.gameserver.data.xml.impl;
 
+import com.l2jserver.gameserver.datatables.ItemTable;
 import com.l2jserver.gameserver.model.StatsSet;
 import com.l2jserver.gameserver.model.items.enchant.EnchantScroll;
 import com.l2jserver.gameserver.model.items.enchant.EnchantSupportItem;
@@ -23,9 +24,10 @@ public class EnchantItemData implements IXmlReader {
 	private final Map<Integer, EnchantScroll> _scrolls = new HashMap<>();
 	
 	private final Map<Integer, EnchantSupportItem> _supports = new HashMap<>();
-	
-	public EnchantItemData() {
-		load();
+  private final ItemTable itemTable;
+
+  public EnchantItemData(ItemTable itemTable) {
+    this.itemTable = itemTable;
 	}
 	
 	@Override
@@ -54,7 +56,8 @@ public class EnchantItemData implements IXmlReader {
 						}
 						
 						try {
-							final EnchantScroll item = new EnchantScroll(set);
+              final EnchantScroll item =
+                  new EnchantScroll(set, itemTable.getTemplate(set.getInt("id")));
 							for (Node cd = d.getFirstChild(); cd != null; cd = cd.getNextSibling()) {
 								if ("item".equalsIgnoreCase(cd.getNodeName())) {
 									item.addItem(parseInteger(cd.getAttributes(), "id"));
@@ -75,7 +78,7 @@ public class EnchantItemData implements IXmlReader {
 						}
 						
 						try {
-							final EnchantSupportItem item = new EnchantSupportItem(set);
+              var item = new EnchantSupportItem(set, itemTable.getTemplate(set.getInt("id")));
 							_supports.put(item.getId(), item);
 						} catch (NullPointerException e) {
 							LOG.warn("Nonexistent enchant support item: {} defined in enchant data!", set.getString("id"));
@@ -115,6 +118,6 @@ public class EnchantItemData implements IXmlReader {
 	}
 	
 	private static class SingletonHolder {
-		protected static final EnchantItemData _instance = new EnchantItemData();
+    protected static final EnchantItemData _instance = new EnchantItemData(null);
 	}
 }

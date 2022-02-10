@@ -22,18 +22,14 @@ import java.util.Map;
 public class RecipeData implements IXmlReader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RecipeData.class);
-	
-	private final Map<Integer, L2RecipeList> _recipes = new HashMap<>();
-	
-	protected RecipeData() {
-		load();
-	}
-	
+
+  private final Map<Integer, L2RecipeList> recipes = new HashMap<>();
+
 	@Override
 	public void load() {
-		_recipes.clear();
+    recipes.clear();
 		parseDatapackFile("data/recipes.xml");
-		LOG.info("Loaded {} recipes.", _recipes.size());
+    LOG.info("Loaded {} recipes.", recipes.size());
 	}
 	
 	@Override
@@ -141,8 +137,8 @@ public class RecipeData implements IXmlReader {
 						for (L2RecipeStatInstance recipeAltStatChange : recipeAltStatChangeList) {
 							recipeList.addAltStatChange(recipeAltStatChange);
 						}
-						
-						_recipes.put(id, recipeList);
+
+            recipes.put(id, recipeList);
 					}
 				}
 			}
@@ -155,7 +151,7 @@ public class RecipeData implements IXmlReader {
 	 * @return the recipe list
 	 */
 	public L2RecipeList getRecipeList(int listId) {
-		return _recipes.get(listId);
+    return recipes.get(listId);
 	}
 	
 	/**
@@ -164,7 +160,7 @@ public class RecipeData implements IXmlReader {
 	 * @return the recipe by item id
 	 */
 	public L2RecipeList getRecipeByItemId(int itemId) {
-		for (L2RecipeList find : _recipes.values()) {
+    for (L2RecipeList find : recipes.values()) {
 			if (find.getRecipeId() == itemId) {
 				return find;
 			}
@@ -177,9 +173,9 @@ public class RecipeData implements IXmlReader {
 	 * @return the all item ids
 	 */
 	public int[] getAllItemIds() {
-		int[] idList = new int[_recipes.size()];
+    int[] idList = new int[recipes.size()];
 		int i = 0;
-		for (L2RecipeList rec : _recipes.values()) {
+    for (L2RecipeList rec : recipes.values()) {
 			idList[i++] = rec.getRecipeId();
 		}
 		return idList;
@@ -192,7 +188,7 @@ public class RecipeData implements IXmlReader {
 	 * @return the valid recipe list
 	 */
 	public L2RecipeList getValidRecipeList(L2PcInstance player, int id) {
-		L2RecipeList recipeList = _recipes.get(id);
+    L2RecipeList recipeList = recipes.get(id);
 		if ((recipeList == null) || (recipeList.getRecipes().length == 0)) {
 			player.sendMessage(getClass().getSimpleName() + ": No recipe for: " + id);
 			player.isInCraftMode(false);

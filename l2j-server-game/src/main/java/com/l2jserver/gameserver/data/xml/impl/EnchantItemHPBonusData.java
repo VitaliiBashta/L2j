@@ -28,7 +28,6 @@ public class EnchantItemHPBonusData implements IXmlReader {
 
   protected EnchantItemHPBonusData(ItemTable itemTable) {
     this.itemTable = itemTable;
-    load();
   }
 
   @Override

@@ -26,8 +26,8 @@ public class FishData implements IXmlReader {
 	
 	private final Map<Integer, L2Fish> _fishHard = new HashMap<>();
 	
-	protected FishData() {
-		load();
+	public static FishData getInstance() {
+		return SingletonHolder.INSTANCE;
 	}
 	
 	@Override
@@ -46,13 +46,13 @@ public class FishData implements IXmlReader {
 				for (Node d = n.getFirstChild(); d != null; d = d.getNextSibling()) {
 					if ("fish".equalsIgnoreCase(d.getNodeName())) {
 						final NamedNodeMap attrs = d.getAttributes();
-						
+
 						final StatsSet set = new StatsSet();
 						for (int i = 0; i < attrs.getLength(); i++) {
 							final Node att = attrs.item(i);
 							set.set(att.getNodeName(), att.getNodeValue());
 						}
-						
+
 						final L2Fish fish = new L2Fish(set);
 						switch (fish.getFishGrade()) {
 							case 0 -> _fishEasy.put(fish.getFishId(), fish);
@@ -84,22 +84,18 @@ public class FishData implements IXmlReader {
 				return result;
 			}
 		}
-		
+
 		for (L2Fish f : fish.values()) {
 			if ((f.getFishLevel() != level) || (f.getFishGroup() != group)) {
 				continue;
 			}
 			result.add(f);
 		}
-		
+
 		if (result.isEmpty()) {
 			LOG.warn("Cannot find any fish for level: {} group: {} and grade: {}!", level, group, grade);
 		}
 		return result;
-	}
-	
-	public static FishData getInstance() {
-		return SingletonHolder.INSTANCE;
 	}
 	
 	private static class SingletonHolder {
