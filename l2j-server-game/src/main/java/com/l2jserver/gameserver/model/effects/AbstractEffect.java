@@ -21,10 +21,6 @@ import static com.l2jserver.gameserver.config.Configuration.character;
  * Instant effects should not override {@link #canStart(BuffInfo)}, all checks should be done {@link
  * #onStart(BuffInfo)}.<br>
  * Do not call super class methods {@link #onStart(BuffInfo)} nor {@link #onExit(BuffInfo)}.
- *
- * @since <a href="http://trac.l2jserver.com/changeset/6249">Changeset 6249</a> the "effect steal
- *     constructor" is deprecated.
- * @author Zoey76
  */
 public abstract class AbstractEffect {
   protected static final Logger _log = Logger.getLogger(AbstractEffect.class.getName());
@@ -33,45 +29,24 @@ public abstract class AbstractEffect {
   /** Attach condition. */
   private final Condition attachCond;
   /** Effect name. */
-  private final String _name;
-  // Apply condition
-  // private final Condition _applyCond; // TODO: Use or cleanup.
-  private List<FuncTemplate> funcTemplates;
-  /** Ticks. */
-  private int _ticks;
+  private final String name;
 
-  /**
-   * Abstract effect constructor.
-   *
-   * @param attachCond the attach condition
-   * @param applyCond the apply condition
-   * @param set the attributes
-   * @param params the parameters
-   */
+  private List<FuncTemplate> funcTemplates;
+  private int ticks;
+
+  /** Abstract effect constructor. */
   protected AbstractEffect(
       Condition attachCond, Condition applyCond, StatsSet set, StatsSet params) {
     this.attachCond = attachCond;
-    // _applyCond = applyCond;
-    _name = set.getString("name");
+    name = set.getString("name");
   }
 
-  /**
-   * Tests the attach condition.
-   *
-   * @param caster the caster
-   * @param target the target
-   * @param skill the skill
-   * @return {@code true} if there isn't a condition to test or it's passed, {@code false} otherwise
-   */
+  /** Tests the attach condition. */
   public boolean testConditions(L2Character caster, L2Character target, Skill skill) {
     return (attachCond == null) || attachCond.test(caster, target, skill);
   }
 
-  /**
-   * Attaches a function template.
-   *
-   * @param f the function
-   */
+  /** Attaches a function template. */
   public void attach(FuncTemplate f) {
     if (funcTemplates == null) {
       funcTemplates = new ArrayList<>(1);
@@ -81,17 +56,17 @@ public abstract class AbstractEffect {
 
   /** Gets the effect name. */
   public String getName() {
-    return _name;
+    return name;
   }
 
   /** Gets the effect ticks */
   public int getTicks() {
-    return _ticks;
+    return ticks;
   }
 
   /** Sets the effect ticks */
   protected void setTicks(int ticks) {
-    _ticks = ticks;
+    this.ticks = ticks;
   }
 
   public double getTicksMultiplier() {
@@ -193,7 +168,7 @@ public abstract class AbstractEffect {
 
   @Override
   public String toString() {
-    return "Effect " + _name;
+    return "Effect " + name;
   }
 
   public void decreaseForce() {}

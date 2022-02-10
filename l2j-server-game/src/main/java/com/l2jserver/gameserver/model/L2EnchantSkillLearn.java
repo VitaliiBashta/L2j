@@ -11,21 +11,24 @@ public class L2EnchantSkillLearn {
   private final int baseLvl;
   private final TreeMap<Integer, Integer> enchantRoutes = new TreeMap<>();
 
-  public L2EnchantSkillLearn(int id, int baseLvl) {
+  private final EnchantSkillGroupsData enchantSkillGroupsData;
+
+  public L2EnchantSkillLearn(EnchantSkillGroupsData enchantSkillGroupsData, int id, int baseLvl) {
+    this.enchantSkillGroupsData = enchantSkillGroupsData;
     this.id = id;
     this.baseLvl = baseLvl;
   }
 
-  public static int getEnchantRoute(int level) {
-    return (int) Math.floor(level / 100.0);
-  }
-
-  public static int getEnchantIndex(int level) {
+  private int getEnchantIndex(int level) {
     return (level % 100) - 1;
   }
 
-  public static int getEnchantType(int level) {
+  private int getEnchantType(int level) {
     return ((level - 1) / 100) - 1;
+  }
+
+  public int getEnchantRoute(int level) {
+    return (int) Math.floor(level / 100.0);
   }
 
   public void addNewEnchantRoute(int route, int group) {
@@ -41,8 +44,7 @@ public class L2EnchantSkillLearn {
   }
 
   public L2EnchantSkillGroup getFirstRouteGroup() {
-    return EnchantSkillGroupsData.getInstance()
-        .getEnchantSkillGroupById(enchantRoutes.firstEntry().getValue());
+    return enchantSkillGroupsData.getEnchantSkillGroupById(enchantRoutes.firstEntry().getValue());
   }
 
   public Set<Integer> getAllRoutes() {
@@ -64,7 +66,7 @@ public class L2EnchantSkillLearn {
     int index = getEnchantIndex(level);
 
     return (index + 1)
-        >= EnchantSkillGroupsData.getInstance()
+        >= enchantSkillGroupsData
             .getEnchantSkillGroupById(enchantRoutes.get(enchantType))
             .getEnchantGroupDetails()
             .size();
@@ -77,8 +79,7 @@ public class L2EnchantSkillLearn {
     }
     int index = getEnchantIndex(level);
     L2EnchantSkillGroup group =
-        EnchantSkillGroupsData.getInstance()
-            .getEnchantSkillGroupById(enchantRoutes.get(enchantType));
+        enchantSkillGroupsData.getEnchantSkillGroupById(enchantRoutes.get(enchantType));
 
     if (index < 0) {
       return group.getEnchantGroupDetails().get(0);
@@ -86,7 +87,7 @@ public class L2EnchantSkillLearn {
       return group
           .getEnchantGroupDetails()
           .get(
-              EnchantSkillGroupsData.getInstance()
+              enchantSkillGroupsData
                       .getEnchantSkillGroupById(enchantRoutes.get(enchantType))
                       .getEnchantGroupDetails()
                       .size()

@@ -115,7 +115,7 @@ public class ItemTable extends IXmlReader {
 
   protected ItemTable(EffectHandler effectHandler) {
     this.effectHandler = effectHandler;
-    parseDatapackDirectory("data/stats/items", true);
+
 
   }
 
@@ -150,6 +150,7 @@ public class ItemTable extends IXmlReader {
     _armors.clear();
     _etcItems.clear();
     _weapons.clear();
+    parseDatapackDirectory("data/stats/items", true);
     for (L2Item item : loadItems()) {
       if (highest < item.getId()) {
         highest = item.getId();

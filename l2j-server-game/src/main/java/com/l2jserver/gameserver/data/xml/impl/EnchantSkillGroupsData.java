@@ -80,7 +80,7 @@ public class EnchantSkillGroupsData extends IXmlReader {
   public int addNewRouteForSkill(int skillId, int maxLvL, int route, int group) {
     L2EnchantSkillLearn enchantableSkill = enchantSkillTrees.get(skillId);
     if (enchantableSkill == null) {
-      enchantableSkill = new L2EnchantSkillLearn(skillId, maxLvL);
+      enchantableSkill = new L2EnchantSkillLearn(this, skillId, maxLvL);
       enchantSkillTrees.put(skillId, enchantableSkill);
     }
     if (enchantSkillGroups.containsKey(group)) {

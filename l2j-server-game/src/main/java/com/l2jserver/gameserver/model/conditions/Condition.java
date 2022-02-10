@@ -71,7 +71,7 @@ public abstract class Condition implements ConditionListener {
       L2Character effector, L2Character effected, Skill skill, L2Item item);
 
   @Override
-  public void notifyChanged() {
+  public final void notifyChanged() {
     if (listener != null) {
       listener.notifyChanged();
     }

@@ -16,7 +16,6 @@ import com.l2jserver.gameserver.data.json.ExperienceData;
 import com.l2jserver.gameserver.data.sql.impl.*;
 import com.l2jserver.gameserver.data.xml.impl.*;
 import com.l2jserver.gameserver.datatables.*;
-import com.l2jserver.gameserver.handler.EffectHandler;
 import com.l2jserver.gameserver.idfactory.IdFactory;
 import com.l2jserver.gameserver.instancemanager.*;
 import com.l2jserver.gameserver.model.AutoSpawnHandler;
@@ -90,7 +89,6 @@ public class GameServer {
       throw new IllegalStateException("Could not initialize the Id factory!");
     }
 
-    ThreadPoolManager.getInstance();
     EventDispatcher.getInstance();
     ScriptEngineManager.getInstance();
 
@@ -106,8 +104,6 @@ public class GameServer {
     CategoryData.getInstance();
     SecondaryAuthData.getInstance();
 
-    printSection("Effects");
-    EffectHandler.getInstance().executeScript();
 
     printSection("Enchant Skill Groups");
     EnchantSkillGroupsData.getInstance();
