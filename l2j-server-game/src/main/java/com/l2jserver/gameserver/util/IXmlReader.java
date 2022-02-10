@@ -134,9 +134,6 @@ public abstract class IXmlReader {
    * @param doc the current document to parse
    */
   protected abstract void parseDocument(Document doc);
-  //  {
-  //    LOG.error("{}: Parser not implemented!", getClass().getSimpleName());
-  //  }
 
   /**
    * Parses a boolean value.

@@ -38,9 +38,11 @@ public class SpawnTable extends IXmlReader {
 	
 	private int _xmlSpawnCount = 0;
 	private final NpcData npcData;
+	private final ConnectionFactory connectionFactory;
 
-	public SpawnTable(NpcData npcData) {
+	public SpawnTable(NpcData npcData, ConnectionFactory connectionFactory) {
 		this.npcData = npcData;
+		this.connectionFactory = connectionFactory;
 	}
 
 	@Override
@@ -194,7 +196,7 @@ public class SpawnTable extends IXmlReader {
 	 */
 	private int fillSpawnTable(boolean isCustom) {
 		int npcSpawnCount = 0;
-		try (var con = ConnectionFactory.getInstance().getConnection();
+		try (var con = connectionFactory.getConnection();
 			var s = con.createStatement();
 			var rs = s.executeQuery(isCustom ? SELECT_CUSTOM_SPAWNS : SELECT_SPAWNS)) {
 			while (rs.next()) {
@@ -421,6 +423,6 @@ public class SpawnTable extends IXmlReader {
 	}
 	
 	private static class SingletonHolder {
-		protected static final SpawnTable INSTANCE = new SpawnTable(null);
+		protected static final SpawnTable INSTANCE = new SpawnTable(null, null);
 	}
 }

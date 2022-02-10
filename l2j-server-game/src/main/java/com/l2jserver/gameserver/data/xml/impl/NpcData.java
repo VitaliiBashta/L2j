@@ -307,7 +307,7 @@ public class NpcData extends  IXmlReader {
 
 											List<IDropItem> dropList = new ArrayList<>();
 											parseDropList(f, dropListsNode, dropListScope, dropList);
-											dropLists.put(dropListScope, Collections.unmodifiableList(dropList));
+											dropLists.put(dropListScope, List.copyOf(dropList));
 										}
 									}
 								}

@@ -48,10 +48,6 @@ public class SkillData extends IXmlReader {
 
   /**
    * Centralized method for easier change of the hashing sys
-   *
-   * @param skillId The Skill Id
-   * @param skillLevel The Skill Level
-   * @return The Skill hash number
    */
   public static int getSkillHashCode(int skillId, int skillLevel) {
     return (skillId * 1021) + skillLevel;
@@ -63,11 +59,6 @@ public class SkillData extends IXmlReader {
 
   public void load() {
     parseDatapackDirectory("data/stats/skills", true);
-    final Map<Integer, Skill> _temp = new HashMap<>();
-//    loadAllSkills(_temp);
-
-    skills.clear();
-    skills.putAll(_temp);
 
     skillMaxLevel.clear();
     enchantable.clear();
@@ -84,7 +75,9 @@ public class SkillData extends IXmlReader {
       if (skillLvl > maxLvl) {
         skillMaxLevel.put(skillId, skillLvl);
       }
+
     }
+    LOG.info("Loaded skills: {}, enchantables: {}", skills.size(),enchantable.size() );
   }
 
   @Override
@@ -105,6 +98,7 @@ public class SkillData extends IXmlReader {
           skillsInFile.addAll(currentSkill.skills);
         }
       }
+      skillsInFile.forEach(skill -> skills.put(getSkillHashCode(skill.getId(), skill.getLevel()), skill));
   }
 
   protected void resetTable() {
@@ -1443,15 +1437,15 @@ public class SkillData extends IXmlReader {
   public Skill[] getSiegeSkills(boolean addNoble, boolean hasCastle) {
     Skill[] temp = new Skill[2 + (addNoble ? 1 : 0) + (hasCastle ? 2 : 0)];
     int i = 0;
-    temp[i++] = skills.get(SkillData.getSkillHashCode(246, 1));
-    temp[i++] = skills.get(SkillData.getSkillHashCode(247, 1));
+    temp[i++] = skills.get(getSkillHashCode(246, 1));
+    temp[i++] = skills.get(getSkillHashCode(247, 1));
 
     if (addNoble) {
-      temp[i++] = skills.get(SkillData.getSkillHashCode(326, 1));
+      temp[i++] = skills.get(getSkillHashCode(326, 1));
     }
     if (hasCastle) {
-      temp[i++] = skills.get(SkillData.getSkillHashCode(844, 1));
-      temp[i] = skills.get(SkillData.getSkillHashCode(845, 1));
+      temp[i++] = skills.get(getSkillHashCode(844, 1));
+      temp[i] = skills.get(getSkillHashCode(845, 1));
     }
     return temp;
   }
@@ -1475,9 +1469,7 @@ public class SkillData extends IXmlReader {
     try {
       return tables.get(name)[idx - 1];
     } catch (RuntimeException e) {
-      LOG.error(
-
-              "wrong level count in skill Id " + currentSkill.id + " name: " + name + " index : " + idx,
+      LOG.error(              "wrong level count in skill Id " + currentSkill.id + " name: " + name + " index : " + idx,
               e);
       return "";
     }
