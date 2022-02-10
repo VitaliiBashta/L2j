@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class UIData implements IXmlReader {
+public class UIData extends IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(UIData.class);
 	

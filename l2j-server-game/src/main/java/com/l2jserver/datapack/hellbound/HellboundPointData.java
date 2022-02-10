@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class HellboundPointData implements IXmlReader {
+public class HellboundPointData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(HellboundPointData.class);
 

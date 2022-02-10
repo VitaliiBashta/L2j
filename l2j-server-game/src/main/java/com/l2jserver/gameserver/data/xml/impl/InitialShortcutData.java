@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Zoey76
  */
 @Service
-public class InitialShortcutData implements IXmlReader {
+public class InitialShortcutData extends  IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(InitialShortcutData.class);
 	

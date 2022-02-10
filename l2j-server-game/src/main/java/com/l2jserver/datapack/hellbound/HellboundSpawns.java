@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class HellboundSpawns implements IXmlReader {
+public class HellboundSpawns extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(HellboundSpawns.class);
 

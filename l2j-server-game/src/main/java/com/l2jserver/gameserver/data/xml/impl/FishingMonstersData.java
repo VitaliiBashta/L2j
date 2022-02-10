@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class FishingMonstersData implements IXmlReader {
+public class FishingMonstersData extends IXmlReader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FishingMonstersData.class);
 	

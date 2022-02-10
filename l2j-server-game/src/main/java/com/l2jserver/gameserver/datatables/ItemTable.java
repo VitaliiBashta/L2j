@@ -56,7 +56,7 @@ import static com.l2jserver.gameserver.model.items.type.EtcItemType.ARROW;
 import static com.l2jserver.gameserver.model.items.type.EtcItemType.SHOT;
 
 @Service
-public class ItemTable implements IXmlReader {
+public class ItemTable extends IXmlReader {
 
   public static final Map<String, Integer> SLOTS = new HashMap<>();
   private static final Logger LOG = LoggerFactory.getLogger(ItemTable.class);
@@ -117,7 +117,6 @@ public class ItemTable implements IXmlReader {
     this.effectHandler = effectHandler;
     parseDatapackDirectory("data/stats/items", true);
 
-    load();
   }
 
   public static ItemTable getInstance() {

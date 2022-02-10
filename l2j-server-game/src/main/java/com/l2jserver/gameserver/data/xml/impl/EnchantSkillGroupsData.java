@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class EnchantSkillGroupsData implements IXmlReader {
+public class EnchantSkillGroupsData extends IXmlReader {
 
   public static final int NORMAL_ENCHANT_BOOK = 6622;
   public static final int SAFE_ENCHANT_BOOK = 9627;

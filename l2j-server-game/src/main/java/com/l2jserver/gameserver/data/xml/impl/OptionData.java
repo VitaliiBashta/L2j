@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class OptionData implements IXmlReader {
+public class OptionData extends IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(OptionData.class);
 	

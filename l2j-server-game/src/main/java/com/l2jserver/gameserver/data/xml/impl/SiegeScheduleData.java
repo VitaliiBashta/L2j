@@ -17,7 +17,7 @@ import java.util.Calendar;
 import java.util.List;
 
 @Service
-public class SiegeScheduleData implements IXmlReader {
+public class SiegeScheduleData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(SiegeScheduleData.class);
 

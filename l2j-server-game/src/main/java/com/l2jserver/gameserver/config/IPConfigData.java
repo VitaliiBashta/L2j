@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 @Service
-public class IPConfigData implements IXmlReader {
+public class IPConfigData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(IPConfigData.class);
 

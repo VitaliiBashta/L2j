@@ -20,7 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 
 @Service
-public class TarBeetleSpawn implements IXmlReader {
+public class TarBeetleSpawn extends IXmlReader {
 	private final List<SpawnZone> zones = new ArrayList<>();
 	private ScheduledFuture<?> spawnTask;
 	private ScheduledFuture<?> shotTask;

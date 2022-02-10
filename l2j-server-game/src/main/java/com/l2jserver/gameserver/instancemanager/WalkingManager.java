@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public final class WalkingManager implements IXmlReader {
+public final class WalkingManager extends IXmlReader {
 	
 	// Repeat style:
 	// -1 - no repeat

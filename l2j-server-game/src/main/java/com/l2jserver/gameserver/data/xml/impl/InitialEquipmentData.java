@@ -19,7 +19,7 @@ import java.util.Map;
 import static com.l2jserver.gameserver.config.Configuration.character;
 
 @Service
-public class InitialEquipmentData implements IXmlReader {
+public class InitialEquipmentData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(InitialEquipmentData.class);
 

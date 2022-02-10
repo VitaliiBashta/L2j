@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class PlayerCreationPointData implements IXmlReader {
+public class PlayerCreationPointData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlayerCreationPointData.class);
 

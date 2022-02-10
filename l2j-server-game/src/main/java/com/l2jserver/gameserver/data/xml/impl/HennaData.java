@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public  class HennaData implements IXmlReader {
+public  class HennaData extends  IXmlReader {
 	private static final Logger LOG = LoggerFactory.getLogger(HennaData.class);
 	
 	private final Map<Integer, L2Henna> hennaList = new HashMap<>();

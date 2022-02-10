@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class EnchantItemData implements IXmlReader {
+public class EnchantItemData extends IXmlReader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EnchantItemData.class);
 	

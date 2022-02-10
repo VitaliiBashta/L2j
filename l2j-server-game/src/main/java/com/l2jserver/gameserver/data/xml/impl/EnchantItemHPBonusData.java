@@ -17,7 +17,7 @@ import org.w3c.dom.Node;
 import java.util.*;
 
 @Service
-public class EnchantItemHPBonusData implements IXmlReader {
+public class EnchantItemHPBonusData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(EnchantItemHPBonusData.class);
 

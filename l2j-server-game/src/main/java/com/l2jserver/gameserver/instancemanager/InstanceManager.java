@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class InstanceManager implements IXmlReader {
+public class InstanceManager extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(InstanceManager.class);
 

@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class StaticObjectData implements IXmlReader {
+public class StaticObjectData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(StaticObjectData.class);
 

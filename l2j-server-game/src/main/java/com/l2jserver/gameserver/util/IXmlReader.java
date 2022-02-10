@@ -19,15 +19,15 @@ import java.nio.file.Path;
 
 import static com.l2jserver.gameserver.config.Configuration.server;
 
-public interface IXmlReader {
+public abstract class IXmlReader {
 
-  Logger LOG = LogManager.getLogger(IXmlReader.class);
+  protected Logger LOG = LogManager.getLogger(IXmlReader.class);
 
   String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
 
   String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
 
-  /** The default file filter, ".xml" files only. */
+  /** Theprotected file filter, ".xml" files only. */
   XMLFilter XML_FILTER = new XMLFilter();
 
   /**
@@ -35,14 +35,14 @@ public interface IXmlReader {
    * It's highly recommended to clear the data storage, either the list or map.
    */
   @PostConstruct
-  void load();
+  protected abstract void load();
 
   /**
    * Wrapper for {@link #parseFile(File)} method.
    *
    * @param path the relative path to the datapack root of the XML file to parse.
    */
-  default void parseDatapackFile(String path) {
+  protected void parseDatapackFile(String path) {
     parseFile(new File(server().getDatapackRoot(), path));
   }
 
@@ -54,7 +54,7 @@ public interface IXmlReader {
    *
    * @param f the XML file to parse.
    */
-  default void parseFile(File f) {
+  protected void parseFile(File f) {
     if (!getCurrentFileFilter().accept(f)) {
       LOG.warn(
           "{}: Could not parse {} is not a file or it doesn't exist!",
@@ -85,11 +85,11 @@ public interface IXmlReader {
     }
   }
 
-  default boolean parseDirectory(Path path) {
+  protected boolean parseDirectory(Path path) {
     return parseDirectory(path, false);
   }
 
-  default boolean parseDirectory(Path strDir, boolean recursive) {
+  protected boolean parseDirectory(Path strDir, boolean recursive) {
     if (!Files.exists(strDir)) {
       LOG.warn("Folder {} doesn't exist!", strDir);
       return false;
@@ -108,11 +108,11 @@ public interface IXmlReader {
     return true;
   }
 
-  default boolean parseDatapackDirectory(String path, boolean recursive) {
+  protected boolean parseDatapackDirectory(String path, boolean recursive) {
     return parseDirectory(Path.of(path), recursive);
   }
 
-  default boolean parseDatapackDirectory(String path) {
+  protected boolean parseDatapackDirectory(String path) {
     return parseDirectory(Path.of(path), false);
   }
 
@@ -123,7 +123,7 @@ public interface IXmlReader {
    * @param doc the current document to parse
    * @param f the current file
    */
-  default void parseDocument(Document doc, File f) {
+  protected void parseDocument(Document doc, File f) {
     parseDocument(doc);
   }
 
@@ -133,7 +133,7 @@ public interface IXmlReader {
    *
    * @param doc the current document to parse
    */
-  void parseDocument(Document doc);
+  protected abstract void parseDocument(Document doc);
   //  {
   //    LOG.error("{}: Parser not implemented!", getClass().getSimpleName());
   //  }
@@ -142,15 +142,15 @@ public interface IXmlReader {
    * Parses a boolean value.
    *
    * @param node the node to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Boolean parseBoolean(Node node, Boolean defaultValue) {
+  protected Boolean parseBoolean(Node node, Boolean defaultValue) {
     return node != null ? Boolean.valueOf(node.getNodeValue()) : defaultValue;
   }
 
   /** Parses a boolean value. */
-  default Boolean parseBoolean(Node node) {
+  protected Boolean parseBoolean(Node node) {
     return parseBoolean(node, null);
   }
 
@@ -161,7 +161,7 @@ public interface IXmlReader {
    * @param name the name of the attribute to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Boolean parseBoolean(NamedNodeMap attrs, String name) {
+  protected Boolean parseBoolean(NamedNodeMap attrs, String name) {
     return parseBoolean(attrs.getNamedItem(name));
   }
 
@@ -170,10 +170,10 @@ public interface IXmlReader {
    *
    * @param attrs the attributes
    * @param name the name of the attribute to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Boolean parseBoolean(NamedNodeMap attrs, String name, Boolean defaultValue) {
+  protected Boolean parseBoolean(NamedNodeMap attrs, String name, Boolean defaultValue) {
     return parseBoolean(attrs.getNamedItem(name), defaultValue);
   }
 
@@ -181,10 +181,10 @@ public interface IXmlReader {
    * Parses a byte value.
    *
    * @param node the node to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Byte parseByte(Node node, Byte defaultValue) {
+  protected Byte parseByte(Node node, Byte defaultValue) {
     return node != null ? Byte.valueOf(node.getNodeValue()) : defaultValue;
   }
 
@@ -194,7 +194,7 @@ public interface IXmlReader {
    * @param node the node to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Byte parseByte(Node node) {
+  protected Byte parseByte(Node node) {
     return parseByte(node, null);
   }
 
@@ -205,7 +205,7 @@ public interface IXmlReader {
    * @param name the name of the attribute to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Byte parseByte(NamedNodeMap attrs, String name) {
+  protected Byte parseByte(NamedNodeMap attrs, String name) {
     return parseByte(attrs.getNamedItem(name));
   }
 
@@ -213,10 +213,10 @@ public interface IXmlReader {
    * Parses a short value.
    *
    * @param node the node to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Short parseShort(Node node, Short defaultValue) {
+  protected Short parseShort(Node node, Short defaultValue) {
     return node != null ? Short.valueOf(node.getNodeValue()) : defaultValue;
   }
 
@@ -226,7 +226,7 @@ public interface IXmlReader {
    * @param node the node to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Short parseShort(Node node) {
+  protected Short parseShort(Node node) {
     return parseShort(node, null);
   }
 
@@ -237,7 +237,7 @@ public interface IXmlReader {
    * @param name the name of the attribute to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Short parseShort(NamedNodeMap attrs, String name) {
+  protected Short parseShort(NamedNodeMap attrs, String name) {
     return parseShort(attrs.getNamedItem(name));
   }
 
@@ -246,10 +246,10 @@ public interface IXmlReader {
    *
    * @param attrs the attributes
    * @param name the name of the attribute to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Short parseShort(NamedNodeMap attrs, String name, Short defaultValue) {
+  protected Short parseShort(NamedNodeMap attrs, String name, Short defaultValue) {
     return parseShort(attrs.getNamedItem(name), defaultValue);
   }
 
@@ -257,10 +257,10 @@ public interface IXmlReader {
    * Parses an int value.
    *
    * @param node the node to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default int parseInt(Node node, Integer defaultValue) {
+  protected int parseInt(Node node, Integer defaultValue) {
     return node != null ? Integer.parseInt(node.getNodeValue()) : defaultValue;
   }
 
@@ -268,9 +268,9 @@ public interface IXmlReader {
    * Parses an int value.
    *
    * @param node the node to parse
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default int parseInt(Node node) {
+  protected int parseInt(Node node) {
     return parseInt(node, -1);
   }
 
@@ -278,10 +278,10 @@ public interface IXmlReader {
    * Parses an integer value.
    *
    * @param node the node to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Integer parseInteger(Node node, Integer defaultValue) {
+  protected Integer parseInteger(Node node, Integer defaultValue) {
     return node != null ? Integer.valueOf(node.getNodeValue()) : defaultValue;
   }
 
@@ -291,7 +291,7 @@ public interface IXmlReader {
    * @param node the node to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Integer parseInteger(Node node) {
+  protected Integer parseInteger(Node node) {
     return parseInteger(node, null);
   }
 
@@ -302,7 +302,7 @@ public interface IXmlReader {
    * @param name the name of the attribute to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Integer parseInteger(NamedNodeMap attrs, String name) {
+  protected Integer parseInteger(NamedNodeMap attrs, String name) {
     return parseInteger(attrs.getNamedItem(name));
   }
 
@@ -311,10 +311,10 @@ public interface IXmlReader {
    *
    * @param attrs the attributes
    * @param name the name of the attribute to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Integer parseInteger(NamedNodeMap attrs, String name, Integer defaultValue) {
+  protected Integer parseInteger(NamedNodeMap attrs, String name, Integer defaultValue) {
     return parseInteger(attrs.getNamedItem(name), defaultValue);
   }
 
@@ -322,10 +322,10 @@ public interface IXmlReader {
    * Parses a long value.
    *
    * @param node the node to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Long parseLong(Node node, Long defaultValue) {
+  protected Long parseLong(Node node, Long defaultValue) {
     return node != null ? Long.valueOf(node.getNodeValue()) : defaultValue;
   }
 
@@ -335,7 +335,7 @@ public interface IXmlReader {
    * @param node the node to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Long parseLong(Node node) {
+  protected Long parseLong(Node node) {
     return parseLong(node, null);
   }
 
@@ -346,7 +346,7 @@ public interface IXmlReader {
    * @param name the name of the attribute to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Long parseLong(NamedNodeMap attrs, String name) {
+  protected Long parseLong(NamedNodeMap attrs, String name) {
     return parseLong(attrs.getNamedItem(name));
   }
 
@@ -355,10 +355,10 @@ public interface IXmlReader {
    *
    * @param attrs the attributes
    * @param name the name of the attribute to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Long parseLong(NamedNodeMap attrs, String name, Long defaultValue) {
+  protected Long parseLong(NamedNodeMap attrs, String name, Long defaultValue) {
     return parseLong(attrs.getNamedItem(name), defaultValue);
   }
 
@@ -366,10 +366,10 @@ public interface IXmlReader {
    * Parses a float value.
    *
    * @param node the node to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Float parseFloat(Node node, Float defaultValue) {
+  protected Float parseFloat(Node node, Float defaultValue) {
     return node != null ? Float.valueOf(node.getNodeValue()) : defaultValue;
   }
 
@@ -379,7 +379,7 @@ public interface IXmlReader {
    * @param node the node to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Float parseFloat(Node node) {
+  protected Float parseFloat(Node node) {
     return parseFloat(node, null);
   }
 
@@ -390,7 +390,7 @@ public interface IXmlReader {
    * @param name the name of the attribute to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Float parseFloat(NamedNodeMap attrs, String name) {
+  protected Float parseFloat(NamedNodeMap attrs, String name) {
     return parseFloat(attrs.getNamedItem(name));
   }
 
@@ -399,10 +399,10 @@ public interface IXmlReader {
    *
    * @param attrs the attributes
    * @param name the name of the attribute to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Float parseFloat(NamedNodeMap attrs, String name, Float defaultValue) {
+  protected Float parseFloat(NamedNodeMap attrs, String name, Float defaultValue) {
     return parseFloat(attrs.getNamedItem(name), defaultValue);
   }
 
@@ -410,10 +410,10 @@ public interface IXmlReader {
    * Parses a double value.
    *
    * @param node the node to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Double parseDouble(Node node, Double defaultValue) {
+  protected Double parseDouble(Node node, Double defaultValue) {
     return node != null ? Double.valueOf(node.getNodeValue()) : defaultValue;
   }
 
@@ -423,7 +423,7 @@ public interface IXmlReader {
    * @param node the node to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Double parseDouble(Node node) {
+  protected Double parseDouble(Node node) {
     return parseDouble(node, null);
   }
 
@@ -434,7 +434,7 @@ public interface IXmlReader {
    * @param name the name of the attribute to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default Double parseDouble(NamedNodeMap attrs, String name) {
+  protected Double parseDouble(NamedNodeMap attrs, String name) {
     return parseDouble(attrs.getNamedItem(name));
   }
 
@@ -443,10 +443,10 @@ public interface IXmlReader {
    *
    * @param attrs the attributes
    * @param name the name of the attribute to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default Double parseDouble(NamedNodeMap attrs, String name, Double defaultValue) {
+  protected Double parseDouble(NamedNodeMap attrs, String name, Double defaultValue) {
     return parseDouble(attrs.getNamedItem(name), defaultValue);
   }
 
@@ -454,10 +454,10 @@ public interface IXmlReader {
    * Parses a string value.
    *
    * @param node the node to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default String parseString(Node node, String defaultValue) {
+  protected String parseString(Node node, String defaultValue) {
     return node != null ? node.getNodeValue() : defaultValue;
   }
 
@@ -467,7 +467,7 @@ public interface IXmlReader {
    * @param node the node to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default String parseString(Node node) {
+  protected String parseString(Node node) {
     return parseString(node, null);
   }
 
@@ -478,7 +478,7 @@ public interface IXmlReader {
    * @param name the name of the attribute to parse
    * @return if the node is not null, the value of the parsed node, otherwise null
    */
-  default String parseString(NamedNodeMap attrs, String name) {
+  protected String parseString(NamedNodeMap attrs, String name) {
     return parseString(attrs.getNamedItem(name));
   }
 
@@ -487,10 +487,10 @@ public interface IXmlReader {
    *
    * @param attrs the attributes
    * @param name the name of the attribute to parse
-   * @param defaultValue the default value
-   * @return if the node is not null, the value of the parsed node, otherwise the default value
+   * @param defaultValue theprotected value
+   * @return if the node is not null, the value of the parsed node, otherwise theprotected value
    */
-  default String parseString(NamedNodeMap attrs, String name, String defaultValue) {
+  protected String parseString(NamedNodeMap attrs, String name, String defaultValue) {
     return parseString(attrs.getNamedItem(name), defaultValue);
   }
 
@@ -500,11 +500,11 @@ public interface IXmlReader {
    * @param <T> the enumerated type
    * @param node the node to parse
    * @param clazz the class of the enumerated
-   * @param defaultValue the default value
+   * @param defaultValue theprotected value
    * @return if the node is not null and the node value is valid the parsed value, otherwise the
-   *     default value
+   *     protected value
    */
-  default <T extends Enum<T>> T parseEnum(Node node, Class<T> clazz, T defaultValue) {
+  protected <T extends Enum<T>> T parseEnum(Node node, Class<T> clazz, T defaultValue) {
     if (node == null) {
       return defaultValue;
     }
@@ -513,7 +513,7 @@ public interface IXmlReader {
       return Enum.valueOf(clazz, node.getNodeValue());
     } catch (IllegalArgumentException e) {
       LOG.warn(
-          "Invalid value specified for node: {} specified value: {} should be enum value of \"{}\" using default value: {}",
+          "Invalid value specified for node: {} specified value: {} should be enum value of \"{}\" usingprotected value: {}",
           node.getNodeName(),
           node.getNodeValue(),
           clazz.getSimpleName(),
@@ -530,7 +530,7 @@ public interface IXmlReader {
    * @param clazz the class of the enumerated
    * @return if the node is not null and the node value is valid the parsed value, otherwise null
    */
-  default <T extends Enum<T>> T parseEnum(Node node, Class<T> clazz) {
+  protected <T extends Enum<T>> T parseEnum(Node node, Class<T> clazz) {
     return parseEnum(node, clazz, null);
   }
 
@@ -543,16 +543,16 @@ public interface IXmlReader {
    * @param name the name of the attribute to parse
    * @return if the node is not null and the node value is valid the parsed value, otherwise null
    */
-  default <T extends Enum<T>> T parseEnum(NamedNodeMap attrs, Class<T> clazz, String name) {
+  protected <T extends Enum<T>> T parseEnum(NamedNodeMap attrs, Class<T> clazz, String name) {
     return parseEnum(attrs.getNamedItem(name), clazz);
   }
 
-  default <T extends Enum<T>> T parseEnum(
+  protected <T extends Enum<T>> T parseEnum(
       NamedNodeMap attrs, Class<T> clazz, String name, T defaultValue) {
     return parseEnum(attrs.getNamedItem(name), clazz, defaultValue);
   }
 
-  default FileFilter getCurrentFileFilter() {
+  protected FileFilter getCurrentFileFilter() {
     return XML_FILTER;
   }
 

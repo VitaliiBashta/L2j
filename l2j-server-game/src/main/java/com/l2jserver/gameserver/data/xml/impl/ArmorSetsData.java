@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class ArmorSetsData implements IXmlReader {
+public class ArmorSetsData extends  IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ArmorSetsData.class);
 	

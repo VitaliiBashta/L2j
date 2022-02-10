@@ -26,7 +26,7 @@ import java.util.Map;
 import static com.l2jserver.gameserver.config.Configuration.*;
 
 @Service
-public class AugmentationData implements IXmlReader {
+public class AugmentationData extends IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(AugmentationData.class);
 	

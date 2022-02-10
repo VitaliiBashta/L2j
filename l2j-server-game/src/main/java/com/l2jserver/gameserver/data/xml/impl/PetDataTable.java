@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class PetDataTable implements IXmlReader {
+public class PetDataTable extends IXmlReader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PetDataTable.class);
 

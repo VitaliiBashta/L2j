@@ -73,7 +73,7 @@ public class GameServer {
     this.xmlreaders = xmlreaders;
 
     final var serverLoadStart = System.currentTimeMillis();
-    xmlreaders.forEach(IXmlReader::load);
+    //    xmlreaders.forEach(IXmlReader::load);
     //    printSection("Database");
     //    ConnectionFactory.builder() //
     //        .withUrl(database().getURL()) //

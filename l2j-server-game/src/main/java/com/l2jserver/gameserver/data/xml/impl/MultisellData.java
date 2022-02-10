@@ -31,7 +31,7 @@ import java.util.Map;
 import static com.l2jserver.gameserver.config.Configuration.general;
 
 @Service
-public class MultisellData implements IXmlReader {
+public class MultisellData extends IXmlReader {
 	
 	public static final int PAGE_SIZE = 40;
 	// Special IDs.

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class FishData implements IXmlReader {
+public class FishData extends  IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(FishData.class);
 	

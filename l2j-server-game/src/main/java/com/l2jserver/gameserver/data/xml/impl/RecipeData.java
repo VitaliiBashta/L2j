@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class RecipeData implements IXmlReader {
+public class RecipeData extends IXmlReader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RecipeData.class);
 

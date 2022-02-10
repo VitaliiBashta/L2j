@@ -69,7 +69,7 @@ import static com.l2jserver.gameserver.config.Configuration.character;
  * @author Zoey76
  */
 @Service
-public class SkillTreesData implements IXmlReader {
+public class SkillTreesData extends  IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SkillTreesData.class);
 	

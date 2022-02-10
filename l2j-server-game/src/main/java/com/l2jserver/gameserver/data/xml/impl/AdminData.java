@@ -23,7 +23,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class AdminData implements IXmlReader {
+public class AdminData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(AdminData.class);
   private final Map<Integer, L2AccessLevel> _accessLevels = new HashMap<>();

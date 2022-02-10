@@ -20,7 +20,7 @@ import org.w3c.dom.Node;
 import java.util.*;
 
 @Service
-public class DoorData implements IXmlReader {
+public class DoorData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(DoorData.class);
 

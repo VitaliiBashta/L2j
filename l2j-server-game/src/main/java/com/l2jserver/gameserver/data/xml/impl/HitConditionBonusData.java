@@ -11,7 +11,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 @Service
-public  class HitConditionBonusData implements IXmlReader {
+public  class HitConditionBonusData extends  IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(HitConditionBonusData.class);
 	

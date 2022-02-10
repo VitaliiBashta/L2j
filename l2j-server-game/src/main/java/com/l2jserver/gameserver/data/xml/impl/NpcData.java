@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import static com.l2jserver.gameserver.config.Configuration.general;
 
 @Service
-public class NpcData implements IXmlReader {
+public class NpcData extends  IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(NpcData.class);
 	
@@ -46,7 +46,6 @@ public class NpcData implements IXmlReader {
 		this.skillLearnData = skillLearnData;
 		this.minionData = minionData;
 		this.skillData = skillData;
-		load();
 	}
 	
 	public static NpcData getInstance() {

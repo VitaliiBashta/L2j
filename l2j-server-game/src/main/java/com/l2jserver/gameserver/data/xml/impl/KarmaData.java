@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class KarmaData implements IXmlReader {
+public class KarmaData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(KarmaData.class);
 

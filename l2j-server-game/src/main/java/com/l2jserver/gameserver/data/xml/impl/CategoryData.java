@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
-public class CategoryData implements IXmlReader {
+public class CategoryData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(CategoryData.class);
 

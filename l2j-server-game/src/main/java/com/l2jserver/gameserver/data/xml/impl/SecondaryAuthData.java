@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
-public class SecondaryAuthData implements IXmlReader {
+public class SecondaryAuthData extends IXmlReader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SecondaryAuthData.class);
 	

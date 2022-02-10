@@ -29,10 +29,8 @@ import org.w3c.dom.Node;
 import java.io.File;
 import java.util.*;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
 @Service
-public class SkillData implements IXmlReader {
+public class SkillData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(SkillData.class);
   protected final Map<String, String[]> tables = new HashMap<>();
@@ -46,7 +44,6 @@ public class SkillData implements IXmlReader {
   private SkillInfo currentSkill;
   public SkillData(EffectHandler effectHandler) {
     this.effectHandler = effectHandler;
-    load();
   }
 
   /**
@@ -1419,18 +1416,10 @@ public class SkillData implements IXmlReader {
     final int maxLvl = getMaxLevel(skillId);
     // requested level too high
     if ((maxLvl > 0) && (level > maxLvl)) {
-      if (general().debug()) {
-        LOG.warn(
-            "Call to unexisting skill level Id {} requested level {} max level {}!",
-            skillId,
-            level,
-            maxLvl);
-      }
       return _skills.get(getSkillHashCode(skillId, maxLvl));
     }
 
-    LOG.warn("No skill info found for skill Id {} and skill level {}!", skillId, level);
-    return null;
+    throw new IllegalArgumentException("No skill info found for skill Id "+skillId+" and skill level " + level);
   }
 
   public int getMaxLevel(int skillId) {

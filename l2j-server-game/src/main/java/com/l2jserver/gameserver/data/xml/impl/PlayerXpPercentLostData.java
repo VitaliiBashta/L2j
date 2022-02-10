@@ -11,7 +11,7 @@ import java.util.Arrays;
 import static com.l2jserver.gameserver.config.Configuration.character;
 
 @Service
-public class PlayerXpPercentLostData implements IXmlReader {
+public class PlayerXpPercentLostData extends IXmlReader {
 
   private final double[] playerXpPercentLost = new double[character().getMaxPlayerLevel() + 1];
 

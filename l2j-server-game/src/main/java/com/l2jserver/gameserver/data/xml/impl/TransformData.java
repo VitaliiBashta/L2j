@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class TransformData implements IXmlReader {
+public class TransformData extends  IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(TransformData.class);
 	

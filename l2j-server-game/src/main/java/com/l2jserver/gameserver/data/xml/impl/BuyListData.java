@@ -22,7 +22,7 @@ import java.util.Map;
 import static com.l2jserver.gameserver.config.Configuration.general;
 
 @Service
-public final class BuyListData implements IXmlReader {
+public final class BuyListData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(BuyListData.class);
 

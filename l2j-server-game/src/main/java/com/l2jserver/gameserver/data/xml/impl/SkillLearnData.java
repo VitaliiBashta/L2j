@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class SkillLearnData implements IXmlReader {
+public class SkillLearnData extends IXmlReader {
   private static final Logger LOG = LoggerFactory.getLogger(SkillLearnData.class);
   private final Map<Integer, List<ClassId>> skillLearn = new HashMap<>();
 

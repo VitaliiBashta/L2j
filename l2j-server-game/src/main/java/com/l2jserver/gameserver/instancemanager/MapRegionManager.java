@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class MapRegionManager implements IXmlReader {
+public class MapRegionManager extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(MapRegionManager.class);
 

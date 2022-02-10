@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class PlayerTemplateData implements IXmlReader {
+public class PlayerTemplateData extends IXmlReader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PlayerTemplateData.class);
 	

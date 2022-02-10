@@ -29,7 +29,7 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 
 @Service
-public class ZoneManager implements IXmlReader {
+public class ZoneManager extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(ZoneManager.class);
 

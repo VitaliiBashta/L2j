@@ -26,7 +26,7 @@ import static com.l2jserver.gameserver.config.Configuration.general;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Service
-public class SpawnTable implements IXmlReader {
+public class SpawnTable extends IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SpawnTable.class);
 	

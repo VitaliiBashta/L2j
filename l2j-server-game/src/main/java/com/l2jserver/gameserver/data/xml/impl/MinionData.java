@@ -19,7 +19,7 @@ import java.util.Map;
  * Once Spawn System gets reworked delete this class<br>
  */
 @Service
-public class MinionData implements IXmlReader {
+public class MinionData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(MinionData.class);
 

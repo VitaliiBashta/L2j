@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import static com.l2jserver.gameserver.config.Configuration.general;
 
 @Service
-public class CastleManorManager implements IXmlReader, IStorable {
+public class CastleManorManager extends IXmlReader implements IStorable {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(CastleManorManager.class);
 	

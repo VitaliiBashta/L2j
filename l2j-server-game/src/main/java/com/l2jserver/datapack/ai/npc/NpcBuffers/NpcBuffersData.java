@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
-public class NpcBuffersData implements IXmlReader {
+public class NpcBuffersData extends IXmlReader {
   private static final Logger LOG = LoggerFactory.getLogger(NpcBuffersData.class);
 
   private final Map<Integer, NpcBufferData> _npcBuffers = new HashMap<>();
