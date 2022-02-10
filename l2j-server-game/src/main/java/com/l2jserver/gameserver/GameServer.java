@@ -1,7 +1,6 @@
 package com.l2jserver.gameserver;
 
 import com.l2jserver.commons.dao.ServerNameDAO;
-import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.commons.util.IPv4Filter;
 import com.l2jserver.datapack.ai.AILoader;
 import com.l2jserver.datapack.gracia.GraciaLoader;
@@ -74,18 +73,18 @@ public class GameServer {
     this.xmlreaders = xmlreaders;
 
     final var serverLoadStart = System.currentTimeMillis();
-    printSection("Database");
-    ConnectionFactory.builder() //
-        .withUrl(database().getURL()) //
-        .withUser(database().getUser()) //
-        .withPassword(database().getPassword()) //
-        .withMaxIdleTime(database().getMaxIdleTime()) //
-        .withMaxPoolSize(database().getMaxConnections()) //
-        .build();
+    xmlreaders.forEach(IXmlReader::load);
+    //    printSection("Database");
+    //    ConnectionFactory.builder() //
+    //        .withUrl(database().getURL()) //
+    //        .withUser(database().getUser()) //
+    //        .withPassword(database().getPassword()) //
+    //        .withMaxIdleTime(database().getMaxIdleTime()) //
+    //        .withMaxPoolSize(database().getMaxConnections()) //
+    //        .build();
 
     DAOFactory.getInstance();
 
-    xmlreaders.forEach(IXmlReader::load);
     if (!idFactory.isInitialized()) {
       LOG.error("Could not read object IDs from database. Please check your configuration.");
       throw new IllegalStateException("Could not initialize the Id factory!");

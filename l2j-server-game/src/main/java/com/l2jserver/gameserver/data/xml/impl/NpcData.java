@@ -40,10 +40,12 @@ public class NpcData implements IXmlReader {
 	private final Map<String, Integer> _clans = new ConcurrentHashMap<>();
 	private final SkillLearnData skillLearnData;
 	private final MinionData minionData;
+	private final SkillData skillData;
 
-	protected NpcData(SkillLearnData skillLearnData, MinionData minionData) {
+	protected NpcData(SkillLearnData skillLearnData, MinionData minionData, SkillData skillData) {
 		this.skillLearnData = skillLearnData;
 		this.minionData = minionData;
+		this.skillData = skillData;
 	}
 	
 	public static NpcData getInstance() {
@@ -231,7 +233,7 @@ public class NpcData implements IXmlReader {
 											attrs = skillListNode.getAttributes();
 											final int skillId = parseInteger(attrs, "id");
 											final int skillLevel = parseInteger(attrs, "level");
-											final Skill skill = SkillData.getInstance().getSkill(skillId, skillLevel);
+											final Skill skill = skillData.getSkill(skillId, skillLevel);
 											if (skill != null) {
 												skills.put(skill.getId(), skill);
 											} else {
@@ -574,6 +576,6 @@ public class NpcData implements IXmlReader {
 
 	
 	private static class SingletonHolder {
-		protected static final NpcData INSTANCE = new NpcData(null, null);
+		protected static final NpcData INSTANCE = new NpcData(null, null, null);
 	}
 }

@@ -15,7 +15,7 @@ import java.util.Set;
 import static com.l2jserver.gameserver.config.Configuration.general;
 
 @Service
-public final class SkillData implements IXmlReader {
+public class SkillData implements IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(SkillData.class);
 

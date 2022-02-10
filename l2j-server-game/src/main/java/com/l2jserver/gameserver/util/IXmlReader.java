@@ -9,6 +9,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXParseException;
 
+import javax.annotation.PostConstruct;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
@@ -33,6 +34,7 @@ public interface IXmlReader {
    * This method can be used to load/reload the data.<br>
    * It's highly recommended to clear the data storage, either the list or map.
    */
+  @PostConstruct
   void load();
 
   /**
@@ -146,12 +148,7 @@ public interface IXmlReader {
     return node != null ? Boolean.valueOf(node.getNodeValue()) : defaultValue;
   }
 
-  /**
-   * Parses a boolean value.
-   *
-   * @param node the node to parse
-   * @return if the node is not null, the value of the parsed node, otherwise null
-   */
+  /** Parses a boolean value. */
   default Boolean parseBoolean(Node node) {
     return parseBoolean(node, null);
   }
@@ -557,7 +554,6 @@ public interface IXmlReader {
   default FileFilter getCurrentFileFilter() {
     return XML_FILTER;
   }
-
 
   class XMLErrorHandler implements ErrorHandler {
     @Override

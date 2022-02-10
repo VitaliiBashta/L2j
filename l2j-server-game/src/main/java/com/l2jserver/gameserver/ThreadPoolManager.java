@@ -12,53 +12,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
 
-/**
- * This class is made to handle all the ThreadPools used in L2J.
- *
- * <p>Scheduled Tasks can either be sent to a {@link #_generalScheduledThreadPool "general"} or
- * {@link #_effectsScheduledThreadPool "effects"} {@link ScheduledThreadPoolExecutor
- * ScheduledThreadPool}: The "effects" one is used for every effects (skills, hp/mp regen ...) while
- * the "general" one is used for everything else that needs to be scheduled.<br>
- * There also is an {@link #_aiScheduledThreadPool "ai"} {@link ScheduledThreadPoolExecutor
- * ScheduledThreadPool} used for AI Tasks.
- *
- * <p>Tasks can be sent to {@link ScheduledThreadPoolExecutor ScheduledThreadPool} either with:
- *
- * <ul>
- *   <li>{@link #scheduleEffect(Runnable, long, TimeUnit)} and {@link #scheduleEffect(Runnable,
- *       long)} : for effects Tasks that needs to be executed only once.
- *   <li>{@link #scheduleGeneral(Runnable, long, TimeUnit)} and {@link #scheduleGeneral(Runnable,
- *       long)} : for scheduled Tasks that needs to be executed once.
- *   <li>{@link #scheduleAi(Runnable, long, TimeUnit)} and {@link #scheduleAi(Runnable, long)} : for
- *       AI Tasks that needs to be executed once
- * </ul>
- *
- * or
- *
- * <ul>
- *   <li>{@link #scheduleEffectAtFixedRate(Runnable, long, long, TimeUnit)} and {@link
- *       #scheduleEffectAtFixedRate(Runnable, long, long)} : for effects Tasks that needs to be
- *       executed periodically.
- *   <li>{@link #scheduleGeneralAtFixedRate(Runnable, long, long, TimeUnit)} and {@link
- *       #scheduleGeneralAtFixedRate(Runnable, long, long)} : for scheduled Tasks that needs to be
- *       executed periodically.
- *   <li>{@link #scheduleAiAtFixedRate(Runnable, long, long, TimeUnit)} and {@link
- *       #scheduleAiAtFixedRate(Runnable, long, long)} : for AI Tasks that needs to be executed
- *       periodically
- * </ul>
- *
- * <p>For all Tasks that should be executed with no delay asynchronously in a ThreadPool there also
- * are usual {@link ThreadPoolExecutor ThreadPools} that can grow/shrink according to their load.:
- *
- * <ul>
- *   <li>{@link #_generalPacketsThreadPool GeneralPackets} where most packets handler are executed.
- *   <li>{@link #_ioPacketsThreadPool I/O Packets} where all the i/o packets are executed.
- *   <li>There will be an AI ThreadPool where AI events should be executed
- *   <li>A general ThreadPool where everything else that needs to run asynchronously with no delay
- *       should be executed ({@link com.l2jserver.gameserver.model.actor.knownlist KnownList}
- *       updates, SQL updates/inserts...)?
- * </ul>
- */
 @Service
 public class ThreadPoolManager {
   protected static final Logger LOG = LoggerFactory.getLogger(ThreadPoolManager.class);
@@ -122,15 +75,15 @@ public class ThreadPoolManager {
             new LinkedBlockingQueue<>(),
             new PriorityThreadFactory("Event Pool", Thread.NORM_PRIORITY));
 
-    scheduleGeneralAtFixedRate(
-        new PurgeTask(
-            _effectsScheduledThreadPool,
-            _generalScheduledThreadPool,
-            _aiScheduledThreadPool,
-            _eventThreadPool),
-        10,
-        5,
-        TimeUnit.MINUTES);
+    //    scheduleGeneralAtFixedRate(
+    //        new PurgeTask(
+    //            _effectsScheduledThreadPool,
+    //            _generalScheduledThreadPool,
+    //            _aiScheduledThreadPool,
+    //            _eventThreadPool),
+    //        10,
+    //        5,
+    //        TimeUnit.MINUTES);
   }
 
   public static ThreadPoolManager getInstance() {

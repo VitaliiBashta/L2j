@@ -1,23 +1,9 @@
 
 package com.l2jserver.datapack.hellbound;
 
-import static com.l2jserver.gameserver.config.Configuration.customs;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.l2jserver.datapack.handlers.admincommandhandlers.AdminHellbound;
 import com.l2jserver.datapack.handlers.voicedcommandhandlers.Hellbound;
-import com.l2jserver.datapack.hellbound.ai.Amaskari;
-import com.l2jserver.datapack.hellbound.ai.Chimeras;
-import com.l2jserver.datapack.hellbound.ai.DemonPrince;
-import com.l2jserver.datapack.hellbound.ai.HellboundCore;
-import com.l2jserver.datapack.hellbound.ai.Keltas;
-import com.l2jserver.datapack.hellbound.ai.NaiaLock;
-import com.l2jserver.datapack.hellbound.ai.OutpostCaptain;
-import com.l2jserver.datapack.hellbound.ai.Ranku;
-import com.l2jserver.datapack.hellbound.ai.Slaves;
-import com.l2jserver.datapack.hellbound.ai.Typhoon;
+import com.l2jserver.datapack.hellbound.ai.*;
 import com.l2jserver.datapack.hellbound.ai.npc.Bernarde.Bernarde;
 import com.l2jserver.datapack.hellbound.ai.npc.Budenka.Budenka;
 import com.l2jserver.datapack.hellbound.ai.npc.Buron.Buron;
@@ -44,11 +30,11 @@ import com.l2jserver.gameserver.handler.AdminCommandHandler;
 import com.l2jserver.gameserver.handler.IAdminCommandHandler;
 import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
 import com.l2jserver.gameserver.handler.VoicedCommandHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Hellbound loader.
- * @author Zoey76
- */
+import static com.l2jserver.gameserver.config.Configuration.customs;
+
 public final class HellboundLoader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(HellboundLoader.class);

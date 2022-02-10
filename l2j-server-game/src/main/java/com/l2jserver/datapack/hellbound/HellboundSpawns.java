@@ -1,8 +1,10 @@
 package com.l2jserver.datapack.hellbound;
 
+import com.l2jserver.gameserver.data.xml.impl.NpcData;
 import com.l2jserver.gameserver.datatables.SpawnTable;
 import com.l2jserver.gameserver.model.L2Spawn;
 import com.l2jserver.gameserver.model.Location;
+import com.l2jserver.gameserver.model.actor.templates.L2NpcTemplate;
 import com.l2jserver.gameserver.util.IXmlReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,13 @@ public class HellboundSpawns implements IXmlReader {
   private final List<L2Spawn> spawns = new ArrayList<>();
 
   private final Map<Integer, int[]> spawnLevels = new HashMap<>();
+  private final SpawnTable spawnTable;
+  private final NpcData npcData;
+
+  public HellboundSpawns(SpawnTable spawnTable, NpcData npcData) {
+    this.spawnTable = spawnTable;
+    this.npcData = npcData;
+  }
 
   public static HellboundSpawns getInstance() {
     return SingletonHolder.INSTANCE;
@@ -103,7 +112,8 @@ public class HellboundSpawns implements IXmlReader {
       }
 
       try {
-        final L2Spawn spawn = new L2Spawn(npcId);
+        L2NpcTemplate template = npcData.getTemplate(npcId);
+        final L2Spawn spawn = new L2Spawn(template);
         spawn.setAmount(1);
         if (loc == null) {
           LOG.warn("Hellbound spawn location is null!");
@@ -111,7 +121,7 @@ public class HellboundSpawns implements IXmlReader {
         spawn.setLocation(loc);
         spawn.setRespawnDelay(delay, randomInterval);
         spawnLevels.put(npcId, new int[] {minLevel, maxLevel});
-        SpawnTable.getInstance().addNewSpawn(spawn, false);
+        spawnTable.addNewSpawn(spawn, false);
         spawns.add(spawn);
       } catch (Exception ex) {
         LOG.warn("Couldn't load spawns!", ex);
@@ -149,6 +159,6 @@ public class HellboundSpawns implements IXmlReader {
   }
 
   private static class SingletonHolder {
-    protected static final HellboundSpawns INSTANCE = new HellboundSpawns();
+    protected static final HellboundSpawns INSTANCE = new HellboundSpawns(null, null);
   }
 }

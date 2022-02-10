@@ -4,7 +4,6 @@ import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.GeoData;
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.data.sql.impl.TerritoryTable;
-import com.l2jserver.gameserver.data.xml.impl.NpcData;
 import com.l2jserver.gameserver.datatables.NpcPersonalAIData;
 import com.l2jserver.gameserver.model.actor.L2Attackable;
 import com.l2jserver.gameserver.model.actor.L2Npc;
@@ -110,10 +109,6 @@ public class L2Spawn implements IPositionable, Identifiable, INamable {
     // Set the _template of the L2Spawn
     this.template = template;
 
-    if (this.template == null) {
-      return;
-    }
-
     String className =
         "com.l2jserver.gameserver.model.actor.instance." + this.template.getType() + "Instance";
 
@@ -123,9 +118,8 @@ public class L2Spawn implements IPositionable, Identifiable, INamable {
   }
 
   /** Creates a spawn. */
-  public L2Spawn(int npcId)
-      throws SecurityException, ClassNotFoundException, NoSuchMethodException, ClassCastException {
-    this(NpcData.getInstance().getTemplate(npcId));
+  public L2Spawn(int npcId) {
+    throw new IllegalArgumentException("Create spawn with template not id: " + npcId);
   }
 
   public static void addSpawnListener(SpawnListener listener) {

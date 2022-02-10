@@ -37,7 +37,12 @@ public class SpawnTable implements IXmlReader {
 	private static final Map<Integer, Set<L2Spawn>> _spawnTable = new ConcurrentHashMap<>();
 	
 	private int _xmlSpawnCount = 0;
-	
+	private final NpcData npcData;
+
+	public SpawnTable(NpcData npcData) {
+		this.npcData = npcData;
+	}
+
 	@Override
 	public void load() {
 		if (!general().noSpawns()) {
@@ -62,7 +67,7 @@ public class SpawnTable implements IXmlReader {
 	 * @return {@code true} if the NPC ID belongs to an spawnable template, {@code false} otherwise
 	 */
 	private boolean checkTemplate(int npcId) {
-		L2NpcTemplate npcTemplate = NpcData.getInstance().getTemplate(npcId);
+		L2NpcTemplate npcTemplate = npcData.getTemplate(npcId);
 		if (npcTemplate == null) {
 			LOG.warn("Data missing in NPC table for ID {}!", npcId);
 			return false;
@@ -416,6 +421,6 @@ public class SpawnTable implements IXmlReader {
 	}
 	
 	private static class SingletonHolder {
-		protected static final SpawnTable INSTANCE = new SpawnTable();
+		protected static final SpawnTable INSTANCE = new SpawnTable(null);
 	}
 }
