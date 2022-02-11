@@ -26,7 +26,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+
+import static com.l2jserver.gameserver.datatables.Conditions.races;
 
 @Service
 public class SkillData extends IXmlReader {
@@ -1534,7 +1542,7 @@ public class SkillData extends IXmlReader {
     String nodeName = a.getNodeName();
     final String nodeValue = a.getNodeValue();
     return switch (nodeName.toLowerCase()) {
-      case "races" -> races(cond, a);
+      case "races" -> races(cond, nodeValue);
       case "level" -> joinAnd(cond, new ConditionPlayerLevel(Integer.decode(getValue(nodeValue, template))));
       case "levelrange" -> levelRange(template, cond, a);
       case "resting" -> joinAnd(cond, new ConditionPlayerState(PlayerState.RESTING, Boolean.parseBoolean(nodeValue)));
@@ -1650,16 +1658,6 @@ public class SkillData extends IXmlReader {
     return joinAnd(cond, new ConditionPlayerHasClanHall(array));
   }
 
-  private Condition races(Condition cond, Node a) {
-    final String[] racesVal = a.getNodeValue().split(",");
-    final Race[] races = new Race[racesVal.length];
-    for (int r = 0; r < racesVal.length; r++) {
-      if (racesVal[r] != null) {
-        races[r] = Race.valueOf(racesVal[r]);
-      }
-    }
-   return joinAnd(cond, new ConditionPlayerRace(races));
-  }
 
   private Condition classIsRestriction(Condition cond, Node a) {
     StringTokenizer st = new StringTokenizer(a.getNodeValue(), ",");
