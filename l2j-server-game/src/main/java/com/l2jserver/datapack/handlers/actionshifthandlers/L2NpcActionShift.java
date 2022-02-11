@@ -1,10 +1,6 @@
 
 package com.l2jserver.datapack.handlers.actionshifthandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.npc;
-
-import java.util.Set;
-
 import com.l2jserver.datapack.handlers.bypasshandlers.NpcViewMod;
 import com.l2jserver.gameserver.enums.InstanceType;
 import com.l2jserver.gameserver.handler.IActionShiftHandler;
@@ -18,7 +14,13 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
+import static com.l2jserver.gameserver.config.Configuration.npc;
+
+@Service
 public class L2NpcActionShift implements IActionShiftHandler {
 	/**
 	 * Manage and Display the GM console to modify the L2NpcInstance (GM only).<BR>

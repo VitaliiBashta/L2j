@@ -10,11 +10,13 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.model.skills.targets.TargetType;
 import com.l2jserver.gameserver.model.zone.ZoneId;
 import com.l2jserver.gameserver.network.SystemMessageId;
+import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+@Service
 public class AreaFriendly implements TargetTypeHandler {
   private static final CharComparator CHAR_COMPARATOR = new CharComparator();
 

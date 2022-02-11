@@ -20,11 +20,9 @@ import com.l2jserver.gameserver.model.zone.ZoneId;
 import com.l2jserver.gameserver.model.zone.type.L2JailZone;
 import com.l2jserver.gameserver.network.L2GameClient;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * This class handles jail punishment.
- * @author UnAfraid
- */
+@Service
 public class JailHandler implements IPunishmentHandler {
 	public JailHandler() {
 		// Register global listener

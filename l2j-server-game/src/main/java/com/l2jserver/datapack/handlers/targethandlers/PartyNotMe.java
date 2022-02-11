@@ -7,12 +7,14 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.model.skills.targets.TargetType;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.l2jserver.gameserver.config.Configuration.character;
 
+@Service
 public class PartyNotMe implements TargetTypeHandler {
   @Override
   public List<L2Object> getTargetList(

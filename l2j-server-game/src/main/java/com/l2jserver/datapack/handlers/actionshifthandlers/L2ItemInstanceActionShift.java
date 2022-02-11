@@ -8,7 +8,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.StringUtil;
+import org.springframework.stereotype.Service;
 
+@Service
 public class L2ItemInstanceActionShift implements IActionShiftHandler {
 	@Override
 	public boolean action(L2PcInstance activeChar, L2Object target, boolean interact) {

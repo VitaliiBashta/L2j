@@ -1,17 +1,15 @@
 
 package com.l2jserver.datapack.handlers.chathandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
 import com.l2jserver.gameserver.handler.IChatHandler;
 import com.l2jserver.gameserver.instancemanager.PetitionManager;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
+import org.springframework.stereotype.Service;
 
-/**
- * A chat handler
- * @author durgus
- */
+import static com.l2jserver.gameserver.config.Configuration.general;
+
+@Service
 public class ChatPetition implements IChatHandler {
 	private static final int[] COMMAND_IDS = {
 		6,

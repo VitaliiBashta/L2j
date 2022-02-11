@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.handlers.itemhandlers;
 
-import java.util.List;
-
 import com.l2jserver.gameserver.data.xml.impl.PetDataTable;
 import com.l2jserver.gameserver.datatables.SkillData;
 import com.l2jserver.gameserver.handler.IItemHandler;
@@ -15,10 +13,11 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * @author Kerberos, Zoey76
- */
+import java.util.List;
+
+@Service
 public class PetFood implements IItemHandler {
 	@Override
 	public boolean useItem(L2Playable playable, L2ItemInstance item, boolean forceUse) {

@@ -8,11 +8,9 @@ import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.EtcStatusUpdate;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Charm Of Courage Handler
- * @author Zealar
- */
+@Service
 public class CharmOfCourage implements IItemHandler {
 	@Override
 	public boolean useItem(L2Playable playable, L2ItemInstance item, boolean forceUse) {

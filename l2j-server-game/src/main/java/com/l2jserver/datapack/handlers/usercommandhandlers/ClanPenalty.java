@@ -1,17 +1,15 @@
 
 package com.l2jserver.datapack.handlers.usercommandhandlers;
 
-import java.text.SimpleDateFormat;
-
 import com.l2jserver.gameserver.handler.IUserCommandHandler;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.StringUtil;
+import org.springframework.stereotype.Service;
 
-/**
- * Clan Penalty user command.
- * @author Tempy
- */
+import java.text.SimpleDateFormat;
+
+@Service
 public class ClanPenalty implements IUserCommandHandler {
 	private static final int[] COMMAND_IDS = {
 		100

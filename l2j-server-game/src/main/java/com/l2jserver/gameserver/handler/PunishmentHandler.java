@@ -1,64 +1,33 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.handler;
 
+import com.l2jserver.gameserver.model.punishment.PunishmentType;
+import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import com.l2jserver.gameserver.model.punishment.PunishmentType;
+@Service
+public class PunishmentHandler {
+  private final Map<PunishmentType, IPunishmentHandler> handlers = new HashMap<>();
 
-/**
- * This class manages handlers of punishments.
- * @author UnAfraid
- */
-public class PunishmentHandler implements IHandler<IPunishmentHandler, PunishmentType> {
-	private final Map<PunishmentType, IPunishmentHandler> _handlers = new HashMap<>();
-	
-	protected PunishmentHandler() {
-		
+  protected PunishmentHandler(List<IPunishmentHandler> handlers) {
+    handlers.forEach(this::registerHandler);
 	}
-	
-	@Override
-	public void registerHandler(IPunishmentHandler handler) {
-		_handlers.put(handler.getType(), handler);
+
+  private void registerHandler(IPunishmentHandler handler) {
+    handlers.put(handler.getType(), handler);
 	}
-	
-	@Override
-	public synchronized void removeHandler(IPunishmentHandler handler) {
-		_handlers.remove(handler.getType());
-	}
-	
-	@Override
+
 	public IPunishmentHandler getHandler(PunishmentType val) {
-		return _handlers.get(val);
+    return handlers.get(val);
 	}
-	
-	@Override
-	public int size() {
-		return _handlers.size();
-	}
-	
+
 	public static PunishmentHandler getInstance() {
 		return SingletonHolder._instance;
 	}
 	
 	private static class SingletonHolder {
-		protected static final PunishmentHandler _instance = new PunishmentHandler();
+    protected static final PunishmentHandler _instance = new PunishmentHandler(null);
 	}
 }

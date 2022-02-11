@@ -7,7 +7,9 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2MerchantInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
+import org.springframework.stereotype.Service;
 
+@Service
 public class BuyShadowItem implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"BuyShadowItem"

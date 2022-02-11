@@ -1,11 +1,6 @@
 
 package com.l2jserver.datapack.handlers.bypasshandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.customs;
-import static com.l2jserver.gameserver.config.Configuration.general;
-
-import java.util.logging.Level;
-
 import com.l2jserver.gameserver.handler.IBypassHandler;
 import com.l2jserver.gameserver.model.ClanPrivilege;
 import com.l2jserver.gameserver.model.actor.L2Character;
@@ -21,7 +16,14 @@ import com.l2jserver.gameserver.network.serverpackets.SortedWareHouseWithdrawalL
 import com.l2jserver.gameserver.network.serverpackets.SortedWareHouseWithdrawalList.WarehouseListType;
 import com.l2jserver.gameserver.network.serverpackets.WareHouseDepositList;
 import com.l2jserver.gameserver.network.serverpackets.WareHouseWithdrawalList;
+import org.springframework.stereotype.Service;
 
+import java.util.logging.Level;
+
+import static com.l2jserver.gameserver.config.Configuration.customs;
+import static com.l2jserver.gameserver.config.Configuration.general;
+
+@Service
 public class ClanWarehouse implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"withdrawc",

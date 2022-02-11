@@ -1,11 +1,6 @@
 
 package com.l2jserver.datapack.handlers.bypasshandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-import static com.l2jserver.gameserver.config.Configuration.npc;
-
-import java.util.StringTokenizer;
-
 import com.l2jserver.gameserver.handler.IBypassHandler;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Npc;
@@ -13,7 +8,14 @@ import com.l2jserver.gameserver.model.actor.instance.L2MerchantInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.network.serverpackets.SetupGauge;
+import org.springframework.stereotype.Service;
 
+import java.util.StringTokenizer;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
+import static com.l2jserver.gameserver.config.Configuration.npc;
+
+@Service
 public class RentPet implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"RentPet"

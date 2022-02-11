@@ -1,9 +1,6 @@
 
 package com.l2jserver.datapack.handlers.chathandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.character;
-import static com.l2jserver.gameserver.config.Configuration.general;
-
 import com.l2jserver.gameserver.handler.IChatHandler;
 import com.l2jserver.gameserver.model.BlockList;
 import com.l2jserver.gameserver.model.L2World;
@@ -11,11 +8,12 @@ import com.l2jserver.gameserver.model.PcCondOverride;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.CreatureSay;
+import org.springframework.stereotype.Service;
 
-/**
- * Tell chat handler.
- * @author durgus
- */
+import static com.l2jserver.gameserver.config.Configuration.character;
+import static com.l2jserver.gameserver.config.Configuration.general;
+
+@Service
 public class ChatTell implements IChatHandler {
 	private static final int[] COMMAND_IDS = {
 		2

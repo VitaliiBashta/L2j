@@ -1,10 +1,6 @@
 
 package com.l2jserver.datapack.handlers.bypasshandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
-import java.text.DateFormat;
-
 import com.l2jserver.gameserver.handler.IBypassHandler;
 import com.l2jserver.gameserver.idfactory.IdFactory;
 import com.l2jserver.gameserver.instancemanager.games.Lottery;
@@ -17,7 +13,13 @@ import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
 import com.l2jserver.gameserver.network.serverpackets.InventoryUpdate;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
+import java.text.DateFormat;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
+
+@Service
 public class Loto implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"Loto"

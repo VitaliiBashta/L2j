@@ -1,7 +1,16 @@
 
 package com.l2jserver.datapack.custom.service.buffer;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import com.l2jserver.commons.database.ConnectionFactory;
+import com.l2jserver.datapack.custom.service.base.util.htmltmpls.HTMLTemplatePlaceholder;
+import com.l2jserver.datapack.custom.service.buffer.model.BufferConfig;
+import com.l2jserver.datapack.custom.service.buffer.model.UniqueBufflist;
+import com.l2jserver.datapack.custom.service.buffer.model.entity.BuffSkill;
+import com.l2jserver.gameserver.config.Configuration;
+import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -10,23 +19,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
-import com.l2jserver.commons.database.ConnectionFactory;
-import com.l2jserver.datapack.custom.service.base.util.htmltmpls.HTMLTemplatePlaceholder;
-import com.l2jserver.datapack.custom.service.buffer.model.BufferConfig;
-import com.l2jserver.datapack.custom.service.buffer.model.UniqueBufflist;
-import com.l2jserver.datapack.custom.service.buffer.model.entity.BuffSkill;
-import com.l2jserver.gameserver.config.Configuration;
-import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
-
-/**
- * Buffer Service Data.
- * @author HorridoJoho
- * @version 2.6.2.0
- */
-public final class BufferServiceRepository {
+@Service
+public class BufferServiceRepository {
 	public enum BuffType {
 		BUFF,
 		SONG_DANCE

@@ -1,78 +1,37 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.handler;
-
-import static com.l2jserver.gameserver.config.Configuration.general;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Community Board handler.
- * @author Zoey76
- */
-public final class CommunityBoardHandler implements IHandler<IParseBoardHandler, String> {
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
+
+@Service
+public  class CommunityBoardHandler  {
 	private static final Logger LOG = Logger.getLogger(CommunityBoardHandler.class.getName());
-	/** The registered handlers. */
-	private final Map<String, IParseBoardHandler> _datatable = new HashMap<>();
+	private final Map<String, IParseBoardHandler> datatable = new HashMap<>();
 	/** The bypasses used by the players. */
-	private final Map<Integer, String> _bypasses = new ConcurrentHashMap<>();
+	private final Map<Integer, String> bypasses = new ConcurrentHashMap<>();
 	
-	protected CommunityBoardHandler() {
-		// Prevent external initialization.
+	protected CommunityBoardHandler(List<IParseBoardHandler> handlers) {
+		handlers.forEach(this::registerHandler);
 	}
 	
-	@Override
 	public void registerHandler(IParseBoardHandler handler) {
 		for (String cmd : handler.getCommunityBoardCommands()) {
-			_datatable.put(cmd.toLowerCase(), handler);
+			datatable.put(cmd.toLowerCase(), handler);
 		}
 	}
 	
-	@Override
-	public synchronized void removeHandler(IParseBoardHandler handler) {
-		for (String cmd : handler.getCommunityBoardCommands()) {
-			_datatable.remove(cmd.toLowerCase());
-		}
-	}
-	
-	@Override
-	public IParseBoardHandler getHandler(String cmd) {
-		for (IParseBoardHandler cb : _datatable.values()) {
-			for (String command : cb.getCommunityBoardCommands()) {
-				if (cmd.toLowerCase().startsWith(command.toLowerCase())) {
-					return cb;
-				}
-			}
-		}
-		return null;
-	}
-	
-	@Override
-	public int size() {
-		return _datatable.size();
+	public static CommunityBoardHandler getInstance() {
+		return SingletonHolder._instance;
 	}
 	
 	/**
@@ -84,6 +43,17 @@ public final class CommunityBoardHandler implements IHandler<IParseBoardHandler,
 		return getHandler(cmd) != null;
 	}
 	
+	public IParseBoardHandler getHandler(String cmd) {
+		for (IParseBoardHandler cb : datatable.values()) {
+			for (String command : cb.getCommunityBoardCommands()) {
+				if (cmd.toLowerCase().startsWith(command.toLowerCase())) {
+					return cb;
+				}
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Parses a community board command.
 	 * @param command the command
@@ -93,18 +63,18 @@ public final class CommunityBoardHandler implements IHandler<IParseBoardHandler,
 		if (player == null) {
 			return;
 		}
-		
+
 		if (!general().enableCommunityBoard()) {
 			player.sendPacket(SystemMessageId.CB_OFFLINE);
 			return;
 		}
-		
+
 		final IParseBoardHandler cb = getHandler(command);
 		if (cb == null) {
 			LOG.warning(CommunityBoardHandler.class.getSimpleName() + ": Couldn't find parse handler for command " + command + "!");
 			return;
 		}
-		
+
 		cb.parseCommunityBoardCommand(command, player);
 	}
 	
@@ -122,12 +92,12 @@ public final class CommunityBoardHandler implements IHandler<IParseBoardHandler,
 		if (player == null) {
 			return;
 		}
-		
+
 		if (!general().enableCommunityBoard()) {
 			player.sendPacket(SystemMessageId.CB_OFFLINE);
 			return;
 		}
-		
+
 		String cmd;
 		switch (url) {
 			case "Topic" -> cmd = "_bbstop";
@@ -139,37 +109,18 @@ public final class CommunityBoardHandler implements IHandler<IParseBoardHandler,
 				return;
 			}
 		}
-		
+
 		final IParseBoardHandler cb = getHandler(cmd);
 		if (cb == null) {
 			LOG.warning(CommunityBoardHandler.class.getSimpleName() + ": Couldn't find write handler for command " + cmd + "!");
 			return;
 		}
-		
+
 		if (!(cb instanceof IWriteBoardHandler)) {
 			LOG.warning(CommunityBoardHandler.class.getSimpleName() + ": " + cb.getClass().getSimpleName() + " doesn't implement write!");
 			return;
 		}
 		((IWriteBoardHandler) cb).writeCommunityBoardCommand(player, arg1, arg2, arg3, arg4, arg5);
-	}
-	
-	/**
-	 * Sets the last bypass used by the player.
-	 * @param player the player
-	 * @param title the title
-	 * @param bypass the bypass
-	 */
-	public void addBypass(L2PcInstance player, String title, String bypass) {
-		_bypasses.put(player.getObjectId(), title + "&" + bypass);
-	}
-	
-	/**
-	 * Removes the last bypass used by the player.
-	 * @param player the player
-	 * @return the last bypass used
-	 */
-	public String removeBypass(L2PcInstance player) {
-		return _bypasses.remove(player.getObjectId());
 	}
 	
 	/**
@@ -182,11 +133,26 @@ public final class CommunityBoardHandler implements IHandler<IParseBoardHandler,
 		Util.sendCBHtml(player, html);
 	}
 	
-	public static CommunityBoardHandler getInstance() {
-		return SingletonHolder._instance;
+	/**
+	 * Sets the last bypass used by the player.
+	 * @param player the player
+	 * @param title the title
+	 * @param bypass the bypass
+	 */
+	public void addBypass(L2PcInstance player, String title, String bypass) {
+		bypasses.put(player.getObjectId(), title + "&" + bypass);
+	}
+	
+	/**
+	 * Removes the last bypass used by the player.
+	 * @param player the player
+	 * @return the last bypass used
+	 */
+	public String removeBypass(L2PcInstance player) {
+		return bypasses.remove(player.getObjectId());
 	}
 	
 	private static class SingletonHolder {
-		protected static final CommunityBoardHandler _instance = new CommunityBoardHandler();
+		protected static final CommunityBoardHandler _instance = new CommunityBoardHandler(null);
 	}
 }

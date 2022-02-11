@@ -7,7 +7,9 @@ import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
+import org.springframework.stereotype.Service;
 
+@Service
 public class SupportMagic implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"supportmagicservitor",

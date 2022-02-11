@@ -1,19 +1,17 @@
 
 package com.l2jserver.datapack.handlers.usercommandhandlers;
 
-import java.util.Map;
-
 import com.l2jserver.gameserver.handler.IUserCommandHandler;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Instance Zone user command.
- * @author nille02
- */
+import java.util.Map;
+
+@Service
 public class InstanceZone implements IUserCommandHandler {
 	private static final int[] COMMAND_IDS = {
 		114

@@ -1,12 +1,6 @@
 
 package com.l2jserver.datapack.handlers.bypasshandlers;
 
-import java.text.DecimalFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.TimeUnit;
-
 import com.l2jserver.gameserver.cache.HtmCache;
 import com.l2jserver.gameserver.datatables.ItemTable;
 import com.l2jserver.gameserver.handler.IBypassHandler;
@@ -25,10 +19,15 @@ import com.l2jserver.gameserver.model.items.L2Item;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.HtmlUtil;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * @author NosBit
- */
+import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
+
+@Service
 public class NpcViewMod implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"NpcViewMod"

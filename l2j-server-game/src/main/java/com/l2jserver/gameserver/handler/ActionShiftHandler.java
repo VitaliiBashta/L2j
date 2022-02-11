@@ -1,28 +1,24 @@
 package com.l2jserver.gameserver.handler;
 
+import com.l2jserver.gameserver.enums.InstanceType;
+import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import com.l2jserver.gameserver.enums.InstanceType;
+@Service
+public class ActionShiftHandler {
+  private final Map<InstanceType, IActionShiftHandler> _actionsShift = new HashMap<>();
 
-public class ActionShiftHandler implements IHandler<IActionShiftHandler, InstanceType> {
-	private final Map<InstanceType, IActionShiftHandler> _actionsShift;
-	
-	protected ActionShiftHandler() {
-		_actionsShift = new HashMap<>();
+  public ActionShiftHandler(List<IActionShiftHandler> handlers) {
+    handlers.forEach(this::registerHandler);
 	}
-	
-	@Override
-	public void registerHandler(IActionShiftHandler handler) {
+
+  private void registerHandler(IActionShiftHandler handler) {
 		_actionsShift.put(handler.getInstanceType(), handler);
 	}
-	
-	@Override
-	public synchronized void removeHandler(IActionShiftHandler handler) {
-		_actionsShift.remove(handler.getInstanceType());
-	}
-	
-	@Override
+
 	public IActionShiftHandler getHandler(InstanceType iType) {
 		IActionShiftHandler result = null;
 		for (InstanceType t = iType; t != null; t = t.getParent()) {
@@ -34,16 +30,12 @@ public class ActionShiftHandler implements IHandler<IActionShiftHandler, Instanc
 		return result;
 	}
 	
-	@Override
-	public int size() {
-		return _actionsShift.size();
-	}
-	
+
 	public static ActionShiftHandler getInstance() {
 		return SingletonHolder._instance;
 	}
 	
 	private static class SingletonHolder {
-		protected static final ActionShiftHandler _instance = new ActionShiftHandler();
+    protected static final ActionShiftHandler _instance = new ActionShiftHandler(null);
 	}
 }

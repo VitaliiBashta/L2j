@@ -9,11 +9,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.util.StringUtil;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Clan board.
- * @author Zoey76
- */
+@Service
 public class ClanBoard implements IWriteBoardHandler {
 	private static final String[] COMMANDS = {
 		"_bbsclan",
@@ -46,7 +44,7 @@ public class ClanBoard implements IWriteBoardHandler {
 					clanList(activeChar, Integer.parseInt(command.split(";")[1]));
 				} catch (Exception e) {
 					clanList(activeChar, 1);
-					LOG.warning(ClanBoard.class.getSimpleName() + ": Player " + activeChar + " send invalid clan list bypass " + command + "!");
+          LOG.warning("Player " + activeChar + " send invalid clan list bypass " + command + "!");
 				}
 			}
 		} else if (command.startsWith("_bbsclan_clanhome")) {
@@ -59,7 +57,7 @@ public class ClanBoard implements IWriteBoardHandler {
 					clanHome(activeChar, Integer.parseInt(command.split(";")[1]));
 				} catch (Exception e) {
 					clanHome(activeChar);
-					LOG.warning(ClanBoard.class.getSimpleName() + ": Player " + activeChar + " send invalid clan home bypass " + command + "!");
+          LOG.warning("Player " + activeChar + " send invalid clan home bypass " + command + "!");
 				}
 			}
 		} else if (command.startsWith("_bbsclan_clannotice_edit;")) {

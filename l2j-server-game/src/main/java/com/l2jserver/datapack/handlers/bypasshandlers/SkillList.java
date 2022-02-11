@@ -1,11 +1,6 @@
 
 package com.l2jserver.datapack.handlers.bypasshandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.character;
-
-import java.util.List;
-import java.util.logging.Level;
-
 import com.l2jserver.gameserver.data.xml.impl.SkillTreesData;
 import com.l2jserver.gameserver.handler.IBypassHandler;
 import com.l2jserver.gameserver.model.actor.L2Character;
@@ -15,7 +10,14 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.base.ClassId;
 import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.logging.Level;
+
+import static com.l2jserver.gameserver.config.Configuration.character;
+
+@Service
 public class SkillList implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"SkillList"

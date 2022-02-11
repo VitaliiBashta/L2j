@@ -1,15 +1,6 @@
 
 package com.l2jserver.datapack.handlers.usercommandhandlers;
 
-import static com.l2jserver.gameserver.GameTimeController.MILLIS_IN_TICK;
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_IDLE;
-import static com.l2jserver.gameserver.config.Configuration.character;
-import static com.l2jserver.gameserver.model.TeleportWhereType.TOWN;
-import static com.l2jserver.gameserver.network.SystemMessageId.THIS_SKILL_IS_NOT_AVAILABLE_FOR_THE_OLYMPIAD_EVENT;
-import static com.l2jserver.gameserver.network.serverpackets.ActionFailed.STATIC_PACKET;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.MINUTES;
-
 import com.l2jserver.gameserver.GameTimeController;
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.handler.IUserCommandHandler;
@@ -19,12 +10,18 @@ import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
 import com.l2jserver.gameserver.network.serverpackets.SetupGauge;
 import com.l2jserver.gameserver.util.Broadcast;
+import org.springframework.stereotype.Service;
 
-/**
- * Unstuck user command.
- * @author Zoey76
- * @since 2.6.0.0
- */
+import static com.l2jserver.gameserver.GameTimeController.MILLIS_IN_TICK;
+import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_IDLE;
+import static com.l2jserver.gameserver.config.Configuration.character;
+import static com.l2jserver.gameserver.model.TeleportWhereType.TOWN;
+import static com.l2jserver.gameserver.network.SystemMessageId.THIS_SKILL_IS_NOT_AVAILABLE_FOR_THE_OLYMPIAD_EVENT;
+import static com.l2jserver.gameserver.network.serverpackets.ActionFailed.STATIC_PACKET;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+
+@Service
 public class Unstuck implements IUserCommandHandler {
 	private static final long FIVE_MINUTES = MINUTES.toSeconds(5);
 	

@@ -18,12 +18,10 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Primeval Isle AI.
- * @author St3eT
- */
-public final class PrimevalIsle extends AbstractNpcAI {
+@Service
+public class PrimevalIsle extends AbstractNpcAI {
 	// NPC
 	private static final int EGG = 18344; // Ancient Egg
 	private static final int SAILREN = 29065; // Sailren

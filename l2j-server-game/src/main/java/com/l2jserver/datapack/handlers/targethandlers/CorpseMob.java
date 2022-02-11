@@ -8,11 +8,13 @@ import com.l2jserver.gameserver.model.effects.L2EffectType;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.model.skills.targets.TargetType;
 import com.l2jserver.gameserver.network.SystemMessageId;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 import static com.l2jserver.gameserver.config.Configuration.npc;
 
+@Service
 public class CorpseMob implements TargetTypeHandler {
   @Override
   public List<L2Object> getTargetList(

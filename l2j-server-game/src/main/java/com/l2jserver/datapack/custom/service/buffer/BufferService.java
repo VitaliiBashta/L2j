@@ -7,9 +7,6 @@ import com.l2jserver.datapack.custom.service.buffer.model.entity.AbstractBuffer;
 import com.l2jserver.datapack.custom.service.buffer.model.entity.BuffCategory;
 import com.l2jserver.datapack.custom.service.buffer.model.entity.BuffSkill;
 import com.l2jserver.gameserver.config.Configuration;
-import com.l2jserver.gameserver.handler.BypassHandler;
-import com.l2jserver.gameserver.handler.ItemHandler;
-import com.l2jserver.gameserver.handler.VoicedCommandHandler;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.L2Playable;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
@@ -20,6 +17,7 @@ import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.taskmanager.AttackStanceTaskManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,13 +28,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Buffer Service.
- *
- * @author HorridoJoho
- * @version 2.6.2.0
- */
-public final class BufferService extends CustomServiceScript {
+@Service
+public class BufferService extends CustomServiceScript {
 
   public static final String SCRIPT_NAME = "buffer";
   public static final Path SCRIPT_PATH = Paths.get(SCRIPT_COLLECTION, SCRIPT_NAME);
@@ -46,44 +39,11 @@ public final class BufferService extends CustomServiceScript {
 
   BufferService() {
     super(SCRIPT_NAME);
-
-    BypassHandler.getInstance().registerHandler(BufferServiceBypassHandler.getInstance());
-
-    if (Configuration.bufferService().getVoicedEnable()) {
-      VoicedCommandHandler.getInstance()
-          .registerHandler(BufferServiceVoicedCommandHandler.getInstance());
-      ItemHandler.getInstance().registerHandler(BufferServiceItemHandler.getInstance());
-    }
-  }
-
-  public static void main(String[] args) {
-    if (!Configuration.bufferService().enable()) {
-      LOG.info("Disabled.");
-      return;
-    }
-
-    LOG.info("Loading...");
-
-    BufferServiceRepository.getInstance().getConfig().registerNpcs(getInstance());
-  }
-
-  public static BufferService getInstance() {
-    return SingletonHolder.INSTANCE;
   }
 
   @Override
   public boolean unload() {
-    BypassHandler.getInstance().removeHandler(BufferServiceBypassHandler.getInstance());
-    if (Configuration.bufferService().getVoicedEnable()) {
-      VoicedCommandHandler.getInstance()
-          .removeHandler(BufferServiceVoicedCommandHandler.getInstance());
-      ItemHandler.getInstance().removeHandler(BufferServiceItemHandler.getInstance());
-    }
     return super.unload();
-  }
-
-  private void castBuff(L2Playable playable, BuffSkill buff) {
-    buff.getSkill().applyEffects(playable, playable);
   }
 
   private void showAdvancedHtml(
@@ -201,6 +161,180 @@ public final class BufferService extends CustomServiceScript {
 
     showAdvancedHtml(player, buffer, npc, "unique.html", placeholders);
     return true;
+  }
+
+  @Override
+  public boolean executeHtmlCommand(L2PcInstance player, L2Npc npc, CommandProcessor command) {
+    AbstractBuffer buffer =
+        BufferServiceRepository.getInstance().getConfig().determineBuffer(npc, player);
+    if (buffer == null) {
+      player.sendPacket(
+          SystemMessage.getSystemMessage(SystemMessageId.S1_NOT_FOUND).addString("Buffer"));
+      return false;
+    }
+
+    if (command.matchAndRemove("main", "m")) {
+      return htmlShowMain(player, buffer, npc);
+    } else if (command.matchAndRemove("category ", "c ")) {
+      return htmlShowCategory(player, buffer, npc, command.getRemaining());
+    } else if (command.matchAndRemove("preset ", "p ")) {
+      return htmlShowPreset(player, buffer, npc, command.getRemaining());
+    } else if (command.matchAndRemove("buff ", "b ")) {
+      String[] argsSplit = command.splitRemaining(" ");
+      if (argsSplit.length != 2) {
+        debug(player, "Missing arguments!");
+        return false;
+      }
+      return htmlShowBuff(player, buffer, npc, argsSplit[0], argsSplit[1]);
+    } else if (command.matchAndRemove("unique ", "u ")) {
+      return htmlShowUnique(player, buffer, npc, command.getRemaining());
+    }
+
+    return false;
+  }
+
+  @Override
+  public boolean executeActionCommand(L2PcInstance player, L2Npc npc, CommandProcessor command) {
+    SystemMessage abortSysMsg = null;
+    AbstractBuffer buffer = null;
+
+    if (player.isDead()) {
+      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
+      abortSysMsg.addString("Buffer");
+    } else if (isInsideAnyZoneOf(player, Configuration.bufferService().getForbidInZones())) {
+      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
+      abortSysMsg.addString("Buffer");
+    } else if (Configuration.bufferService().getForbidInEvents()
+        && ((player.getEventStatus() != null)
+            || (player.getBlockCheckerArena() != -1)
+            || player.isOnEvent()
+            || player.isInOlympiadMode()
+            || TvTEvent.isPlayerParticipant(player.getObjectId()))) {
+      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
+      abortSysMsg.addString("Buffer");
+    } else if (Configuration.bufferService().getForbidInDuell() && player.isInDuel()) {
+      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
+      abortSysMsg.addString("Buffer");
+    } else if (Configuration.bufferService().getForbidInFight()
+        && AttackStanceTaskManager.getInstance().hasAttackStanceTask(player)) {
+      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
+      abortSysMsg.addString("Buffer");
+    } else if (Configuration.bufferService().getForbidInPvp() && (player.getPvpFlag() == 1)) {
+      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
+      abortSysMsg.addString("Buffer");
+    } else if (Configuration.bufferService().getForbidForChaoticPlayers()
+        && player.getKarma() > 0) {
+      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
+      abortSysMsg.addString("Buffer");
+    } else {
+      buffer = BufferServiceRepository.getInstance().getConfig().determineBuffer(npc, player);
+      if (buffer == null) {
+        abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_NOT_FOUND);
+        abortSysMsg.addString("Buffer");
+      }
+    }
+
+    if (abortSysMsg != null) {
+      player.sendPacket(abortSysMsg);
+      return false;
+    }
+
+    if (command.matchAndRemove("target ", "t ")) {
+      executeTargetCommand(player, buffer, command);
+    } else if (command.matchAndRemove("unique ", "u ")) {
+      executeUniqueCommand(player, buffer, command);
+    }
+
+    return true;
+  }
+
+  private void executeTargetCommand(
+      L2PcInstance player, AbstractBuffer buffer, CommandProcessor command) {
+    // first determine the target
+    L2Playable target;
+    if (command.matchAndRemove("player ", "p ")) {
+      target = player;
+    } else if (command.matchAndRemove("summon ", "s ")) {
+      target = player.getSummon();
+      if (target == null) {
+        debug(player, "No summon available!");
+        return;
+      }
+    } else {
+      debug(player, "Invalid target command target!");
+      return;
+    }
+
+    // run the chosen action on the target
+    if (command.matchAndRemove("buff ", "b ")) {
+      String[] argsSplit = command.splitRemaining(" ");
+      if (argsSplit.length != 2) {
+        debug(player, "Missing arguments!");
+        return;
+      }
+      targetBuffBuff(player, target, buffer, argsSplit[0], argsSplit[1]);
+    } else if (command.matchAndRemove("unique ", "u ")) {
+      targetBuffUnique(player, target, buffer, command.getRemaining());
+    } else if (command.matchAndRemove("preset ", "p ")) {
+      targetBuffPreset(player, target, buffer, command.getRemaining());
+    } else if (command.matchAndRemove("heal", "h")) {
+      targetHeal(player, target, buffer);
+    } else if (command.matchAndRemove("cancel", "c")) {
+      targetCancel(player, target, buffer);
+    }
+  }
+
+  private void executeUniqueCommand(
+      L2PcInstance player, AbstractBuffer buffer, CommandProcessor command) {
+    if (command.matchAndRemove("create ", "c ")) {
+      uniqueCreate(player, command.getRemaining());
+    } else if (command.matchAndRemove("create_from_effects ", "cfe ")) {
+      String uniqueName = command.getRemaining();
+      if (!uniqueCreate(player, uniqueName)) {
+        return;
+      }
+
+      final List<BuffInfo> effects = player.getEffectList().getEffects();
+      for (final BuffInfo effect : effects) {
+        for (Entry<String, BuffCategory> buffCatEntry : buffer.getBuffCats().entrySet()) {
+          boolean added = false;
+
+          for (Entry<String, BuffSkill> buffEntry : buffCatEntry.getValue().getBuffs().entrySet()) {
+            final BuffSkill buff = buffEntry.getValue();
+
+            if (buff.getSkill().getId() == effect.getSkill().getId()) {
+              uniqueAdd(player, buffer, uniqueName, buffCatEntry.getKey(), buff.getId());
+              added = true;
+              break;
+            }
+          }
+
+          if (added) {
+            break;
+          }
+        }
+      }
+    } else if (command.matchAndRemove("delete ", "del ")) {
+      uniqueDelete(player, command.getRemaining());
+    } else if (command.matchAndRemove("add ", "a ")) {
+      String[] argsSplit = command.splitRemaining(" ");
+      if (argsSplit.length != 3) {
+        debug(player, "Missing arguments!");
+        return;
+      }
+      uniqueAdd(player, buffer, argsSplit[0], argsSplit[1], argsSplit[2]);
+    } else if (command.matchAndRemove("remove ", "r ")) {
+      String[] argsSplit = command.splitRemaining(" ");
+      if (argsSplit.length != 2) {
+        debug(player, "Missing arguments!");
+        return;
+      }
+      uniqueRemove(player, argsSplit[0], argsSplit[1]);
+    } else if (command.matchAndRemove("select ", "s ")) {
+      uniqueSelect(player, command.getRemaining());
+    } else if (command.matchAndRemove("deselect", "des")) {
+      uniqueDeselect(player);
+    }
   }
 
   private void targetBuffBuff(
@@ -358,42 +492,6 @@ public final class BufferService extends CustomServiceScript {
     target.stopAllEffectsExceptThoseThatLastThroughDeath();
   }
 
-  private void executeTargetCommand(
-      L2PcInstance player, AbstractBuffer buffer, CommandProcessor command) {
-    // first determine the target
-    L2Playable target;
-    if (command.matchAndRemove("player ", "p ")) {
-      target = player;
-    } else if (command.matchAndRemove("summon ", "s ")) {
-      target = player.getSummon();
-      if (target == null) {
-        debug(player, "No summon available!");
-        return;
-      }
-    } else {
-      debug(player, "Invalid target command target!");
-      return;
-    }
-
-    // run the chosen action on the target
-    if (command.matchAndRemove("buff ", "b ")) {
-      String[] argsSplit = command.splitRemaining(" ");
-      if (argsSplit.length != 2) {
-        debug(player, "Missing arguments!");
-        return;
-      }
-      targetBuffBuff(player, target, buffer, argsSplit[0], argsSplit[1]);
-    } else if (command.matchAndRemove("unique ", "u ")) {
-      targetBuffUnique(player, target, buffer, command.getRemaining());
-    } else if (command.matchAndRemove("preset ", "p ")) {
-      targetBuffPreset(player, target, buffer, command.getRemaining());
-    } else if (command.matchAndRemove("heal", "h")) {
-      targetHeal(player, target, buffer);
-    } else if (command.matchAndRemove("cancel", "c")) {
-      targetCancel(player, target, buffer);
-    }
-  }
-
   private boolean uniqueCreate(L2PcInstance player, String uniqueName) {
     if (!BufferServiceRepository.getInstance().canHaveMoreBufflists(player)) {
       player.sendMessage("Maximum number of unique bufflists reached!");
@@ -407,15 +505,6 @@ public final class BufferService extends CustomServiceScript {
 
     return BufferServiceRepository.getInstance()
         .createUniqueBufflist(player.getObjectId(), uniqueName);
-  }
-
-  private void uniqueDelete(L2PcInstance player, String uniqueName) {
-    BufferServiceRepository.getInstance().deleteUniqueBufflist(player.getObjectId(), uniqueName);
-    // also remove from active buff list when it's the deleted
-    String activeUniqueName = ACTIVE_PLAYER_BUFFLISTS.get(player.getObjectId());
-    if ((activeUniqueName != null) && activeUniqueName.equals(uniqueName)) {
-      ACTIVE_PLAYER_BUFFLISTS.remove(player.getObjectId());
-    }
   }
 
   private void uniqueAdd(
@@ -434,6 +523,15 @@ public final class BufferService extends CustomServiceScript {
     }
 
     BufferServiceRepository.getInstance().addToUniqueBufflist(player, uniqueName, buff);
+  }
+
+  private void uniqueDelete(L2PcInstance player, String uniqueName) {
+    BufferServiceRepository.getInstance().deleteUniqueBufflist(player.getObjectId(), uniqueName);
+    // also remove from active buff list when it's the deleted
+    String activeUniqueName = ACTIVE_PLAYER_BUFFLISTS.get(player.getObjectId());
+    if ((activeUniqueName != null) && activeUniqueName.equals(uniqueName)) {
+      ACTIVE_PLAYER_BUFFLISTS.remove(player.getObjectId());
+    }
   }
 
   private void uniqueRemove(L2PcInstance player, String uniqueName, String buffIdent) {
@@ -457,142 +555,8 @@ public final class BufferService extends CustomServiceScript {
     ACTIVE_PLAYER_BUFFLISTS.remove(player.getObjectId());
   }
 
-  private void executeUniqueCommand(
-      L2PcInstance player, AbstractBuffer buffer, CommandProcessor command) {
-    if (command.matchAndRemove("create ", "c ")) {
-      uniqueCreate(player, command.getRemaining());
-    } else if (command.matchAndRemove("create_from_effects ", "cfe ")) {
-      String uniqueName = command.getRemaining();
-      if (!uniqueCreate(player, uniqueName)) {
-        return;
-      }
-
-      final List<BuffInfo> effects = player.getEffectList().getEffects();
-      for (final BuffInfo effect : effects) {
-        for (Entry<String, BuffCategory> buffCatEntry : buffer.getBuffCats().entrySet()) {
-          boolean added = false;
-
-          for (Entry<String, BuffSkill> buffEntry : buffCatEntry.getValue().getBuffs().entrySet()) {
-            final BuffSkill buff = buffEntry.getValue();
-
-            if (buff.getSkill().getId() == effect.getSkill().getId()) {
-              uniqueAdd(player, buffer, uniqueName, buffCatEntry.getKey(), buff.getId());
-              added = true;
-              break;
-            }
-          }
-
-          if (added) {
-            break;
-          }
-        }
-      }
-    } else if (command.matchAndRemove("delete ", "del ")) {
-      uniqueDelete(player, command.getRemaining());
-    } else if (command.matchAndRemove("add ", "a ")) {
-      String[] argsSplit = command.splitRemaining(" ");
-      if (argsSplit.length != 3) {
-        debug(player, "Missing arguments!");
-        return;
-      }
-      uniqueAdd(player, buffer, argsSplit[0], argsSplit[1], argsSplit[2]);
-    } else if (command.matchAndRemove("remove ", "r ")) {
-      String[] argsSplit = command.splitRemaining(" ");
-      if (argsSplit.length != 2) {
-        debug(player, "Missing arguments!");
-        return;
-      }
-      uniqueRemove(player, argsSplit[0], argsSplit[1]);
-    } else if (command.matchAndRemove("select ", "s ")) {
-      uniqueSelect(player, command.getRemaining());
-    } else if (command.matchAndRemove("deselect", "des")) {
-      uniqueDeselect(player);
-    }
-  }
-
-  @Override
-  public boolean executeHtmlCommand(L2PcInstance player, L2Npc npc, CommandProcessor command) {
-    AbstractBuffer buffer =
-        BufferServiceRepository.getInstance().getConfig().determineBuffer(npc, player);
-    if (buffer == null) {
-      player.sendPacket(
-          SystemMessage.getSystemMessage(SystemMessageId.S1_NOT_FOUND).addString("Buffer"));
-      return false;
-    }
-
-    if (command.matchAndRemove("main", "m")) {
-      return htmlShowMain(player, buffer, npc);
-    } else if (command.matchAndRemove("category ", "c ")) {
-      return htmlShowCategory(player, buffer, npc, command.getRemaining());
-    } else if (command.matchAndRemove("preset ", "p ")) {
-      return htmlShowPreset(player, buffer, npc, command.getRemaining());
-    } else if (command.matchAndRemove("buff ", "b ")) {
-      String[] argsSplit = command.splitRemaining(" ");
-      if (argsSplit.length != 2) {
-        debug(player, "Missing arguments!");
-        return false;
-      }
-      return htmlShowBuff(player, buffer, npc, argsSplit[0], argsSplit[1]);
-    } else if (command.matchAndRemove("unique ", "u ")) {
-      return htmlShowUnique(player, buffer, npc, command.getRemaining());
-    }
-
-    return false;
-  }
-
-  @Override
-  public boolean executeActionCommand(L2PcInstance player, L2Npc npc, CommandProcessor command) {
-    SystemMessage abortSysMsg = null;
-    AbstractBuffer buffer = null;
-
-    if (player.isDead()) {
-      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
-      abortSysMsg.addString("Buffer");
-    } else if (isInsideAnyZoneOf(player, Configuration.bufferService().getForbidInZones())) {
-      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
-      abortSysMsg.addString("Buffer");
-    } else if (Configuration.bufferService().getForbidInEvents()
-        && ((player.getEventStatus() != null)
-            || (player.getBlockCheckerArena() != -1)
-            || player.isOnEvent()
-            || player.isInOlympiadMode()
-            || TvTEvent.isPlayerParticipant(player.getObjectId()))) {
-      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
-      abortSysMsg.addString("Buffer");
-    } else if (Configuration.bufferService().getForbidInDuell() && player.isInDuel()) {
-      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
-      abortSysMsg.addString("Buffer");
-    } else if (Configuration.bufferService().getForbidInFight()
-        && AttackStanceTaskManager.getInstance().hasAttackStanceTask(player)) {
-      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
-      abortSysMsg.addString("Buffer");
-    } else if (Configuration.bufferService().getForbidInPvp() && (player.getPvpFlag() == 1)) {
-      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
-      abortSysMsg.addString("Buffer");
-    } else if (Configuration.bufferService().getForbidForChaoticPlayers()
-        && player.getKarma() > 0) {
-      abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_CANNOT_BE_USED);
-      abortSysMsg.addString("Buffer");
-    } else {
-      buffer = BufferServiceRepository.getInstance().getConfig().determineBuffer(npc, player);
-      if (buffer == null) {
-        abortSysMsg = SystemMessage.getSystemMessage(SystemMessageId.S1_NOT_FOUND);
-        abortSysMsg.addString("Buffer");
-      }
-    }
-
-    if (abortSysMsg != null) {
-      player.sendPacket(abortSysMsg);
-      return false;
-    }
-
-    if (command.matchAndRemove("target ", "t ")) {
-      executeTargetCommand(player, buffer, command);
-    } else if (command.matchAndRemove("unique ", "u ")) {
-      executeUniqueCommand(player, buffer, command);
-    }
-
-    return true;
+  private void castBuff(L2Playable playable, BuffSkill buff) {
+    buff.getSkill().applyEffects(playable, playable);
   }
 
   @Override
@@ -600,7 +564,4 @@ public final class BufferService extends CustomServiceScript {
     return Configuration.bufferService().getDebug();
   }
 
-  private static final class SingletonHolder {
-    protected static final BufferService INSTANCE = new BufferService();
-  }
 }

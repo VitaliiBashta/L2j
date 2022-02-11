@@ -1,10 +1,6 @@
 
 package com.l2jserver.datapack.handlers.itemhandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.rates;
-
-import java.util.List;
-
 import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.handler.IItemHandler;
 import com.l2jserver.gameserver.model.L2ExtractableProduct;
@@ -13,11 +9,13 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.items.L2EtcItem;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
+import org.springframework.stereotype.Service;
 
-/**
- * Extractable Items handler.
- * @author HorridoJoho
- */
+import java.util.List;
+
+import static com.l2jserver.gameserver.config.Configuration.rates;
+
+@Service
 public class ExtractableItems implements IItemHandler {
 	@Override
 	public boolean useItem(L2Playable playable, L2ItemInstance item, boolean forceUse) {

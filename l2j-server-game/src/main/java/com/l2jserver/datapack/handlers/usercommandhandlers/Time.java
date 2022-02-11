@@ -1,20 +1,19 @@
 
 package com.l2jserver.datapack.handlers.usercommandhandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.customs;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import com.l2jserver.gameserver.GameTimeController;
 import com.l2jserver.gameserver.handler.IUserCommandHandler;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Time user command.
- */
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import static com.l2jserver.gameserver.config.Configuration.customs;
+
+@Service
 public class Time implements IUserCommandHandler {
 	private static final int[] COMMAND_IDS = {
 		77

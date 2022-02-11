@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.handlers.itemhandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
 import com.l2jserver.gameserver.handler.IItemHandler;
 import com.l2jserver.gameserver.instancemanager.CastleManorManager;
 import com.l2jserver.gameserver.instancemanager.MapRegionManager;
@@ -16,10 +14,11 @@ import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
+import org.springframework.stereotype.Service;
 
-/**
- * @author l3x
- */
+import static com.l2jserver.gameserver.config.Configuration.general;
+
+@Service
 public class Seed implements IItemHandler {
 	@Override
 	public boolean useItem(L2Playable playable, L2ItemInstance item, boolean forceUse) {

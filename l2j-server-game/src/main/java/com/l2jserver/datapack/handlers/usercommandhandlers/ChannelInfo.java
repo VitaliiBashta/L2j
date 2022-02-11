@@ -5,11 +5,9 @@ import com.l2jserver.gameserver.handler.IUserCommandHandler;
 import com.l2jserver.gameserver.model.L2CommandChannel;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.serverpackets.ExMultiPartyCommandChannelInfo;
+import org.springframework.stereotype.Service;
 
-/**
- * Channel Info user command.
- * @author chris_00
- */
+@Service
 public class ChannelInfo implements IUserCommandHandler {
 	private static final int[] COMMAND_IDS = {
 		97

@@ -9,10 +9,9 @@ import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.PackageToList;
 import com.l2jserver.gameserver.network.serverpackets.WareHouseWithdrawalList;
+import org.springframework.stereotype.Service;
 
-/**
- * @author UnAfraid
- */
+@Service
 public class Freight implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"package_withdraw",

@@ -6,11 +6,9 @@ import com.l2jserver.gameserver.model.L2Party;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Party Info user command.
- * @author Tempy
- */
+@Service
 public class PartyInfo implements IUserCommandHandler {
 	private static final int[] COMMAND_IDS = {
 		81

@@ -5,11 +5,9 @@ import com.l2jserver.gameserver.cache.HtmCache;
 import com.l2jserver.gameserver.handler.CommunityBoardHandler;
 import com.l2jserver.gameserver.handler.IWriteBoardHandler;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Mail board.
- * @author Zoey76
- */
+@Service
 public class MailBoard implements IWriteBoardHandler {
 	private static final String[] COMMANDS = {
 		"_maillist"

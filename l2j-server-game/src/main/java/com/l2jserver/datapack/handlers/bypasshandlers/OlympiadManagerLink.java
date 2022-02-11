@@ -1,12 +1,6 @@
 
 package com.l2jserver.datapack.handlers.bypasshandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.olympiad;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.logging.Level;
-
 import com.l2jserver.gameserver.data.sql.impl.NpcBufferTable;
 import com.l2jserver.gameserver.data.sql.impl.NpcBufferTable.NpcBufferData;
 import com.l2jserver.gameserver.data.xml.impl.MultisellData;
@@ -29,10 +23,15 @@ import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * @author DS
- */
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Level;
+
+import static com.l2jserver.gameserver.config.Configuration.olympiad;
+
+@Service
 public class OlympiadManagerLink implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"olympiaddesc",

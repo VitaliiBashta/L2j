@@ -6,6 +6,7 @@ import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.model.skills.targets.TargetType;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import static com.l2jserver.gameserver.model.skills.targets.TargetType.ENEMY_ONL
 import static com.l2jserver.gameserver.model.zone.ZoneId.PVP;
 import static com.l2jserver.gameserver.network.SystemMessageId.INCORRECT_TARGET;
 
+@Service
 public class EnemyOnly implements TargetTypeHandler {
   @Override
   public List<L2Object> getTargetList(

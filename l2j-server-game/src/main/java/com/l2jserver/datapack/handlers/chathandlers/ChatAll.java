@@ -1,12 +1,6 @@
 
 package com.l2jserver.datapack.handlers.chathandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
-import java.util.Collection;
-import java.util.StringTokenizer;
-import java.util.logging.Logger;
-
 import com.l2jserver.gameserver.handler.IChatHandler;
 import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
 import com.l2jserver.gameserver.handler.VoicedCommandHandler;
@@ -14,11 +8,15 @@ import com.l2jserver.gameserver.model.BlockList;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.CreatureSay;
+import org.springframework.stereotype.Service;
 
-/**
- * A chat handler
- * @author durgus
- */
+import java.util.Collection;
+import java.util.StringTokenizer;
+import java.util.logging.Logger;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
+
+@Service
 public class ChatAll implements IChatHandler {
 	private static Logger _log = Logger.getLogger(ChatAll.class.getName());
 	

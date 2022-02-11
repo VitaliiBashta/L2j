@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.handlers.communityboard;
 
-import java.util.List;
-
 import com.l2jserver.gameserver.cache.HtmCache;
 import com.l2jserver.gameserver.data.sql.impl.ClanTable;
 import com.l2jserver.gameserver.handler.CommunityBoardHandler;
@@ -12,11 +10,11 @@ import com.l2jserver.gameserver.model.L2Clan;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.entity.Castle;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Region board.
- * @author Zoey76
- */
+import java.util.List;
+
+@Service
 public class RegionBoard implements IWriteBoardHandler {
 	// Region data
 	// @formatter:off

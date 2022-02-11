@@ -6,10 +6,9 @@ import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
 import com.l2jserver.gameserver.handler.VoicedCommandHandler;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * @author DS
- */
+@Service
 public class VoiceCommand implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"voice"

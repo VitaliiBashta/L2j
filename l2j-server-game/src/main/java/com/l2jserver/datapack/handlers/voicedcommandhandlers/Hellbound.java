@@ -4,11 +4,9 @@ package com.l2jserver.datapack.handlers.voicedcommandhandlers;
 import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Hellbound voiced command.
- * @author DS
- */
+@Service
 public class Hellbound implements IVoicedCommandHandler {
 	private static final String[] VOICED_COMMANDS = {
 		"hellbound"

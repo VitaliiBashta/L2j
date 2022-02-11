@@ -7,12 +7,14 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.buylist.L2BuyList;
 import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
 import com.l2jserver.gameserver.network.serverpackets.ShopPreviewList;
+import org.springframework.stereotype.Service;
 
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
 
+@Service
 public class Wear implements IBypassHandler {
   @Override
   public boolean useBypass(String command, L2PcInstance activeChar, L2Character target) {

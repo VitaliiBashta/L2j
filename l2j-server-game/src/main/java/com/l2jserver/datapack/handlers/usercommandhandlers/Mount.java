@@ -3,11 +3,9 @@ package com.l2jserver.datapack.handlers.usercommandhandlers;
 
 import com.l2jserver.gameserver.handler.IUserCommandHandler;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Mount user command.
- * @author Tempy
- */
+@Service
 public class Mount implements IUserCommandHandler {
 	private static final int[] COMMAND_IDS = {
 		61

@@ -4,7 +4,6 @@ import com.l2jserver.commons.dao.ServerNameDAO;
 import com.l2jserver.commons.util.IPv4Filter;
 import com.l2jserver.datapack.ai.AILoader;
 import com.l2jserver.datapack.gracia.GraciaLoader;
-import com.l2jserver.datapack.handlers.MasterHandler;
 import com.l2jserver.datapack.hellbound.HellboundLoader;
 import com.l2jserver.datapack.instances.InstanceLoader;
 import com.l2jserver.datapack.quests.QuestLoader;
@@ -108,7 +107,6 @@ public class GameServer {
     CategoryData.getInstance();
     SecondaryAuthData.getInstance();
 
-
     printSection("Enchant Skill Groups");
     EnchantSkillGroupsData.getInstance();
 
@@ -198,9 +196,6 @@ public class GameServer {
     BoatManager.getInstance();
     AirShipManager.getInstance();
     GraciaSeedsManager.getInstance();
-
-    printSection("Handlers");
-    ScriptEngineManager.getInstance().executeScript(MasterHandler.class);
 
     printSection("AI");
     ScriptEngineManager.getInstance().executeScript(AILoader.class);

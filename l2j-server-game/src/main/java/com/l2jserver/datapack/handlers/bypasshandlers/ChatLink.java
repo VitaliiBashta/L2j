@@ -8,7 +8,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.events.EventDispatcher;
 import com.l2jserver.gameserver.model.events.EventType;
 import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcFirstTalk;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ChatLink implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"Chat"

@@ -1,9 +1,6 @@
 
 package com.l2jserver.datapack.hellbound.ai;
 
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2MonsterInstance;
@@ -13,10 +10,9 @@ import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.util.MinionList;
 
-/**
- * Ranku's AI.
- * @author GKR
- */
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 public final class Ranku extends AbstractNpcAI {
 	// NPCs
 	private static final int RANKU = 25542;

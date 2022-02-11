@@ -4,11 +4,12 @@ import com.l2jserver.datapack.custom.service.base.CustomServiceScript;
 import com.l2jserver.datapack.custom.service.base.util.CommandProcessor;
 import com.l2jserver.datapack.custom.service.base.util.htmltmpls.HTMLTemplatePlaceholder;
 import com.l2jserver.datapack.custom.service.teleporter.model.TeleporterConfig;
-import com.l2jserver.datapack.custom.service.teleporter.model.entity.*;
+import com.l2jserver.datapack.custom.service.teleporter.model.entity.AbstractTeleporter;
+import com.l2jserver.datapack.custom.service.teleporter.model.entity.GroupTeleport;
+import com.l2jserver.datapack.custom.service.teleporter.model.entity.GroupTeleportCategory;
+import com.l2jserver.datapack.custom.service.teleporter.model.entity.SoloTeleport;
+import com.l2jserver.datapack.custom.service.teleporter.model.entity.SoloTeleportCategory;
 import com.l2jserver.gameserver.config.Configuration;
-import com.l2jserver.gameserver.handler.BypassHandler;
-import com.l2jserver.gameserver.handler.ItemHandler;
-import com.l2jserver.gameserver.handler.VoicedCommandHandler;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
 import com.l2jserver.gameserver.model.AbstractPlayerGroup;
 import com.l2jserver.gameserver.model.L2CommandChannel;
@@ -22,6 +23,7 @@ import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.taskmanager.AttackStanceTaskManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,13 +32,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-/**
- * Teleporter service.
- *
- * @author HorridoJoho
- * @version 2.6.2.0
- */
-public final class TeleporterService extends CustomServiceScript {
+@Service
+public class TeleporterService extends CustomServiceScript {
   public static final String SCRIPT_NAME = "teleporter";
   public static final Path SCRIPT_PATH = Paths.get(SCRIPT_COLLECTION, SCRIPT_NAME);
   private static final Logger LOG = LoggerFactory.getLogger(TeleporterService.class.getName());
@@ -45,14 +42,6 @@ public final class TeleporterService extends CustomServiceScript {
 
   public TeleporterService() {
     super(SCRIPT_NAME);
-
-    BypassHandler.getInstance().registerHandler(TeleporterServiceBypassHandler.getInstance());
-
-    if (Configuration.teleporterService().getVoicedEnable()) {
-      VoicedCommandHandler.getInstance()
-          .registerHandler(TeleporterServiceVoicedCommandHandler.getInstance());
-      ItemHandler.getInstance().registerHandler(TeleporterServiceItemHandler.getInstance());
-    }
   }
 
   public static TeleporterConfig getConfig() {
@@ -83,12 +72,6 @@ public final class TeleporterService extends CustomServiceScript {
 
   @Override
   public boolean unload() {
-    BypassHandler.getInstance().removeHandler(TeleporterServiceBypassHandler.getInstance());
-    if (Configuration.teleporterService().getVoicedEnable()) {
-      VoicedCommandHandler.getInstance()
-          .removeHandler(TeleporterServiceVoicedCommandHandler.getInstance());
-      ItemHandler.getInstance().removeHandler(TeleporterServiceItemHandler.getInstance());
-    }
     return super.unload();
   }
 

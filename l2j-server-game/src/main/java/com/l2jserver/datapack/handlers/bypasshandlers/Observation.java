@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.handlers.bypasshandlers;
 
-import java.util.logging.Level;
-
 import com.l2jserver.gameserver.handler.IBypassHandler;
 import com.l2jserver.gameserver.instancemanager.SiegeManager;
 import com.l2jserver.gameserver.model.Location;
@@ -13,7 +11,11 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
 import com.l2jserver.gameserver.network.serverpackets.ItemList;
+import org.springframework.stereotype.Service;
 
+import java.util.logging.Level;
+
+@Service
 public class Observation implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"observesiege",

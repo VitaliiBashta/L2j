@@ -9,11 +9,9 @@ import com.l2jserver.gameserver.model.punishment.PunishmentTask;
 import com.l2jserver.gameserver.model.punishment.PunishmentType;
 import com.l2jserver.gameserver.network.L2GameClient;
 import com.l2jserver.gameserver.network.serverpackets.EtcStatusUpdate;
+import org.springframework.stereotype.Service;
 
-/**
- * This class handles chat ban punishment.
- * @author UnAfraid
- */
+@Service
 public class ChatBanHandler implements IPunishmentHandler {
 	@Override
 	public void onStart(PunishmentTask task) {

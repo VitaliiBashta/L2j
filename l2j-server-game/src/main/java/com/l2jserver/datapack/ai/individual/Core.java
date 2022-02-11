@@ -1,11 +1,6 @@
 
 package com.l2jserver.datapack.ai.individual;
 
-import static com.l2jserver.gameserver.config.Configuration.grandBoss;
-
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.enums.audio.Music;
 import com.l2jserver.gameserver.instancemanager.GrandBossManager;
@@ -17,12 +12,15 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
+import org.springframework.stereotype.Service;
 
-/**
- * Core AI.
- * @author DrLecter, Emperorc
- */
-public final class Core extends AbstractNpcAI {
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import static com.l2jserver.gameserver.config.Configuration.grandBoss;
+
+@Service
+public class Core extends AbstractNpcAI {
 	private static final int CORE = 29006;
 	private static final int DEATH_KNIGHT = 29007;
 	private static final int DOOM_WRAITH = 29008;

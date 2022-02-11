@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.handlers.bypasshandlers;
 
-import java.util.logging.Level;
-
 import com.l2jserver.gameserver.handler.IBypassHandler;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Npc;
@@ -14,10 +12,11 @@ import com.l2jserver.gameserver.model.olympiad.OlympiadGameTask;
 import com.l2jserver.gameserver.model.olympiad.OlympiadManager;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.ExOlympiadMatchList;
+import org.springframework.stereotype.Service;
 
-/**
- * @author DS
- */
+import java.util.logging.Level;
+
+@Service
 public class OlympiadObservation implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"watchmatch",

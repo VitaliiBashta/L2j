@@ -1,12 +1,6 @@
 
 package com.l2jserver.datapack.handlers.bypasshandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.sevenSigns;
-
-import java.util.Calendar;
-import java.util.List;
-import java.util.logging.Level;
-
 import com.l2jserver.gameserver.SevenSigns;
 import com.l2jserver.gameserver.SevenSignsFestival;
 import com.l2jserver.gameserver.handler.IBypassHandler;
@@ -21,7 +15,15 @@ import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.StringUtil;
+import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.List;
+import java.util.logging.Level;
+
+import static com.l2jserver.gameserver.config.Configuration.sevenSigns;
+
+@Service
 public class Festival implements IBypassHandler {
 	private static final String[] COMMANDS = {
 		"festival",

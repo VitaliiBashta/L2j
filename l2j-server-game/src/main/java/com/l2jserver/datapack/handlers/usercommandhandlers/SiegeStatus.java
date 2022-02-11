@@ -9,10 +9,9 @@ import com.l2jserver.gameserver.model.entity.Siege;
 import com.l2jserver.gameserver.model.zone.type.L2SiegeZone;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * @author Tryskell
- */
+@Service
 public class SiegeStatus implements IUserCommandHandler {
 	private static final int[] COMMAND_IDS = {
 		99

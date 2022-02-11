@@ -1,19 +1,17 @@
 
 package com.l2jserver.datapack.handlers.chathandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
 import com.l2jserver.gameserver.handler.IChatHandler;
 import com.l2jserver.gameserver.model.PartyMatchRoom;
 import com.l2jserver.gameserver.model.PartyMatchRoomList;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.CreatureSay;
+import org.springframework.stereotype.Service;
 
-/**
- * A chat handler
- * @author Gnacik
- */
+import static com.l2jserver.gameserver.config.Configuration.general;
+
+@Service
 public class ChatPartyMatchRoom implements IChatHandler {
 	private static final int[] COMMAND_IDS = {
 		14

@@ -8,11 +8,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.punishment.PunishmentTask;
 import com.l2jserver.gameserver.model.punishment.PunishmentType;
 import com.l2jserver.gameserver.network.L2GameClient;
+import org.springframework.stereotype.Service;
 
-/**
- * This class handles ban punishment.
- * @author UnAfraid
- */
+@Service
 public class BanHandler implements IPunishmentHandler {
 	@Override
 	public void onStart(PunishmentTask task) {

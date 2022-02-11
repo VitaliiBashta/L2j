@@ -9,10 +9,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.zone.type.L2RespawnZone;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Loc user command.
- */
+@Service
 public class Loc implements IUserCommandHandler {
 	private static final int[] COMMAND_IDS = {
 		0

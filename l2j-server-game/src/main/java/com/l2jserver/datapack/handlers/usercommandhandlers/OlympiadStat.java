@@ -7,11 +7,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.olympiad.Olympiad;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Olympiad Stat user command.
- * @author kamy, Zoey76
- */
+@Service
 public class OlympiadStat implements IUserCommandHandler {
 	private static final int[] COMMAND_IDS = {
 		109
