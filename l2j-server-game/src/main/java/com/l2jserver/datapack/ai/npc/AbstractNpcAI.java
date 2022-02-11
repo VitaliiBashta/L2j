@@ -12,10 +12,6 @@ import com.l2jserver.gameserver.network.serverpackets.NpcSay;
 import com.l2jserver.gameserver.network.serverpackets.SocialAction;
 import com.l2jserver.gameserver.util.Broadcast;
 
-/**
- * Abstract NPC AI class for datapack based AIs.
- * @author UnAfraid, Zoey76
- */
 public abstract class AbstractNpcAI extends Quest {
 	public AbstractNpcAI(String name, String descr) {
 		super(-1, name, descr);

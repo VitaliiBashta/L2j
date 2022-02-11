@@ -2,12 +2,10 @@
 package com.l2jserver.datapack.instances.ChambersOfDelusion;
 
 import com.l2jserver.gameserver.model.Location;
+import org.springframework.stereotype.Service;
 
-/**
- * Chamber of Delusion Square.
- * @author GKR
- */
-public final class ChamberOfDelusionSquare extends Chamber {
+@Service
+public class ChamberOfDelusionSquare extends Chamber {
 	// NPC's
 	private static final int ENTRANCE_GATEKEEPER = 32662;
 	private static final int ROOM_GATEKEEPER_FIRST = 32684;

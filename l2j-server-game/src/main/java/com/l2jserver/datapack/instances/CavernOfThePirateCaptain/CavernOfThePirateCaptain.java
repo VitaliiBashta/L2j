@@ -1,9 +1,6 @@
 
 package com.l2jserver.datapack.instances.CavernOfThePirateCaptain;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
 import com.l2jserver.gameserver.model.L2Party;
@@ -16,12 +13,13 @@ import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Cavern Of The Pirate Captain (Day Dream) instance Zone.
- * @author St3eT
- */
-public final class CavernOfThePirateCaptain extends AbstractInstance {
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class CavernOfThePirateCaptain extends AbstractInstance {
 	protected class CavernOfThePirateCaptainWorld extends InstanceWorld {
 		protected List<L2PcInstance> playersInside = new ArrayList<>();
 		protected L2Attackable _zaken;

@@ -1,13 +1,6 @@
 
 package com.l2jserver.datapack.instances;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-import static java.util.concurrent.TimeUnit.SECONDS;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.enums.InstanceReenterType;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
@@ -22,10 +15,13 @@ import com.l2jserver.gameserver.model.skills.BuffInfo;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 
-/**
- * Abstract class for Instances.
- * @author FallenAngel
- */
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 public abstract class AbstractInstance extends AbstractNpcAI {
 	public AbstractInstance(String name, String desc) {
 		super(name, desc);

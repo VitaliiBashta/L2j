@@ -1,9 +1,6 @@
 
 package com.l2jserver.datapack.instances.PailakaDevilsLegacy;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.datapack.quests.Q00129_PailakaDevilsLegacy.Q00129_PailakaDevilsLegacy;
 import com.l2jserver.gameserver.ai.CtrlIntention;
@@ -17,12 +14,13 @@ import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.zone.L2ZoneType;
+import org.springframework.stereotype.Service;
 
-/**
- * Pailaka Devil's Legacy Instance zone.
- * @author St3eT
- */
-public final class PailakaDevilsLegacy extends AbstractInstance {
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+@Service
+public class PailakaDevilsLegacy extends AbstractInstance {
 	protected class DIWorld extends InstanceWorld {
 		protected L2Attackable _lematanNpc = null;
 		protected List<L2Attackable> _followerslist = new CopyOnWriteArrayList<>();

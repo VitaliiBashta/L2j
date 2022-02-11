@@ -1,11 +1,6 @@
 
 package com.l2jserver.datapack.instances.DisciplesNecropolisPast;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.datapack.quests.Q00196_SevenSignsSealOfTheEmperor.Q00196_SevenSignsSealOfTheEmperor;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
@@ -20,12 +15,15 @@ import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Disciple's Necropolis Past instance zone.
- * @author Adry_85
- */
-public final class DisciplesNecropolisPast extends AbstractInstance {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class DisciplesNecropolisPast extends AbstractInstance {
 	protected class DNPWorld extends InstanceWorld {
 		protected final List<L2Npc> anakimGroup = new ArrayList<>();
 		protected final List<L2Npc> lilithGroup = new ArrayList<>();

@@ -16,12 +16,10 @@ import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Monastery of Silence instance zone.
- * @author Adry_85
- */
-public final class MonasteryOfSilence1 extends AbstractInstance {
+@Service
+public class MonasteryOfSilence1 extends AbstractInstance {
 	protected static final class MoSWorld extends InstanceWorld {
 		protected L2Npc elcadia = null;
 		protected int deadTombGuardianCount = 0;

@@ -8,13 +8,10 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.model.quest.QuestState;
+import org.springframework.stereotype.Service;
 
-/**
- * Secret Area in the Keucereus Fortress instance zone.
- * @author Adry_85
- * @since 2.6.0.0
- */
-public final class SecretAreaInTheKeucereusFortress1 extends AbstractInstance {
+@Service
+public class SecretAreaInTheKeucereusFortress1 extends AbstractInstance {
 	protected class SAKF1World extends InstanceWorld {
 		
 	}

@@ -11,12 +11,10 @@ import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.model.zone.L2ZoneType;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Pailaka Song of Ice and Fire Instance zone.
- * @author Gnacik, St3eT
- */
-public final class PailakaSongOfIceAndFire extends AbstractInstance {
+@Service
+public class PailakaSongOfIceAndFire extends AbstractInstance {
 	protected class PSoIWorld extends InstanceWorld {
 		
 	}

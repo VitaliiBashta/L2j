@@ -19,13 +19,10 @@ import com.l2jserver.gameserver.model.zone.L2ZoneType;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Nornil's Garden instance zone.
- * @author Gnacik
- * @version 2010-10-15 Based on official server Naia
- */
-public final class NornilsGarden extends AbstractInstance {
+@Service
+public class NornilsGarden extends AbstractInstance {
 	protected class NornilsWorld extends InstanceWorld {
 		protected L2Npc first_npc = null;
 		protected boolean spawned_1 = false;

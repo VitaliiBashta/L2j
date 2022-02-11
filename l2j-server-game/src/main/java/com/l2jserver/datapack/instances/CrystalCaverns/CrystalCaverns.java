@@ -1,13 +1,5 @@
 package com.l2jserver.datapack.instances.CrystalCaverns;
 
-import static com.l2jserver.gameserver.config.Configuration.rates;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.datapack.quests.Q00131_BirdInACage.Q00131_BirdInACage;
 import com.l2jserver.gameserver.GeoData;
@@ -45,19 +37,18 @@ import com.l2jserver.gameserver.network.serverpackets.SpecialCamera;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.network.serverpackets.ValidateLocation;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Crystal Caverns instance zone.<br>
- * TODO: 1. Kechi's Henchmans spawn animation is missing.<br>
- * 2. NPC related Traps are not supported by core, so Darnels and Lahm door trap is not working.<br>
- * 3. Need retail spawn for Coral Garden (EmeraldSteam/Square - done).<br>
- * 4. Baylor Raid is missing a lot of things This script takes the best elements of different
- * versions and combines them into one script to get the most optimal and retail-like experience.
- * <br>
- * Original sources: theone, L2JEmu, L2JOfficial, L2JFree Contributing authors: TGS, Lantoc, Janiii,
- * Gigiikun, RosT Please maintain consistency between the Crystal Caverns scripts.
- */
-public final class CrystalCaverns extends AbstractInstance {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static com.l2jserver.gameserver.config.Configuration.rates;
+
+@Service
+public class CrystalCaverns extends AbstractInstance {
   protected static class CrystalGolem {
     protected L2ItemInstance foodItem = null;
     protected boolean isAtDestination = false;

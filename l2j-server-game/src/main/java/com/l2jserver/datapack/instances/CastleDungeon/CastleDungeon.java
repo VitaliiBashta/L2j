@@ -1,11 +1,6 @@
 
 package com.l2jserver.datapack.instances.CastleDungeon;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.gameserver.instancemanager.FortManager;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
@@ -17,13 +12,15 @@ import com.l2jserver.gameserver.model.entity.Castle;
 import com.l2jserver.gameserver.model.entity.Fort;
 import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Castle Dungeon instance zone.
- * @author Adry_85
- * @since 2.6.0.0
- */
-public final class CastleDungeon extends AbstractInstance {
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class CastleDungeon extends AbstractInstance {
 	protected class CDWorld extends InstanceWorld {
 		
 	}

@@ -12,12 +12,10 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.model.quest.QuestState;
+import org.springframework.stereotype.Service;
 
-/**
- * Elcadia's Tent instance zone.
- * @author Adry_85
- */
-public final class ElcadiasTent extends AbstractInstance {
+@Service
+public class ElcadiasTent extends AbstractInstance {
 	protected class ETWorld extends InstanceWorld {
 		
 	}

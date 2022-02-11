@@ -15,12 +15,10 @@ import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Mithril Mine instance zone.
- * @author Adry_85
- */
-public final class MithrilMine extends AbstractInstance {
+@Service
+public class MithrilMine extends AbstractInstance {
 	protected class MMWorld extends InstanceWorld {
 		protected int _count = 0;
 	}

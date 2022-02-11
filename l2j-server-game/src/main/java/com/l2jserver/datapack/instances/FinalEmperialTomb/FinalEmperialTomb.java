@@ -7,7 +7,13 @@ import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.ai.CtrlIntention;
 import com.l2jserver.gameserver.enums.InstanceType;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
-import com.l2jserver.gameserver.model.*;
+import com.l2jserver.gameserver.model.L2CommandChannel;
+import com.l2jserver.gameserver.model.L2Object;
+import com.l2jserver.gameserver.model.L2Party;
+import com.l2jserver.gameserver.model.L2Territory;
+import com.l2jserver.gameserver.model.L2World;
+import com.l2jserver.gameserver.model.Location;
+import com.l2jserver.gameserver.model.PcCondOverride;
 import com.l2jserver.gameserver.model.actor.L2Attackable;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Npc;
@@ -23,6 +29,7 @@ import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.AbstractNpcInfo.NpcInfo;
 import com.l2jserver.gameserver.network.serverpackets.*;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -38,18 +45,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
 
 import static com.l2jserver.gameserver.config.Configuration.server;
 
-/**
- * Final Emperial Tomb instance zone. TODO:<br>
- * Test when Frintezza song use 5008 effect skill.<br>
- * Test deeply Scarlet van Halisha's AI.<br>
- * Use proper zone spawn system.
- * @author Gigiikun
- */
-public final class FinalEmperialTomb extends AbstractInstance {
+@Service
+public class FinalEmperialTomb extends AbstractInstance {
 	protected class FETWorld extends InstanceWorld {
 		protected Lock lock = new ReentrantLock();
 		protected List<L2Npc> npcList = new CopyOnWriteArrayList<>();

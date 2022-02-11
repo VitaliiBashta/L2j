@@ -5,7 +5,6 @@ import com.l2jserver.commons.util.IPv4Filter;
 import com.l2jserver.datapack.ai.AILoader;
 import com.l2jserver.datapack.gracia.GraciaLoader;
 import com.l2jserver.datapack.hellbound.HellboundLoader;
-import com.l2jserver.datapack.instances.InstanceLoader;
 import com.l2jserver.datapack.quests.QuestLoader;
 import com.l2jserver.datapack.quests.TerritoryWarScripts.TerritoryWarSuperClass;
 import com.l2jserver.gameserver.bbs.service.ForumsBBSManager;
@@ -199,9 +198,6 @@ public class GameServer {
 
     printSection("AI");
     ScriptEngineManager.getInstance().executeScript(AILoader.class);
-
-    printSection("Instances");
-    ScriptEngineManager.getInstance().executeScript(InstanceLoader.class);
 
     printSection("Gracia");
     ScriptEngineManager.getInstance().executeScript(GraciaLoader.class);

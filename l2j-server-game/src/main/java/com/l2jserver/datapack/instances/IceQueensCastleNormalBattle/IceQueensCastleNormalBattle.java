@@ -1,15 +1,6 @@
 
 package com.l2jserver.datapack.instances.IceQueensCastleNormalBattle;
 
-import static com.l2jserver.gameserver.model.events.EventType.ON_PLAYER_LOGOUT;
-import static com.l2jserver.gameserver.model.events.ListenerRegisterType.GLOBAL;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.datapack.quests.Q10286_ReunionWithSirra.Q10286_ReunionWithSirra;
 import com.l2jserver.gameserver.ai.CtrlIntention;
@@ -45,12 +36,19 @@ import com.l2jserver.gameserver.network.serverpackets.ExSendUIEvent;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.taskmanager.DecayTaskManager;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Ice Queen's Castle (Normal Battle) instance zone.
- * @author St3eT
- */
-public final class IceQueensCastleNormalBattle extends AbstractInstance {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import static com.l2jserver.gameserver.model.events.EventType.ON_PLAYER_LOGOUT;
+import static com.l2jserver.gameserver.model.events.ListenerRegisterType.GLOBAL;
+
+@Service
+public class IceQueensCastleNormalBattle extends AbstractInstance {
 	protected class IQCNBWorld extends InstanceWorld {
 		protected Set<L2PcInstance> playersInside = ConcurrentHashMap.newKeySet();
 		protected List<L2Npc> knightStatues = new ArrayList<>();

@@ -6,12 +6,10 @@ import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
+import org.springframework.stereotype.Service;
 
-/**
- * Hideout of the Dawn instance zone.
- * @author Adry_85
- */
-public final class HideoutOfTheDawn extends AbstractInstance {
+@Service
+public class HideoutOfTheDawn extends AbstractInstance {
 	protected class HotDWorld extends InstanceWorld {
 		
 	}

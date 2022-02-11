@@ -13,12 +13,10 @@ import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Tower of Infinitum (10th Floor) instance zone.
- * @author GKR
- */
-public final class RankuFloor extends AbstractInstance {
+@Service
+public class RankuFloor extends AbstractInstance {
 	protected class RFWorld extends InstanceWorld {
 		
 	}

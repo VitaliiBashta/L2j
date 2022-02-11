@@ -13,14 +13,12 @@ import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.skills.BuffInfo;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.NpcStringId;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Maguen AI.
- * @author St3eT
- */
-public final class Maguen extends AbstractNpcAI {
+@Service
+public class Maguen extends AbstractNpcAI {
 	// NPC
 	private static final int MAGUEN = 18839; // Wild Maguen
 	private static final int[] ELITES = {

@@ -1,13 +1,6 @@
 
 package com.l2jserver.datapack.instances.Kamaloka;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.gameserver.datatables.SkillData;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
@@ -25,8 +18,17 @@ import com.l2jserver.gameserver.model.skills.BuffInfo;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-public final class Kamaloka extends AbstractInstance {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+@Service
+public class Kamaloka extends AbstractInstance {
 	/*
 	 * Reset time for all kamaloka Default: 6:30AM on server time
 	 */

@@ -1,11 +1,6 @@
 
 package com.l2jserver.datapack.instances.SanctumOftheLordsOfDawn;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.datapack.quests.Q00195_SevenSignsSecretRitualOfThePriests.Q00195_SevenSignsSecretRitualOfThePriests;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
@@ -20,12 +15,15 @@ import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
+import org.springframework.stereotype.Service;
 
-/**
- * Sanctum of the Lords of Dawn instance zone.
- * @author Adry_85
- */
-public final class SanctumOftheLordsOfDawn extends AbstractInstance {
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+@Service
+public class SanctumOftheLordsOfDawn extends AbstractInstance {
 	protected static final class SotLoDWorld extends InstanceWorld {
 		protected int doorst = 0;
 		protected final static Map<Integer, List<L2Npc>> _save_point = new HashMap<>();

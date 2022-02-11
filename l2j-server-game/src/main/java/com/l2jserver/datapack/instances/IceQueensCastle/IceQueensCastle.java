@@ -17,12 +17,10 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Ice Queen's Castle instance zone.
- * @author Adry_85
- */
-public final class IceQueensCastle extends AbstractInstance {
+@Service
+public class IceQueensCastle extends AbstractInstance {
 	protected class IQCWorld extends InstanceWorld {
 		L2PcInstance player = null;
 	}

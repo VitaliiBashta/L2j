@@ -1,11 +1,6 @@
 
 package com.l2jserver.datapack.instances.DarkCloudMansion;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
 import com.l2jserver.gameserver.model.L2Party;
@@ -21,11 +16,15 @@ import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Dark Cloud Mansion instance zone.
- */
-public final class DarkCloudMansion extends AbstractInstance {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Service
+public class DarkCloudMansion extends AbstractInstance {
 	protected class DMCWorld extends InstanceWorld {
 		protected Map<String, DMCRoom> rooms = new ConcurrentHashMap<>();
 	}

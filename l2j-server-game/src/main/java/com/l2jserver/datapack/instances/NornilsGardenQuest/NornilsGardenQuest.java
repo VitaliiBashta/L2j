@@ -9,12 +9,10 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.model.quest.QuestState;
+import org.springframework.stereotype.Service;
 
-/**
- * Nornil's Garden Quest instant zone.
- * @author Zoey76
- */
-public final class NornilsGardenQuest extends AbstractInstance {
+@Service
+public class NornilsGardenQuest extends AbstractInstance {
 	protected static final class NornilsGardenQuestWorld extends InstanceWorld {
 		protected Location ORIGIN_LOC;
 	}

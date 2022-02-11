@@ -9,12 +9,10 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.instancezone.InstanceWorld;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Library of Sages instance zone.
- * @author Adry_85
- */
-public final class LibraryOfSages extends AbstractInstance {
+@Service
+public class LibraryOfSages extends AbstractInstance {
 	protected class LoSWorld extends InstanceWorld {
 		protected L2Npc elcadia = null;
 	}
