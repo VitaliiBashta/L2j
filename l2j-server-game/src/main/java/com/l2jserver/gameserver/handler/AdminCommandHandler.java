@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class AdminCommandHandler implements IHandler<IAdminCommandHandler, String> {
+public class AdminCommandHandler {
   private final Map<String, IAdminCommandHandler> datatable = new HashMap<>();
 
   public AdminCommandHandler(List<IAdminCommandHandler> handlers) {
@@ -18,7 +18,6 @@ public class AdminCommandHandler implements IHandler<IAdminCommandHandler, Strin
     return SingletonHolder._instance;
   }
 
-  @Override
   public void registerHandler(IAdminCommandHandler handler) {
     String[] ids = handler.getAdminCommandList();
     for (String id : ids) {
@@ -26,7 +25,6 @@ public class AdminCommandHandler implements IHandler<IAdminCommandHandler, Strin
     }
   }
 
-  @Override
   public synchronized void removeHandler(IAdminCommandHandler handler) {
     String[] ids = handler.getAdminCommandList();
     for (String id : ids) {
@@ -34,7 +32,6 @@ public class AdminCommandHandler implements IHandler<IAdminCommandHandler, Strin
     }
   }
 
-  @Override
   public IAdminCommandHandler getHandler(String adminCommand) {
     String command = adminCommand;
     if (adminCommand.contains(" ")) {
@@ -43,7 +40,6 @@ public class AdminCommandHandler implements IHandler<IAdminCommandHandler, Strin
     return datatable.get(command);
   }
 
-  @Override
   public int size() {
     return datatable.size();
   }

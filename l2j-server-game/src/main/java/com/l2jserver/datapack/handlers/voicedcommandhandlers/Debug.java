@@ -4,7 +4,9 @@ package com.l2jserver.datapack.handlers.voicedcommandhandlers;
 import com.l2jserver.gameserver.data.xml.impl.AdminData;
 import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
+@Service
 public class Debug implements IVoicedCommandHandler {
 	private static final String[] VOICED_COMMANDS = {
 		"debug"

@@ -9,11 +9,10 @@ import com.l2jserver.gameserver.model.entity.Castle;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.StringUtil;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * @author malyelfik
- */
-public final class AdminManor implements IAdminCommandHandler {
+@Service
+public class AdminManor implements IAdminCommandHandler {
 	@Override
 	public boolean useAdminCommand(String command, L2PcInstance activeChar) {
 		final CastleManorManager manor = CastleManorManager.getInstance();

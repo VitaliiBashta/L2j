@@ -6,7 +6,9 @@ import com.l2jserver.gameserver.handler.IActionHandler;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
+import org.springframework.stereotype.Service;
 
+@Service
 public class L2TrapAction implements IActionHandler {
 	@Override
 	public boolean action(L2PcInstance activeChar, L2Object target, boolean interact) {

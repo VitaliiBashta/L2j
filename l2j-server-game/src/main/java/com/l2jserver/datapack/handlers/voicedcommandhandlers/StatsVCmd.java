@@ -1,9 +1,6 @@
 
 package com.l2jserver.datapack.handlers.voicedcommandhandlers;
 
-import static com.l2jserver.gameserver.network.SystemMessageId.S1_OFFLINE;
-import static com.l2jserver.gameserver.network.SystemMessageId.TARGET_IS_NOT_FOUND_IN_THE_GAME;
-
 import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
 import com.l2jserver.gameserver.model.L2World;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
@@ -11,10 +8,12 @@ import com.l2jserver.gameserver.model.entity.L2Event;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.StringUtil;
+import org.springframework.stereotype.Service;
 
-/**
- * @author Zoey76.
- */
+import static com.l2jserver.gameserver.network.SystemMessageId.S1_OFFLINE;
+import static com.l2jserver.gameserver.network.SystemMessageId.TARGET_IS_NOT_FOUND_IN_THE_GAME;
+
+@Service
 public class StatsVCmd implements IVoicedCommandHandler {
 	private static final String[] VOICED_COMMANDS = {
 		"stats"

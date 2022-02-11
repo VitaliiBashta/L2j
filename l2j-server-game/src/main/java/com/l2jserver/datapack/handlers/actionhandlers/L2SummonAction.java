@@ -13,7 +13,9 @@ import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerSummo
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
 import com.l2jserver.gameserver.network.serverpackets.PetStatusShow;
+import org.springframework.stereotype.Service;
 
+@Service
 public class L2SummonAction implements IActionHandler {
 	@Override
 	public boolean action(L2PcInstance activeChar, L2Object target, boolean interact) {

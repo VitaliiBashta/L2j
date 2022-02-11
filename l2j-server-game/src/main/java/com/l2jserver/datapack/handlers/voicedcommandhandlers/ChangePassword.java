@@ -1,19 +1,17 @@
 
 package com.l2jserver.datapack.handlers.voicedcommandhandlers;
 
-import java.util.StringTokenizer;
-import java.util.logging.Level;
-
 import com.l2jserver.gameserver.LoginServerThread;
 import com.l2jserver.gameserver.cache.HtmCache;
 import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Change Password voiced command handler.
- * @author Nik
- */
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+
+@Service
 public class ChangePassword implements IVoicedCommandHandler {
 	private static final String[] COMMANDS = {
 		"changepassword"

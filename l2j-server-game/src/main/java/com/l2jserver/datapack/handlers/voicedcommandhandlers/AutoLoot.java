@@ -1,17 +1,14 @@
 
 package com.l2jserver.datapack.handlers.voicedcommandhandlers;
 
+import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
+import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
+
 import static com.l2jserver.gameserver.config.Configuration.character;
 import static com.l2jserver.gameserver.config.Configuration.customs;
 
-import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
-import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
-
-/**
- * Auto Loot Extension voiced command.
- * @author Maneco2
- * @version 2.6.2.0
- */
+@Service
 public class AutoLoot implements IVoicedCommandHandler {
 	private static final String[] VOICED_COMMANDS = {
 		"loot",

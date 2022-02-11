@@ -11,7 +11,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2StaticObjectInstance;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
 
+@Service
 public class L2StaticObjectInstanceAction implements IActionHandler {
 
   private static final Logger LOG = LogManager.getLogger(L2StaticObjectInstanceAction.class);

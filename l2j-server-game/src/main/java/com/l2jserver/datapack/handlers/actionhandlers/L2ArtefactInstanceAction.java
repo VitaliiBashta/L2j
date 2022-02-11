@@ -7,7 +7,9 @@ import com.l2jserver.gameserver.handler.IActionHandler;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
+@Service
 public class L2ArtefactInstanceAction implements IActionHandler {
 	/**
 	 * Manage actions when a player click on the L2ArtefactInstance.<BR>

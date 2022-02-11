@@ -1,14 +1,6 @@
 
 package com.l2jserver.datapack.handlers.voicedcommandhandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.customs;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.GameTimeController;
 import com.l2jserver.gameserver.SevenSigns;
@@ -33,11 +25,17 @@ import com.l2jserver.gameserver.network.serverpackets.ConfirmDlg;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
 import com.l2jserver.gameserver.network.serverpackets.SetupGauge;
 import com.l2jserver.gameserver.util.Broadcast;
+import org.springframework.stereotype.Service;
 
-/**
- * Wedding voiced commands handler.
- * @author evill33t
- */
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.l2jserver.gameserver.config.Configuration.customs;
+
+@Service
 public class Wedding implements IVoicedCommandHandler {
 	static final Logger _log = Logger.getLogger(Wedding.class.getName());
 	private static final String[] _voicedCommands = {

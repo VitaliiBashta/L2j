@@ -1,10 +1,6 @@
 
 package com.l2jserver.datapack.handlers.admincommandhandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
-import java.util.StringTokenizer;
-
 import com.l2jserver.gameserver.cache.HtmCache;
 import com.l2jserver.gameserver.data.sql.impl.AnnouncementsTable;
 import com.l2jserver.gameserver.handler.IAdminCommandHandler;
@@ -17,10 +13,13 @@ import com.l2jserver.gameserver.model.announce.IAnnouncement;
 import com.l2jserver.gameserver.util.Broadcast;
 import com.l2jserver.gameserver.util.HtmlUtil;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * @author UnAfraid
- */
+import java.util.StringTokenizer;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
+
+@Service
 public class AdminAnnouncements implements IAdminCommandHandler {
 	private static final String[] ADMIN_COMMANDS = {
 		"admin_announce",

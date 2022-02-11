@@ -98,14 +98,8 @@ public abstract class IXmlReader {
   /**
    * Abstract method that when implemented will parse the current document.<br>
    * Is expected to be call from {@link #parseFile(File)}.
-   *
-   * @param doc the current document to parse
    */
   protected abstract void parseDocument(Document doc);
-
-  protected boolean parseDirectory(Path path) {
-    return parseDirectory(path, false);
-  }
 
   protected boolean parseDirectory(Path strDir, boolean recursive) {
     if (!Files.exists(strDir)) {
@@ -113,7 +107,7 @@ public abstract class IXmlReader {
       return false;
     }
 
-    final File[] files = strDir.toFile().listFiles();
+    File[] files = strDir.toFile().listFiles();
     if (files != null) {
       for (File f : files) {
         if (recursive && f.isDirectory()) {
@@ -134,13 +128,7 @@ public abstract class IXmlReader {
     return parseDirectory(Path.of(path), false);
   }
 
-  /**
-   * Parses a boolean value.
-   *
-   * @param attrs the attributes
-   * @param name the name of the attribute to parse
-   * @return if the node is not null, the value of the parsed node, otherwise null
-   */
+  /** Parses a boolean value. */
   protected Boolean parseBoolean(NamedNodeMap attrs, String name) {
     return parseBoolean(attrs.getNamedItem(name));
   }

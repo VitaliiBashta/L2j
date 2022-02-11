@@ -12,7 +12,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.entity.TvTEvent;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
+import org.springframework.stereotype.Service;
 
+@Service
 public class L2PcInstanceAction implements IActionHandler {
 	private static final int CURSED_WEAPON_VICTIM_MIN_LEVEL = 21;
 	

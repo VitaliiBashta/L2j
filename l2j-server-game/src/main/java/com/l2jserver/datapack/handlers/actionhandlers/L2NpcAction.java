@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.handlers.actionhandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.character;
-
 import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.GeoData;
 import com.l2jserver.gameserver.ai.CtrlIntention;
@@ -17,7 +15,11 @@ import com.l2jserver.gameserver.model.events.EventDispatcher;
 import com.l2jserver.gameserver.model.events.EventType;
 import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcFirstTalk;
 import com.l2jserver.gameserver.network.serverpackets.MoveToPawn;
+import org.springframework.stereotype.Service;
 
+import static com.l2jserver.gameserver.config.Configuration.character;
+
+@Service
 public class L2NpcAction implements IActionHandler {
 	/**
 	 * Manage actions when a player click on the L2Npc.<BR>

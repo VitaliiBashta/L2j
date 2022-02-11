@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.handlers.voicedcommandhandlers;
 
-import java.util.StringTokenizer;
-
 import com.l2jserver.gameserver.data.sql.impl.CharNameTable;
 import com.l2jserver.gameserver.data.xml.impl.AdminData;
 import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
@@ -13,7 +11,11 @@ import com.l2jserver.gameserver.model.punishment.PunishmentAffect;
 import com.l2jserver.gameserver.model.punishment.PunishmentTask;
 import com.l2jserver.gameserver.model.punishment.PunishmentType;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
+import java.util.StringTokenizer;
+
+@Service
 public class ChatAdmin implements IVoicedCommandHandler {
 	private static final String[] VOICED_COMMANDS = {
 		"banchat",

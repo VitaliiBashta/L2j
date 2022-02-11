@@ -20,12 +20,7 @@ import static com.l2jserver.gameserver.config.Configuration.general;
 public class AdminChangeAccessLevel implements IAdminCommandHandler {
   private static final String[] ADMIN_COMMANDS = {"admin_changelvl"};
 
-  /**
-   * @param activeChar the active GM
-   * @param player the online target
-   * @param lvl the access level
-   */
-  private static void onlineChange(L2PcInstance activeChar, L2PcInstance player, int lvl) {
+  private void onlineChange(L2PcInstance activeChar, L2PcInstance player, int lvl) {
     if (lvl >= 0) {
       if (AdminData.getInstance().hasAccessLevel(lvl)) {
         final L2AccessLevel acccessLevel = AdminData.getInstance().getAccessLevel(lvl);

@@ -14,7 +14,9 @@ import com.l2jserver.gameserver.model.events.EventDispatcher;
 import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerSummonTalk;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.PetStatusShow;
+import org.springframework.stereotype.Service;
 
+@Service
 public class L2PetInstanceAction implements IActionHandler {
 	@Override
 	public boolean action(L2PcInstance activeChar, L2Object target, boolean interact) {

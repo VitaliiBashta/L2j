@@ -1,9 +1,12 @@
 package com.l2jserver.datapack.handlers;
 
 import com.l2jserver.commons.util.Util;
-import com.l2jserver.datapack.handlers.actionhandlers.*;
-import com.l2jserver.datapack.handlers.actionshifthandlers.*;
-import com.l2jserver.datapack.handlers.admincommandhandlers.*;
+import com.l2jserver.datapack.handlers.actionshifthandlers.L2DoorInstanceActionShift;
+import com.l2jserver.datapack.handlers.actionshifthandlers.L2ItemInstanceActionShift;
+import com.l2jserver.datapack.handlers.actionshifthandlers.L2NpcActionShift;
+import com.l2jserver.datapack.handlers.actionshifthandlers.L2PcInstanceActionShift;
+import com.l2jserver.datapack.handlers.actionshifthandlers.L2StaticObjectInstanceActionShift;
+import com.l2jserver.datapack.handlers.actionshifthandlers.L2SummonActionShift;
 import com.l2jserver.datapack.handlers.bypasshandlers.*;
 import com.l2jserver.datapack.handlers.chathandlers.*;
 import com.l2jserver.datapack.handlers.communityboard.*;
@@ -12,32 +15,22 @@ import com.l2jserver.datapack.handlers.punishmenthandlers.BanHandler;
 import com.l2jserver.datapack.handlers.punishmenthandlers.ChatBanHandler;
 import com.l2jserver.datapack.handlers.punishmenthandlers.JailHandler;
 import com.l2jserver.datapack.handlers.targethandlers.*;
-import com.l2jserver.datapack.handlers.telnethandlers.*;
+import com.l2jserver.datapack.handlers.telnethandlers.ChatsHandler;
+import com.l2jserver.datapack.handlers.telnethandlers.DebugHandler;
+import com.l2jserver.datapack.handlers.telnethandlers.HelpHandler;
+import com.l2jserver.datapack.handlers.telnethandlers.PlayerHandler;
+import com.l2jserver.datapack.handlers.telnethandlers.ServerHandler;
+import com.l2jserver.datapack.handlers.telnethandlers.StatusHandler;
+import com.l2jserver.datapack.handlers.telnethandlers.ThreadHandler;
 import com.l2jserver.datapack.handlers.usercommandhandlers.*;
-import com.l2jserver.datapack.handlers.voicedcommandhandlers.*;
 import com.l2jserver.gameserver.handler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
 public class MasterHandler {
   private static final Logger LOG = LoggerFactory.getLogger(MasterHandler.class);
-
-  private static final List<Class<?>> ACTION_HANDLERS =
-      List.of(
-          L2ArtefactInstanceAction.class,
-          L2DecoyAction.class,
-          L2DoorInstanceAction.class,
-          L2ItemInstanceAction.class,
-          L2NpcAction.class,
-          L2PcInstanceAction.class,
-          L2PetInstanceAction.class,
-          L2StaticObjectInstanceAction.class,
-          L2SummonAction.class,
-          L2TrapAction.class);
 
   private static final List<Class<?>> ACTION_SHIFT_HANDLERS =
       List.of(
@@ -47,16 +40,6 @@ public class MasterHandler {
           L2PcInstanceActionShift.class,
           L2StaticObjectInstanceActionShift.class,
           L2SummonActionShift.class);
-
-  private static final List<Class<?>> ADMIN_HANDLERS =
-      List.of(
-          AdminAnnouncements.class,
-          AdminBBS.class,
-          AdminChangeAccessLevel.class,
-          AdminManor.class,
-          AdminMobGroup.class,
-          AdminUnblockIp.class,
-          AdminZone.class);
 
   private static final List<Class<?>> BYPASS_HANDLERS =
       List.of(
@@ -226,35 +209,8 @@ public class MasterHandler {
           StatusHandler.class,
           ThreadHandler.class);
 
-  private static final List<Class<?>> VOICED_COMMAND_HANDLERS =
-      List.of(
-          AutoLoot.class,
-          StatsVCmd.class,
-          // TODO: Add configuration options for this voiced commands:
-          // CastleVCmd.class,
-          // SetVCmd.class,
-          Wedding.class,
-          Banking.class,
-          ChatAdmin.class,
-          Lang.class,
-          Debug.class,
-          ChangePassword.class);
-
-  // private static final Class<?>[] CUSTOM_HANDLERS =
-  // {
-  // CustomAnnouncePkPvP.class
-  // };
-
   public void init() {
-    if (general().noHandlers()) {
-      LOG.info("Handlers disabled...");
-      return;
-    }
-
-    loadHandlers(VoicedCommandHandler.getInstance(), VOICED_COMMAND_HANDLERS);
-    loadHandlers(ActionHandler.getInstance(), ACTION_HANDLERS);
     loadHandlers(ActionShiftHandler.getInstance(), ACTION_SHIFT_HANDLERS);
-    loadHandlers(AdminCommandHandler.getInstance(), ADMIN_HANDLERS);
     loadHandlers(BypassHandler.getInstance(), BYPASS_HANDLERS);
     loadHandlers(ChatHandler.getInstance(), CHAT_HANDLERS);
     loadHandlers(CommunityBoardHandler.getInstance(), COMMUNITY_HANDLERS);

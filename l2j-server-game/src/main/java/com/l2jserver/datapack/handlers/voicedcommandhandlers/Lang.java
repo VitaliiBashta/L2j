@@ -1,15 +1,17 @@
 
 package com.l2jserver.datapack.handlers.voicedcommandhandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.customs;
-
-import java.util.StringTokenizer;
-
 import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.StringUtil;
+import org.springframework.stereotype.Service;
 
+import java.util.StringTokenizer;
+
+import static com.l2jserver.gameserver.config.Configuration.customs;
+
+@Service
 public class Lang implements IVoicedCommandHandler {
 	private static final String[] VOICED_COMMANDS = {
 		"lang"

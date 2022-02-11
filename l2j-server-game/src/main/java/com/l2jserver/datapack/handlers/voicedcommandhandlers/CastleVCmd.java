@@ -7,10 +7,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2DoorInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.entity.Castle;
 import com.l2jserver.gameserver.network.SystemMessageId;
+import org.springframework.stereotype.Service;
 
-/**
- * @author Zoey76
- */
+@Service
 public class CastleVCmd implements IVoicedCommandHandler {
 	private static final String[] VOICED_COMMANDS = {
 		"opendoors",

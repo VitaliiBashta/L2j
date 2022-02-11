@@ -1,15 +1,13 @@
 
 package com.l2jserver.datapack.handlers.voicedcommandhandlers;
 
-import static com.l2jserver.gameserver.config.Configuration.customs;
-
 import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * This class trades Gold Bars for Adena and vice versa.
- * @author Ahmed
- */
+import static com.l2jserver.gameserver.config.Configuration.customs;
+
+@Service
 public class Banking implements IVoicedCommandHandler {
 	private static final String[] _voicedCommands = {
 		"bank",

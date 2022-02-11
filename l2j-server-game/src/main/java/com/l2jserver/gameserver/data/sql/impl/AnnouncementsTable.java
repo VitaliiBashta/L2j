@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 @Service
-public final class AnnouncementsTable {
+public class AnnouncementsTable {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(AnnouncementsTable.class);
 	

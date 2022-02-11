@@ -22,13 +22,13 @@ import java.util.Map;
 import static com.l2jserver.gameserver.config.Configuration.general;
 
 @Service
-public final class BuyListData extends IXmlReader {
+public class BuyListData extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(BuyListData.class);
 
   private static final FileFilter NUMERIC_FILTER = new NumericNameFilter();
 
-  private final Map<Integer, L2BuyList> _buyLists = new HashMap<>();
+  private final Map<Integer, L2BuyList> buyLists = new HashMap<>();
   private final Context context;
   private final ItemTable itemTable;
 
@@ -43,13 +43,13 @@ public final class BuyListData extends IXmlReader {
 
   @Override
   public synchronized void load() {
-    _buyLists.clear();
+    buyLists.clear();
     parseDatapackDirectory("data/buylists");
     if (general().customBuyListLoad()) {
       parseDatapackDirectory("data/buylists/custom");
     }
 
-    LOG.info("Loaded {} buy lists.", _buyLists.size());
+    LOG.info("Loaded {} buy lists.", buyLists.size());
 
     try (var con = context.connectionFactory.getConnection();
         var statement = con.createStatement();
@@ -131,7 +131,7 @@ public final class BuyListData extends IXmlReader {
               }
             }
           }
-          _buyLists.put(buyList.getListId(), buyList);
+          buyLists.put(buyList.getListId(), buyList);
         }
       }
     } catch (Exception ex) {
@@ -150,7 +150,7 @@ public final class BuyListData extends IXmlReader {
   }
 
   public L2BuyList getBuyList(int listId) {
-    return _buyLists.get(listId);
+    return buyLists.get(listId);
   }
 
   private static class SingletonHolder {

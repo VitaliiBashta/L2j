@@ -5,10 +5,9 @@ import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * @author Zoey76
- */
+@Service
 public class SetVCmd implements IVoicedCommandHandler {
 	private static final String[] VOICED_COMMANDS = {
 		"set name",

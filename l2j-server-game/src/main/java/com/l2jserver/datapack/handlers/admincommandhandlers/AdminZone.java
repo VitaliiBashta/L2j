@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.handlers.admincommandhandlers;
 
-import java.util.StringTokenizer;
-
 import com.l2jserver.gameserver.cache.HtmCache;
 import com.l2jserver.gameserver.handler.IAdminCommandHandler;
 import com.l2jserver.gameserver.instancemanager.MapRegionManager;
@@ -17,10 +15,11 @@ import com.l2jserver.gameserver.model.zone.ZoneId;
 import com.l2jserver.gameserver.model.zone.type.NpcSpawnTerritory;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.StringUtil;
+import org.springframework.stereotype.Service;
 
-/**
- * Small typo fix by Zoey76 24/02/2011
- */
+import java.util.StringTokenizer;
+
+@Service
 public class AdminZone implements IAdminCommandHandler {
 	private static final String[] ADMIN_COMMANDS = {
 		"admin_zone_check",

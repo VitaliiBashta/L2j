@@ -12,7 +12,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.entity.clanhall.SiegableHall;
 import com.l2jserver.gameserver.model.holders.DoorRequestHolder;
 import com.l2jserver.gameserver.network.serverpackets.ConfirmDlg;
+import org.springframework.stereotype.Service;
 
+@Service
 public class L2DoorInstanceAction implements IActionHandler {
 	@Override
 	public boolean action(L2PcInstance activeChar, L2Object target, boolean interact) {

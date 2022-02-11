@@ -13,10 +13,9 @@ import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
 import com.l2jserver.gameserver.network.serverpackets.SetupGauge;
 import com.l2jserver.gameserver.util.Broadcast;
+import org.springframework.stereotype.Service;
 
-/**
- * @author littlecrow Admin commands handler for controllable mobs
- */
+@Service
 public class AdminMobGroup implements IAdminCommandHandler {
 	private static final String[] ADMIN_COMMANDS = {
 		"admin_mobmenu",
