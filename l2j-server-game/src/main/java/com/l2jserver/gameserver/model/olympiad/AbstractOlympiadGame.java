@@ -18,15 +18,7 @@
  */
 package com.l2jserver.gameserver.model.olympiad;
 
-import static com.l2jserver.gameserver.config.Configuration.customs;
-import static com.l2jserver.gameserver.config.Configuration.olympiad;
-
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.l2jserver.gameserver.ai.CtrlIntention;
-import com.l2jserver.gameserver.instancemanager.AntiFeedManager;
 import com.l2jserver.gameserver.instancemanager.CastleManager;
 import com.l2jserver.gameserver.instancemanager.FortManager;
 import com.l2jserver.gameserver.model.L2Party;
@@ -46,6 +38,12 @@ import com.l2jserver.gameserver.network.serverpackets.InventoryUpdate;
 import com.l2jserver.gameserver.network.serverpackets.L2GameServerPacket;
 import com.l2jserver.gameserver.network.serverpackets.SkillCoolTime;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.l2jserver.gameserver.config.Configuration.olympiad;
 
 /**
  * @author godson
@@ -335,9 +333,6 @@ public abstract class AbstractOlympiadGame {
 			player.setCurrentMp(player.getMaxMp());
 			player.getStatus().startHpMpRegeneration();
 			
-			if (customs().getDualboxCheckMaxOlympiadParticipantsPerIP() > 0) {
-				AntiFeedManager.getInstance().removePlayer(AntiFeedManager.OLYMPIAD_ID, player);
-			}
 		} catch (Exception e) {
 			_log.log(Level.WARNING, "portPlayersToArena()", e);
 		}

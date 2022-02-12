@@ -241,8 +241,6 @@ public class GameServer {
 
     TaskManager.getInstance();
 
-    AntiFeedManager.getInstance().registerEvent(AntiFeedManager.GAME_ID);
-
     if (general().allowMail()) {
       MailManager.getInstance();
     }

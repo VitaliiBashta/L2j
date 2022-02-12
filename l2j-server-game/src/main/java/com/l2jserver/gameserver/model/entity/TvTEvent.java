@@ -18,21 +18,11 @@
  */
 package com.l2jserver.gameserver.model.entity;
 
-import static com.l2jserver.gameserver.config.Configuration.tvt;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.cache.HtmCache;
 import com.l2jserver.gameserver.data.xml.impl.DoorData;
 import com.l2jserver.gameserver.datatables.ItemTable;
 import com.l2jserver.gameserver.datatables.SpawnTable;
-import com.l2jserver.gameserver.instancemanager.AntiFeedManager;
 import com.l2jserver.gameserver.instancemanager.InstanceManager;
 import com.l2jserver.gameserver.model.L2Spawn;
 import com.l2jserver.gameserver.model.L2World;
@@ -57,6 +47,15 @@ import com.l2jserver.gameserver.network.serverpackets.CreatureSay;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.StringUtil;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.l2jserver.gameserver.config.Configuration.tvt;
 
 /**
  * TvT Event.
@@ -92,7 +91,6 @@ public class TvTEvent {
 	
 	/** Teams initializing. */
 	public static void init() {
-		AntiFeedManager.getInstance().registerEvent(AntiFeedManager.TVT_ID);
 		_teams[0] = new TvTEventTeam(tvt().getTeam1Name(), tvt().getTeam1Loc());
 		_teams[1] = new TvTEventTeam(tvt().getTeam2Name(), tvt().getTeam2Loc());
 	}
@@ -212,7 +210,6 @@ public class TvTEvent {
 			_teams[1].cleanMe();
 			// Unspawn the event NPC
 			unSpawnNpc();
-			AntiFeedManager.getInstance().clear(AntiFeedManager.TVT_ID);
 			return false;
 		}
 		
@@ -364,7 +361,6 @@ public class TvTEvent {
 		_teams[1].cleanMe();
 		// Set state INACTIVE
 		setState(EventState.INACTIVE);
-		AntiFeedManager.getInstance().clear(AntiFeedManager.TVT_ID);
 	}
 	
 	/**

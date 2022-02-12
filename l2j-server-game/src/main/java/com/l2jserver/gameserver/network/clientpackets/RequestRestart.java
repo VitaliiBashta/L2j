@@ -18,14 +18,8 @@
  */
 package com.l2jserver.gameserver.network.clientpackets;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.l2jserver.gameserver.SevenSignsFestival;
 import com.l2jserver.gameserver.enums.PrivateStoreType;
-import com.l2jserver.gameserver.instancemanager.AntiFeedManager;
 import com.l2jserver.gameserver.model.L2Party;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.L2GameClient;
@@ -34,6 +28,10 @@ import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.CharSelectionInfo;
 import com.l2jserver.gameserver.network.serverpackets.RestartResponse;
 import com.l2jserver.gameserver.taskmanager.AttackStanceTaskManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
 
 public final class RequestRestart extends L2GameClientPacket {
 	
@@ -116,8 +114,7 @@ public final class RequestRestart extends L2GameClientPacket {
 		player.deleteMe();
 		
 		client.setActiveChar(null);
-		AntiFeedManager.getInstance().onDisconnect(client);
-		
+
 		// return the client to the authed status
 		client.setState(GameClientState.AUTHED);
 		

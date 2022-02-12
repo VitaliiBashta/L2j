@@ -24,7 +24,13 @@ import com.l2jserver.gameserver.idfactory.IdFactory;
 import com.l2jserver.gameserver.instancemanager.*;
 import com.l2jserver.gameserver.model.*;
 import com.l2jserver.gameserver.model.L2Party.messageType;
-import com.l2jserver.gameserver.model.actor.*;
+import com.l2jserver.gameserver.model.actor.L2Attackable;
+import com.l2jserver.gameserver.model.actor.L2Character;
+import com.l2jserver.gameserver.model.actor.L2Decoy;
+import com.l2jserver.gameserver.model.actor.L2Npc;
+import com.l2jserver.gameserver.model.actor.L2Playable;
+import com.l2jserver.gameserver.model.actor.L2Summon;
+import com.l2jserver.gameserver.model.actor.L2Vehicle;
 import com.l2jserver.gameserver.model.actor.appearance.PcAppearance;
 import com.l2jserver.gameserver.model.actor.knownlist.PcKnownList;
 import com.l2jserver.gameserver.model.actor.stat.PcStat;
@@ -38,20 +44,44 @@ import com.l2jserver.gameserver.model.base.PlayerClass;
 import com.l2jserver.gameserver.model.base.SubClass;
 import com.l2jserver.gameserver.model.effects.EffectFlag;
 import com.l2jserver.gameserver.model.effects.L2EffectType;
-import com.l2jserver.gameserver.model.entity.*;
+import com.l2jserver.gameserver.model.entity.Castle;
+import com.l2jserver.gameserver.model.entity.Duel;
+import com.l2jserver.gameserver.model.entity.Fort;
+import com.l2jserver.gameserver.model.entity.Instance;
+import com.l2jserver.gameserver.model.entity.L2Event;
+import com.l2jserver.gameserver.model.entity.Siege;
+import com.l2jserver.gameserver.model.entity.TvTEvent;
 import com.l2jserver.gameserver.model.events.Containers;
 import com.l2jserver.gameserver.model.events.EventDispatcher;
 import com.l2jserver.gameserver.model.events.impl.character.player.*;
 import com.l2jserver.gameserver.model.events.returns.TerminateReturn;
 import com.l2jserver.gameserver.model.fishing.L2Fish;
 import com.l2jserver.gameserver.model.fishing.L2Fishing;
-import com.l2jserver.gameserver.model.holders.*;
+import com.l2jserver.gameserver.model.holders.AdditionalSkillHolder;
+import com.l2jserver.gameserver.model.holders.ItemHolder;
+import com.l2jserver.gameserver.model.holders.PlayerEventHolder;
+import com.l2jserver.gameserver.model.holders.SkillHolder;
+import com.l2jserver.gameserver.model.holders.SkillUseHolder;
 import com.l2jserver.gameserver.model.interfaces.IEventListener;
 import com.l2jserver.gameserver.model.interfaces.ILocational;
-import com.l2jserver.gameserver.model.itemcontainer.*;
-import com.l2jserver.gameserver.model.items.*;
+import com.l2jserver.gameserver.model.itemcontainer.Inventory;
+import com.l2jserver.gameserver.model.itemcontainer.ItemContainer;
+import com.l2jserver.gameserver.model.itemcontainer.PcFreight;
+import com.l2jserver.gameserver.model.itemcontainer.PcInventory;
+import com.l2jserver.gameserver.model.itemcontainer.PcRefund;
+import com.l2jserver.gameserver.model.itemcontainer.PcWarehouse;
+import com.l2jserver.gameserver.model.itemcontainer.PetInventory;
+import com.l2jserver.gameserver.model.items.L2Armor;
+import com.l2jserver.gameserver.model.items.L2EtcItem;
+import com.l2jserver.gameserver.model.items.L2Henna;
+import com.l2jserver.gameserver.model.items.L2Item;
+import com.l2jserver.gameserver.model.items.L2Weapon;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
-import com.l2jserver.gameserver.model.items.type.*;
+import com.l2jserver.gameserver.model.items.type.ActionType;
+import com.l2jserver.gameserver.model.items.type.ArmorType;
+import com.l2jserver.gameserver.model.items.type.EtcItemType;
+import com.l2jserver.gameserver.model.items.type.ItemType2;
+import com.l2jserver.gameserver.model.items.type.WeaponType;
 import com.l2jserver.gameserver.model.multisell.PreparedListContainer;
 import com.l2jserver.gameserver.model.olympiad.OlympiadGameManager;
 import com.l2jserver.gameserver.model.olympiad.OlympiadGameTask;
@@ -86,7 +116,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -4205,15 +4240,13 @@ public class L2PcInstance extends L2Playable {
 					if (!insidePvpZone && !insideSiegeZone) {
 						if ((pk != null) && (pk.getClan() != null) && (getClan() != null) && !isAcademyMember() && !(pk.isAcademyMember())) {
 							if ((_clan.isAtWarWith(pk.getClanId()) && pk.getClan().isAtWarWith(_clan.getId())) || (isInSiege() && pk.isInSiege())) {
-								if (AntiFeedManager.getInstance().check(killer, this)) {
-									// when your reputation score is 0 or below, the other clan cannot acquire any reputation points
-									if (getClan().getReputationScore() > 0) {
-										pk.getClan().addReputationScore(clan().getReputationScorePerKill(), false);
-									}
-									// when the opposing sides reputation score is 0 or below, your clans reputation score does not decrease
-									if (pk.getClan().getReputationScore() > 0) {
-										_clan.takeReputationScore(clan().getReputationScorePerKill(), false);
-									}
+								// when your reputation score is 0 or below, the other clan cannot acquire any reputation points
+								if (getClan().getReputationScore() > 0) {
+									pk.getClan().addReputationScore(clan().getReputationScorePerKill(), false);
+								}
+								// when the opposing sides reputation score is 0 or below, your clans reputation score does not decrease
+								if (pk.getClan().getReputationScore() > 0) {
+									_clan.takeReputationScore(clan().getReputationScorePerKill(), false);
 								}
 							}
 						}
@@ -4262,7 +4295,6 @@ public class L2PcInstance extends L2Playable {
 		stopRentPet();
 		stopWaterTask();
 
-		AntiFeedManager.getInstance().setLastDeathTime(getObjectId());
 
 		return true;
 	}
@@ -4414,16 +4446,13 @@ public class L2PcInstance extends L2Playable {
 	
 	/**
 	 * Increase the pvp kills count and send the info to the player
-	 * @param target
 	 */
 	public void increasePvpKills(L2Character target) {
-		if ((target instanceof L2PcInstance) && AntiFeedManager.getInstance().check(this, target)) {
-			setPvpKills(getPvpKills() + 1);
+		setPvpKills(getPvpKills() + 1);
 
-			// Send a Server->Client UserInfo packet to attacker with its Karma and PK Counter
-			sendPacket(new UserInfo(this));
-			sendPacket(new ExBrExtraUserInfo(this));
-		}
+		// Send a Server->Client UserInfo packet to attacker with its Karma and PK Counter
+		sendPacket(new UserInfo(this));
+		sendPacket(new ExBrExtraUserInfo(this));
 	}
 	
 	/**

@@ -18,8 +18,19 @@
  */
 package com.l2jserver.gameserver.model.entity;
 
-import static com.l2jserver.gameserver.config.Configuration.customs;
-import static com.l2jserver.gameserver.config.Configuration.server;
+import com.l2jserver.gameserver.cache.HtmCache;
+import com.l2jserver.gameserver.data.xml.impl.NpcData;
+import com.l2jserver.gameserver.datatables.SpawnTable;
+import com.l2jserver.gameserver.model.L2Spawn;
+import com.l2jserver.gameserver.model.L2World;
+import com.l2jserver.gameserver.model.actor.L2Npc;
+import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import com.l2jserver.gameserver.model.holders.PlayerEventHolder;
+import com.l2jserver.gameserver.network.serverpackets.CharInfo;
+import com.l2jserver.gameserver.network.serverpackets.ExBrExtraUserInfo;
+import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
+import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
+import com.l2jserver.gameserver.network.serverpackets.UserInfo;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -35,20 +46,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.l2jserver.gameserver.cache.HtmCache;
-import com.l2jserver.gameserver.data.xml.impl.NpcData;
-import com.l2jserver.gameserver.datatables.SpawnTable;
-import com.l2jserver.gameserver.instancemanager.AntiFeedManager;
-import com.l2jserver.gameserver.model.L2Spawn;
-import com.l2jserver.gameserver.model.L2World;
-import com.l2jserver.gameserver.model.actor.L2Npc;
-import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
-import com.l2jserver.gameserver.model.holders.PlayerEventHolder;
-import com.l2jserver.gameserver.network.serverpackets.CharInfo;
-import com.l2jserver.gameserver.network.serverpackets.ExBrExtraUserInfo;
-import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
-import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
-import com.l2jserver.gameserver.network.serverpackets.UserInfo;
+import static com.l2jserver.gameserver.config.Configuration.customs;
+import static com.l2jserver.gameserver.config.Configuration.server;
 
 /**
  * @author Nik
@@ -222,8 +221,8 @@ public class L2Event {
 			player.sendMessage("The registration period for this event is over.");
 			return;
 		}
-		
-		if ((customs().getDualboxCheckMaxL2EventParticipantsPerIP() == 0) || AntiFeedManager.getInstance().tryAddPlayer(AntiFeedManager.L2EVENT_ID, player, customs().getDualboxCheckMaxL2EventParticipantsPerIP())) {
+
+    if ((customs().getDualboxCheckMaxL2EventParticipantsPerIP() == 0)) {
 			_registeredPlayers.add(player);
 		} else {
 			player.sendMessage("You have reached the maximum allowed participants per IP.");
@@ -308,10 +307,7 @@ public class L2Event {
 					break;
 			}
 			
-			// Register the event at AntiFeedManager and clean it for just in case if the event is already registered.
-			AntiFeedManager.getInstance().registerEvent(AntiFeedManager.L2EVENT_ID);
-			AntiFeedManager.getInstance().clear(AntiFeedManager.L2EVENT_ID);
-			
+
 			// Just in case
 			unspawnEventNpcs();
 			_registeredPlayers.clear();
@@ -441,7 +437,6 @@ public class L2Event {
 				}
 				
 				eventState = EventState.OFF;
-				AntiFeedManager.getInstance().clear(AntiFeedManager.TVT_ID);
 				unspawnEventNpcs(); // Just in case
 				// _npcs.clear();
 				_registeredPlayers.clear();

@@ -18,17 +18,7 @@
  */
 package com.l2jserver.gameserver.model.olympiad;
 
-import static com.l2jserver.gameserver.config.Configuration.customs;
-import static com.l2jserver.gameserver.config.Configuration.olympiad;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.l2jserver.gameserver.ThreadPoolManager;
-import com.l2jserver.gameserver.instancemanager.AntiFeedManager;
 import com.l2jserver.gameserver.model.L2Party;
 import com.l2jserver.gameserver.model.L2World;
 import com.l2jserver.gameserver.model.StatsSet;
@@ -36,6 +26,15 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import static com.l2jserver.gameserver.config.Configuration.customs;
+import static com.l2jserver.gameserver.config.Configuration.olympiad;
 
 /**
  * @author DS
@@ -93,7 +92,6 @@ public class OlympiadManager {
 		_nonClassBasedRegisters.clear();
 		_classBasedRegisters.clear();
 		_teamsBasedRegisters.clear();
-		AntiFeedManager.getInstance().clear(AntiFeedManager.OLYMPIAD_ID);
 	}
 	
 	public final boolean isRegistered(L2PcInstance noble) {
@@ -254,7 +252,6 @@ public class OlympiadManager {
 									break;
 								}
 								
-								AntiFeedManager.getInstance().removePlayer(AntiFeedManager.OLYMPIAD_ID, unreg);
 							}
 						}
 						return false;
@@ -271,11 +268,6 @@ public class OlympiadManager {
 					// TODO: replace with retail message
 					player.sendMessage("Your team must have at least 10 points in total.");
 					// remove previously registered party members
-					if (customs().getDualboxCheckMaxOlympiadParticipantsPerIP() > 0) {
-						for (L2PcInstance unreg : party.getMembers()) {
-							AntiFeedManager.getInstance().removePlayer(AntiFeedManager.OLYMPIAD_ID, unreg);
-						}
-					}
 					return false;
 				}
 				
@@ -310,10 +302,7 @@ public class OlympiadManager {
 		
 		Integer objId = noble.getObjectId();
 		if (_nonClassBasedRegisters.remove(objId)) {
-			if (customs().getDualboxCheckMaxOlympiadParticipantsPerIP() > 0) {
-				AntiFeedManager.getInstance().removePlayer(AntiFeedManager.OLYMPIAD_ID, noble);
-			}
-			
+
 			noble.sendPacket(SystemMessageId.YOU_HAVE_BEEN_DELETED_FROM_THE_WAITING_LIST_OF_A_GAME);
 			return true;
 		}
@@ -322,10 +311,7 @@ public class OlympiadManager {
 		if ((classed != null) && classed.remove(objId)) {
 			_classBasedRegisters.put(noble.getBaseClass(), classed);
 			
-			if (customs().getDualboxCheckMaxOlympiadParticipantsPerIP() > 0) {
-				AntiFeedManager.getInstance().removePlayer(AntiFeedManager.OLYMPIAD_ID, noble);
-			}
-			
+
 			noble.sendPacket(SystemMessageId.YOU_HAVE_BEEN_DELETED_FROM_THE_WAITING_LIST_OF_A_GAME);
 			return true;
 		}
@@ -442,15 +428,7 @@ public class OlympiadManager {
 			player.sendPacket(message);
 			return false;
 		}
-		
-		if ((customs().getDualboxCheckMaxOlympiadParticipantsPerIP() > 0) && !AntiFeedManager.getInstance().tryAddPlayer(AntiFeedManager.OLYMPIAD_ID, noble, customs().getDualboxCheckMaxOlympiadParticipantsPerIP())) {
-			final NpcHtmlMessage message = new NpcHtmlMessage(player.getLastHtmlActionOriginId());
-			message.setFile(player.getHtmlPrefix(), "data/html/mods/OlympiadIPRestriction.htm");
-			message.replace("%max%", String.valueOf(AntiFeedManager.getInstance().getLimit(player, customs().getDualboxCheckMaxOlympiadParticipantsPerIP())));
-			player.sendPacket(message);
-			return false;
-		}
-		
+
 		return true;
 	}
 	
@@ -468,9 +446,6 @@ public class OlympiadManager {
 				L2PcInstance teamMember = L2World.getInstance().getPlayer(objectId);
 				if (teamMember != null) {
 					teamMember.sendPacket(sm);
-					if (customs().getDualboxCheckMaxOlympiadParticipantsPerIP() > 0) {
-						AntiFeedManager.getInstance().removePlayer(AntiFeedManager.OLYMPIAD_ID, teamMember);
-					}
 				}
 			}
 		}

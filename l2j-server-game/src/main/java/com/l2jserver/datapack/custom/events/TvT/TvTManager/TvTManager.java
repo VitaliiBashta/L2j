@@ -2,7 +2,6 @@ package com.l2jserver.datapack.custom.events.TvT.TvTManager;
 
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.handler.IVoicedCommandHandler;
-import com.l2jserver.gameserver.instancemanager.AntiFeedManager;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.entity.TvTEvent;
@@ -22,10 +21,6 @@ public class TvTManager extends AbstractNpcAI implements IVoicedCommandHandler {
     addFirstTalkId(MANAGER_ID);
     addTalkId(MANAGER_ID);
     addStartNpc(MANAGER_ID);
-  }
-
-  public static void main(String[] args) {
-    new TvTManager();
   }
 
   @Override
@@ -128,16 +123,6 @@ public class TvTManager extends AbstractNpcAI implements IVoicedCommandHandler {
               && (team2Count == tvt().getMaxPlayersInTeams())) {
             htmltext = getHtm(player.getHtmlPrefix(), "TeamsFull.html");
             htmltext = htmltext.replaceAll("%max%", String.valueOf(tvt().getMaxPlayersInTeams()));
-          } else if ((tvt().getMaxParticipantsPerIP() > 0)
-              && !AntiFeedManager.getInstance()
-                  .tryAddPlayer(AntiFeedManager.TVT_ID, player, tvt().getMaxParticipantsPerIP())) {
-            htmltext = getHtm(player.getHtmlPrefix(), "IPRestriction.html");
-            htmltext =
-                htmltext.replaceAll(
-                    "%max%",
-                    String.valueOf(
-                        AntiFeedManager.getInstance()
-                            .getLimit(player, tvt().getMaxParticipantsPerIP())));
           } else if (TvTEvent.needParticipationFee() && !TvTEvent.hasParticipationFee(player)) {
             htmltext = getHtm(player.getHtmlPrefix(), "ParticipationFee.html");
             htmltext = htmltext.replaceAll("%fee%", TvTEvent.getParticipationFee());
@@ -149,9 +134,6 @@ public class TvTManager extends AbstractNpcAI implements IVoicedCommandHandler {
       case "remove":
         {
           if (TvTEvent.removeParticipant(player.getObjectId())) {
-            if (tvt().getMaxParticipantsPerIP() > 0) {
-              AntiFeedManager.getInstance().removePlayer(AntiFeedManager.TVT_ID, player);
-            }
             htmltext = getHtm(player.getHtmlPrefix(), "Unregistered.html");
           } else {
             player.sendMessage("You cannot unregister to this event.");
