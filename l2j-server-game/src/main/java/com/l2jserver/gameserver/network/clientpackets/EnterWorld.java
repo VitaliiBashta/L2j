@@ -1,46 +1,4 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.network.clientpackets;
-
-import static com.l2jserver.gameserver.SevenSigns.CABAL_NULL;
-import static com.l2jserver.gameserver.SevenSigns.SEAL_STRIFE;
-import static com.l2jserver.gameserver.config.Configuration.character;
-import static com.l2jserver.gameserver.config.Configuration.customs;
-import static com.l2jserver.gameserver.config.Configuration.general;
-import static com.l2jserver.gameserver.config.Configuration.vitality;
-import static com.l2jserver.gameserver.model.PcCondOverride.ZONE_CONDITIONS;
-import static com.l2jserver.gameserver.model.TeleportWhereType.TOWN;
-import static com.l2jserver.gameserver.model.skills.CommonSkill.THE_VANQUISHED_OF_WAR;
-import static com.l2jserver.gameserver.model.skills.CommonSkill.THE_VICTOR_OF_WAR;
-import static com.l2jserver.gameserver.model.zone.ZoneId.SIEGE;
-import static com.l2jserver.gameserver.network.L2GameClient.GameClientState.IN_GAME;
-import static com.l2jserver.gameserver.network.SystemMessageId.CLAN_MEMBERSHIP_TERMINATED;
-import static com.l2jserver.gameserver.network.SystemMessageId.CLAN_MEMBER_S1_LOGGED_IN;
-import static com.l2jserver.gameserver.network.SystemMessageId.FRIEND_S1_HAS_LOGGED_IN;
-import static com.l2jserver.gameserver.network.SystemMessageId.PAYMENT_FOR_YOUR_CLAN_HALL_HAS_NOT_BEEN_MADE_PLEASE_MAKE_PAYMENT_TO_YOUR_CLAN_WAREHOUSE_BY_S1_TOMORROW;
-import static com.l2jserver.gameserver.network.SystemMessageId.THERE_ARE_S1_DAYS_UNTIL_YOUR_CHARACTERS_BIRTHDAY;
-import static com.l2jserver.gameserver.network.SystemMessageId.WELCOME_TO_LINEAGE;
-import static com.l2jserver.gameserver.network.SystemMessageId.YOUR_APPRENTICE_S1_HAS_LOGGED_IN;
-import static com.l2jserver.gameserver.network.SystemMessageId.YOUR_BIRTHDAY_GIFT_HAS_ARRIVED;
-import static com.l2jserver.gameserver.network.SystemMessageId.YOUR_SPONSOR_C1_HAS_LOGGED_IN;
-
-import java.util.Base64;
 
 import com.l2jserver.gameserver.LoginServerThread;
 import com.l2jserver.gameserver.SevenSigns;
@@ -49,19 +7,7 @@ import com.l2jserver.gameserver.custom.AutoLootExtension;
 import com.l2jserver.gameserver.data.sql.impl.AnnouncementsTable;
 import com.l2jserver.gameserver.data.xml.impl.AdminData;
 import com.l2jserver.gameserver.data.xml.impl.SkillTreesData;
-import com.l2jserver.gameserver.instancemanager.CastleManager;
-import com.l2jserver.gameserver.instancemanager.ClanHallManager;
-import com.l2jserver.gameserver.instancemanager.ClanHallSiegeManager;
-import com.l2jserver.gameserver.instancemanager.CoupleManager;
-import com.l2jserver.gameserver.instancemanager.CursedWeaponsManager;
-import com.l2jserver.gameserver.instancemanager.DimensionalRiftManager;
-import com.l2jserver.gameserver.instancemanager.FortManager;
-import com.l2jserver.gameserver.instancemanager.FortSiegeManager;
-import com.l2jserver.gameserver.instancemanager.InstanceManager;
-import com.l2jserver.gameserver.instancemanager.MailManager;
-import com.l2jserver.gameserver.instancemanager.PetitionManager;
-import com.l2jserver.gameserver.instancemanager.SiegeManager;
-import com.l2jserver.gameserver.instancemanager.TerritoryWarManager;
+import com.l2jserver.gameserver.instancemanager.*;
 import com.l2jserver.gameserver.model.L2Clan;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.L2World;
@@ -76,41 +22,24 @@ import com.l2jserver.gameserver.model.entity.clanhall.AuctionableHall;
 import com.l2jserver.gameserver.model.entity.clanhall.SiegableHall;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.model.quest.Quest;
-import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
-import com.l2jserver.gameserver.network.serverpackets.Die;
-import com.l2jserver.gameserver.network.serverpackets.EtcStatusUpdate;
-import com.l2jserver.gameserver.network.serverpackets.ExBasicActionList;
-import com.l2jserver.gameserver.network.serverpackets.ExGetBookMarkInfoPacket;
-import com.l2jserver.gameserver.network.serverpackets.ExNevitAdventPointInfoPacket;
-import com.l2jserver.gameserver.network.serverpackets.ExNevitAdventTimeChange;
-import com.l2jserver.gameserver.network.serverpackets.ExNoticePostArrived;
-import com.l2jserver.gameserver.network.serverpackets.ExNotifyPremiumItem;
-import com.l2jserver.gameserver.network.serverpackets.ExShowContactList;
-import com.l2jserver.gameserver.network.serverpackets.ExShowScreenMessage;
-import com.l2jserver.gameserver.network.serverpackets.ExStorageMaxCount;
-import com.l2jserver.gameserver.network.serverpackets.ExVoteSystemInfo;
-import com.l2jserver.gameserver.network.serverpackets.FriendList;
-import com.l2jserver.gameserver.network.serverpackets.HennaInfo;
-import com.l2jserver.gameserver.network.serverpackets.ItemList;
-import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
-import com.l2jserver.gameserver.network.serverpackets.PledgeShowMemberListAll;
-import com.l2jserver.gameserver.network.serverpackets.PledgeShowMemberListUpdate;
-import com.l2jserver.gameserver.network.serverpackets.PledgeSkillList;
-import com.l2jserver.gameserver.network.serverpackets.PledgeStatusChanged;
-import com.l2jserver.gameserver.network.serverpackets.QuestList;
-import com.l2jserver.gameserver.network.serverpackets.ShortCutInit;
-import com.l2jserver.gameserver.network.serverpackets.SkillCoolTime;
-import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import com.l2jserver.gameserver.network.serverpackets.*;
 
-/**
- * Enter World Packet Handler
- * <p>
- * <p>
- * 0000: 03
- * <p>
- * packet format rev87 bddddbdcccccccccccccccccccc
- * <p>
- */
+import java.util.Base64;
+
+import static com.l2jserver.gameserver.SevenSigns.CABAL_NULL;
+import static com.l2jserver.gameserver.SevenSigns.SEAL_STRIFE;
+import static com.l2jserver.gameserver.config.Configuration.character;
+import static com.l2jserver.gameserver.config.Configuration.customs;
+import static com.l2jserver.gameserver.config.Configuration.general;
+import static com.l2jserver.gameserver.config.Configuration.vitality;
+import static com.l2jserver.gameserver.model.PcCondOverride.ZONE_CONDITIONS;
+import static com.l2jserver.gameserver.model.TeleportWhereType.TOWN;
+import static com.l2jserver.gameserver.model.skills.CommonSkill.THE_VANQUISHED_OF_WAR;
+import static com.l2jserver.gameserver.model.skills.CommonSkill.THE_VICTOR_OF_WAR;
+import static com.l2jserver.gameserver.model.zone.ZoneId.SIEGE;
+import static com.l2jserver.gameserver.network.L2GameClient.GameClientState.IN_GAME;
+import static com.l2jserver.gameserver.network.SystemMessageId.*;
+
 public class EnterWorld extends L2GameClientPacket {
 	private static final String _C__11_ENTERWORLD = "[C] 11 EnterWorld";
 	

@@ -43,7 +43,15 @@ public class Wedding implements IVoicedCommandHandler {
 		"engage",
 		"gotolove"
 	};
-	
+
+  private final ConnectionFactory connectionFactory;
+  private final CoupleManager coupleManager;
+
+  public Wedding(ConnectionFactory connectionFactory, CoupleManager coupleManager) {
+    this.connectionFactory = connectionFactory;
+    this.coupleManager = coupleManager;
+  }
+
 	@Override
 	public boolean useVoicedCommand(String command, L2PcInstance activeChar, String params) {
 		if (activeChar == null) {
@@ -65,7 +73,7 @@ public class Wedding implements IVoicedCommandHandler {
 		}
 		
 		int _partnerId = activeChar.getPartnerId();
-		int _coupleId = activeChar.getCoupleId();
+    int coupleId = activeChar.getCoupleId();
 		long adenaAmount = 0;
 		
 		if (activeChar.isMarried()) {
@@ -92,7 +100,7 @@ public class Wedding implements IVoicedCommandHandler {
 				partner.addAdena("WEDDING", adenaAmount, null, false);
 			}
 		}
-		CoupleManager.getInstance().deleteCouple(_coupleId);
+    coupleManager.deleteCouple(coupleId);
 		return true;
 	}
 	
@@ -158,8 +166,9 @@ public class Wedding implements IVoicedCommandHandler {
 		
 		// Check if target has player on friend list
 		boolean foundOnFriendList = false;
-		try (Connection con = ConnectionFactory.getInstance().getConnection();
-			PreparedStatement statement = con.prepareStatement("SELECT friendId FROM character_friends WHERE charId=?")) {
+    try (Connection con = connectionFactory.getConnection();
+        PreparedStatement statement =
+            con.prepareStatement("SELECT friendId FROM character_friends WHERE charId=?")) {
 			statement.setInt(1, ptarget.getObjectId());
 			try (ResultSet rset = statement.executeQuery()) {
 				while (rset.next()) {

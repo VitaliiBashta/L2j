@@ -3,7 +3,11 @@ package com.l2jserver.gameserver.network;
 import com.l2jserver.commons.util.Util;
 import com.l2jserver.gameserver.network.L2GameClient.GameClientState;
 import com.l2jserver.gameserver.network.clientpackets.*;
-import com.l2jserver.mmocore.*;
+import com.l2jserver.mmocore.ClientFactory;
+import com.l2jserver.mmocore.MMOConnection;
+import com.l2jserver.mmocore.MMOExecutor;
+import com.l2jserver.mmocore.PacketHandler;
+import com.l2jserver.mmocore.ReceivablePacket;
 import org.springframework.stereotype.Service;
 
 import java.nio.ByteBuffer;
@@ -25,9 +29,6 @@ import static com.l2jserver.gameserver.config.Configuration.general;
 public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, ClientFactory<L2GameClient>, MMOExecutor<L2GameClient> {
 	
 	private static final Logger _log = Logger.getLogger(L2GamePacketHandler.class.getName());
-
-	public L2GamePacketHandler() {
-	}
 
 	@Override
 	public ReceivablePacket<L2GameClient> handlePacket(ByteBuffer buf, L2GameClient client) {

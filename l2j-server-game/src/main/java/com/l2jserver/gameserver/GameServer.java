@@ -235,10 +235,6 @@ public class GameServer {
     AutoSpawnHandler.getInstance();
     FaenorScriptEngine.getInstance();
 
-    if (customs().allowWedding()) {
-      CoupleManager.getInstance();
-    }
-
     TaskManager.getInstance();
 
     if (general().allowMail()) {

@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.custom.events.Wedding;
 
-import static com.l2jserver.gameserver.config.Configuration.customs;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.instancemanager.CoupleManager;
 import com.l2jserver.gameserver.model.L2World;
@@ -15,19 +13,21 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.Broadcast;
+import org.springframework.stereotype.Service;
 
-/**
- * Wedding AI.
- * @author Zoey76
- */
-public final class Wedding extends AbstractNpcAI {
+import static com.l2jserver.gameserver.config.Configuration.customs;
+
+@Service
+public class Wedding extends AbstractNpcAI {
 	// NPC
 	private static final int MANAGER_ID = 50007;
 	// Item
 	private static final int FORMAL_WEAR = 6408;
-	
-	public Wedding() {
+  private final CoupleManager coupleManager;
+
+  public Wedding(CoupleManager coupleManager) {
 		super(Wedding.class.getSimpleName(), "custom/events");
+    this.coupleManager = coupleManager;
 		addFirstTalkId(MANAGER_ID);
 		addTalkId(MANAGER_ID);
 		addStartNpc(MANAGER_ID);
@@ -91,7 +91,7 @@ public final class Wedding extends AbstractNpcAI {
 					
 					// Accept the wedding request
 					player.setMarryAccepted(true);
-					Couple couple = CoupleManager.getInstance().getCouple(player.getCoupleId());
+            Couple couple = coupleManager.getCouple(player.getCoupleId());
 					couple.marry();
 					
 					// Messages to the couple
@@ -157,8 +157,5 @@ public final class Wedding extends AbstractNpcAI {
 		}
 		return true;
 	}
-	
-	public static void main(String[] args) {
-		new Wedding();
-	}
+
 }
