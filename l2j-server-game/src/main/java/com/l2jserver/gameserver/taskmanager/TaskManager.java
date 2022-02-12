@@ -5,6 +5,7 @@ import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.taskmanager.tasks.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,10 +19,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 
-import static com.l2jserver.gameserver.taskmanager.TaskTypes.*;
+import static com.l2jserver.gameserver.taskmanager.TaskTypes.TYPE_NONE;
+import static com.l2jserver.gameserver.taskmanager.TaskTypes.TYPE_SHEDULED;
+import static com.l2jserver.gameserver.taskmanager.TaskTypes.TYPE_TIME;
 import static java.util.concurrent.TimeUnit.DAYS;
 
-public final class TaskManager {
+@Service
+public class TaskManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManager.class);
   private static final String[] SQL_STATEMENTS = {

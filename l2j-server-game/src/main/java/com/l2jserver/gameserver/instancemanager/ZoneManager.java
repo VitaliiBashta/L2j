@@ -26,16 +26,21 @@ import org.w3c.dom.Node;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ZoneManager extends IXmlReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(ZoneManager.class);
 
-  private static final Map<String, AbstractZoneSettings> _settings = new HashMap<>();
+  private static final Map<String, AbstractZoneSettings> settings = new HashMap<>();
 
-  private final Map<Class<? extends L2ZoneType>, Map<Integer, ? extends L2ZoneType>> _classZones =
+  private final Map<Class<? extends L2ZoneType>, Map<Integer, ? extends L2ZoneType>> classZones =
       new HashMap<>();
 
   private final Map<String, NpcSpawnTerritory> _spawnTerritories = new HashMap<>();
@@ -45,11 +50,21 @@ public class ZoneManager extends IXmlReader {
   private List<L2ItemInstance> _debugItems;
 
   public static AbstractZoneSettings getSettings(String name) {
-    return _settings.get(name);
+    return settings.get(name);
   }
 
   public static ZoneManager getInstance() {
     return SingletonHolder.INSTANCE;
+  }
+
+  @Override
+  public void load() {
+    classZones.clear();
+    _spawnTerritories.clear();
+    parseDatapackDirectory("data/zones");
+    parseDatapackDirectory("data/zones/npcSpawnTerritories");
+    LOG.info("Loaded {} zone classes and {} zones.", classZones.size(), getSize());
+    LOG.info("Loaded {} NPC spawn territoriers.", _spawnTerritories.size());
   }
 
   @Override
@@ -268,16 +283,6 @@ public class ZoneManager extends IXmlReader {
     throw new IllegalArgumentException("not implemented");
   }
 
-  @Override
-  public void load() {
-    _classZones.clear();
-    _spawnTerritories.clear();
-    parseDatapackDirectory("data/zones");
-    parseDatapackDirectory("data/zones/npcSpawnTerritories");
-    LOG.info("Loaded {} zone classes and {} zones.", _classZones.size(), getSize());
-    LOG.info("Loaded {} NPC spawn territoriers.", _spawnTerritories.size());
-  }
-
   /**
    * Gets the size.
    *
@@ -285,20 +290,15 @@ public class ZoneManager extends IXmlReader {
    */
   public int getSize() {
     int i = 0;
-    for (Map<Integer, ? extends L2ZoneType> map : _classZones.values()) {
+    for (Map<Integer, ? extends L2ZoneType> map : classZones.values()) {
       i += map.size();
     }
     return i;
   }
 
-  /**
-   * Check id.
-   *
-   * @param id the id
-   * @return true, if successful
-   */
+  /** @return true, if successful */
   public boolean checkId(int id) {
-    for (Map<Integer, ? extends L2ZoneType> map : _classZones.values()) {
+    for (Map<Integer, ? extends L2ZoneType> map : classZones.values()) {
       if (map.containsKey(id)) {
         return true;
       }
@@ -315,30 +315,14 @@ public class ZoneManager extends IXmlReader {
    */
   @SuppressWarnings("unchecked")
   public <T extends L2ZoneType> void addZone(Integer id, T zone) {
-    Map<Integer, T> map = (Map<Integer, T>) _classZones.get(zone.getClass());
+    Map<Integer, T> map = (Map<Integer, T>) classZones.get(zone.getClass());
     if (map == null) {
       map = new HashMap<>();
       map.put(id, zone);
-      _classZones.put(zone.getClass(), map);
+      classZones.put(zone.getClass(), map);
     } else {
       map.put(id, zone);
     }
-  }
-
-  /**
-   * Returns all zones registered with the ZoneManager. To minimize iteration processing retrieve
-   * zones from L2WorldRegion for a specific location instead.
-   *
-   * @return zones
-   * @see #getAllZones(Class)
-   */
-  @Deprecated
-  public Collection<L2ZoneType> getAllZones() {
-    final List<L2ZoneType> zones = new ArrayList<>();
-    for (Map<Integer, ? extends L2ZoneType> map : _classZones.values()) {
-      zones.addAll(map.values());
-    }
-    return zones;
   }
 
   /**
@@ -350,7 +334,7 @@ public class ZoneManager extends IXmlReader {
    */
   @SuppressWarnings("unchecked")
   public <T extends L2ZoneType> Collection<T> getAllZones(Class<T> zoneType) {
-    Map<Integer, ? extends L2ZoneType> zones = _classZones.get(zoneType);
+    Map<Integer, ? extends L2ZoneType> zones = classZones.get(zoneType);
     if (zones == null) {
       return List.of();
     }
@@ -366,7 +350,7 @@ public class ZoneManager extends IXmlReader {
    * @see #getZoneById(int, Class)
    */
   public L2ZoneType getZoneById(int id) {
-    for (Map<Integer, ? extends L2ZoneType> map : _classZones.values()) {
+    for (Map<Integer, ? extends L2ZoneType> map : classZones.values()) {
       if (map.containsKey(id)) {
         return map.get(id);
       }
@@ -384,7 +368,7 @@ public class ZoneManager extends IXmlReader {
    */
   @SuppressWarnings("unchecked")
   public <T extends L2ZoneType> T getZoneById(int id, Class<T> zoneType) {
-    Map<Integer, ? extends L2ZoneType> zones = _classZones.get(zoneType);
+    Map<Integer, ? extends L2ZoneType> zones = classZones.get(zoneType);
     if (zones == null) {
       return null;
     }
@@ -399,39 +383,6 @@ public class ZoneManager extends IXmlReader {
    */
   public List<L2ZoneType> getZones(L2Object object) {
     return getZones(object.getX(), object.getY(), object.getZ());
-  }
-
-  /**
-   * Gets the zone.
-   *
-   * @param <T> the generic type
-   * @param object the object
-   * @param type the type
-   * @return zone from where the object is located by type
-   */
-  public <T extends L2ZoneType> T getZone(L2Object object, Class<T> type) {
-    if (object == null) {
-      return null;
-    }
-    return getZone(object.getX(), object.getY(), object.getZ(), type);
-  }
-
-  /**
-   * Returns all zones from given coordinates (plane).
-   *
-   * @param x the x
-   * @param y the y
-   * @return zones
-   */
-  public List<L2ZoneType> getZones(int x, int y) {
-    final L2WorldRegion region = L2World.getInstance().getRegion(x, y);
-    final List<L2ZoneType> temp = new ArrayList<>();
-    for (L2ZoneType zone : region.getZones()) {
-      if (zone.isInsideZone(x, y)) {
-        temp.add(zone);
-      }
-    }
-    return temp;
   }
 
   /**
@@ -453,14 +404,22 @@ public class ZoneManager extends IXmlReader {
     return temp;
   }
 
-  public <T extends L2ZoneType> T getZone(int x, int y, int z, Class<T> type) {
+  /**
+   * Returns all zones from given coordinates (plane).
+   *
+   * @param x the x
+   * @param y the y
+   * @return zones
+   */
+  public List<L2ZoneType> getZones(int x, int y) {
     final L2WorldRegion region = L2World.getInstance().getRegion(x, y);
+    final List<L2ZoneType> temp = new ArrayList<>();
     for (L2ZoneType zone : region.getZones()) {
-      if (zone.isInsideZone(x, y, z) && type.isInstance(zone)) {
-        return (T) zone;
+      if (zone.isInsideZone(x, y)) {
+        temp.add(zone);
       }
     }
-    return null;
+    return temp;
   }
 
   /**
@@ -473,12 +432,7 @@ public class ZoneManager extends IXmlReader {
     return _spawnTerritories.get(name);
   }
 
-  /**
-   * Returns all spawm territories from where the object is located
-   *
-   * @param object
-   * @return zones
-   */
+  /** Returns all spawm territories from where the object is located */
   public List<NpcSpawnTerritory> getSpawnTerritories(L2Object object) {
     List<NpcSpawnTerritory> temp = new ArrayList<>();
     for (NpcSpawnTerritory territory : _spawnTerritories.values()) {
@@ -528,7 +482,7 @@ public class ZoneManager extends IXmlReader {
     T zone = getZone(obj, type);
     if (zone == null) {
       double closestdis = Double.MAX_VALUE;
-      for (T temp : (Collection<T>) _classZones.get(type).values()) {
+      for (T temp : (Collection<T>) classZones.get(type).values()) {
         double distance = temp.getDistanceToZone(obj);
         if (distance < closestdis) {
           closestdis = distance;
@@ -537,6 +491,31 @@ public class ZoneManager extends IXmlReader {
       }
     }
     return zone;
+  }
+
+  /**
+   * Gets the zone.
+   *
+   * @param <T> the generic type
+   * @param object the object
+   * @param type the type
+   * @return zone from where the object is located by type
+   */
+  public <T extends L2ZoneType> T getZone(L2Object object, Class<T> type) {
+    if (object == null) {
+      return null;
+    }
+    return getZone(object.getX(), object.getY(), object.getZ(), type);
+  }
+
+  public <T extends L2ZoneType> T getZone(int x, int y, int z, Class<T> type) {
+    final L2WorldRegion region = L2World.getInstance().getRegion(x, y);
+    for (L2ZoneType zone : region.getZones()) {
+      if (zone.isInsideZone(x, y, z) && type.isInstance(zone)) {
+        return (T) zone;
+      }
+    }
+    return null;
   }
 
   /**
