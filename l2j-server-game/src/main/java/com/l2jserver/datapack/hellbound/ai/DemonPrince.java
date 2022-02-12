@@ -1,20 +1,18 @@
 
 package com.l2jserver.datapack.hellbound.ai;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.skills.Skill;
+import org.springframework.stereotype.Service;
 
-/**
- * Demon Prince's AI.
- * @author GKR
- */
-public final class DemonPrince extends AbstractNpcAI {
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Service
+public class DemonPrince extends AbstractNpcAI {
 	// NPCs
 	private static final int DEMON_PRINCE = 25540;
 	private static final int FIEND = 25541;

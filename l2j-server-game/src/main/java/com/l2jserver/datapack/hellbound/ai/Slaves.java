@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.hellbound.ai;
 
-import java.util.List;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.gameserver.ai.CtrlIntention;
@@ -13,12 +11,12 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.taskmanager.DecayTaskManager;
+import org.springframework.stereotype.Service;
 
-/**
- * Hellbound Slaves AI.
- * @author DS
- */
-public final class Slaves extends AbstractNpcAI {
+import java.util.List;
+
+@Service
+public class Slaves extends AbstractNpcAI {
 	// NPCs
 	private static final int[] MASTERS = {
 		22320, // Junior Watchman

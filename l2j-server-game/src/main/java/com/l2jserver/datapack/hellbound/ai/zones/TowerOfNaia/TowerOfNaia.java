@@ -1,16 +1,6 @@
 
 package com.l2jserver.datapack.hellbound.ai.zones.TowerOfNaia;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.ai.CtrlIntention;
@@ -30,12 +20,20 @@ import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.util.MinionList;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Tower Of Naia.
- * @author GKR
- */
-public final class TowerOfNaia extends AbstractNpcAI {
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Service
+public class TowerOfNaia extends AbstractNpcAI {
 	// Challenge states
 	private static final int STATE_SPORE_CHALLENGE_IN_PROGRESS = 1;
 	private static final int STATE_SPORE_CHALLENGE_SUCCESSFULL = 2;

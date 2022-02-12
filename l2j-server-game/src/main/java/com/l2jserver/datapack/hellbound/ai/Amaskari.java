@@ -12,12 +12,10 @@ import com.l2jserver.gameserver.model.skills.BuffInfo;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Manages Amaskari's and minions' chat and some skill usage.
- * @author GKR
- */
-public final class Amaskari extends AbstractNpcAI {
+@Service
+public class Amaskari extends AbstractNpcAI {
 	// NPCs
 	private static final int AMASKARI = 22449;
 	private static final int AMASKARI_PRISONER = 22450;

@@ -1,10 +1,6 @@
 
 package com.l2jserver.datapack.hellbound.ai;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.model.L2Spawn;
 import com.l2jserver.gameserver.model.Location;
@@ -13,12 +9,14 @@ import com.l2jserver.gameserver.model.actor.instance.L2MonsterInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Manages Darion's Enforcer's and Darion's Executioner spawn/despawn
- * @author GKR
- */
-public final class Keltas extends AbstractNpcAI {
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Service
+public class Keltas extends AbstractNpcAI {
 	// NPCs
 	private static final int KELTAS = 22341;
 	private static final int ENFORCER = 22342;

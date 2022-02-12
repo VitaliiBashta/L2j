@@ -1,9 +1,6 @@
 
 package com.l2jserver.datapack.hellbound.ai.zones.TowerOfInfinitum;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.gameserver.model.L2Party;
@@ -11,12 +8,13 @@ import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Tower Of Infinitum.
- * @author GKR
- */
-public final class TowerOfInfinitum extends AbstractNpcAI {
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+public class TowerOfInfinitum extends AbstractNpcAI {
 	// NPCs
 	private static final int JERIAN = 32302;
 	private static final int GK_FIRST = 32745;

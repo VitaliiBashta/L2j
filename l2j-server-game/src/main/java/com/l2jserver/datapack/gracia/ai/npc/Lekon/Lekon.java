@@ -7,12 +7,10 @@ import com.l2jserver.gameserver.model.L2Clan;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
+import org.springframework.stereotype.Service;
 
-/**
- * Lekon AI.
- * @author St3eT
- */
-public final class Lekon extends AbstractNpcAI {
+@Service
+public class Lekon extends AbstractNpcAI {
 	// NPCs
 	private static final int LEKON = 32557;
 	// Items

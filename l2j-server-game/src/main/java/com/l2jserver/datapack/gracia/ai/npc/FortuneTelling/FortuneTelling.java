@@ -5,12 +5,9 @@ import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.itemcontainer.Inventory;
+import org.springframework.stereotype.Service;
 
-/**
- * Fortune Telling AI.<br>
- * Original Jython script by Kerberos.
- * @author Nyaran
- */
+@Service
 public class FortuneTelling extends AbstractNpcAI {
 	// NPC
 	private static final int MINE = 32616;

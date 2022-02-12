@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.hellbound.instancess.UrbanArea;
 
-import java.util.concurrent.ScheduledFuture;
-
 import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.gameserver.ThreadPoolManager;
@@ -24,12 +22,12 @@ import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Urban Area instance zone.
- * @author GKR
- */
-public final class UrbanArea extends AbstractInstance {
+import java.util.concurrent.ScheduledFuture;
+
+@Service
+public class UrbanArea extends AbstractInstance {
 	protected class UrbanAreaWorld extends InstanceWorld {
 		protected L2MonsterInstance spawnedAmaskari;
 		protected ScheduledFuture<?> activeAmaskariCall = null;

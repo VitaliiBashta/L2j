@@ -5,12 +5,10 @@ import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Buron AI.
- * @author DS
- */
-public final class Buron extends AbstractNpcAI {
+@Service
+public class Buron extends AbstractNpcAI {
 	private static final int BURON = 32345;
 	private static final int HELMET = 9669;
 	private static final int TUNIC = 9670;

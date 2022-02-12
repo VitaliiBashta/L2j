@@ -4,12 +4,10 @@ package com.l2jserver.datapack.hellbound.ai.npc.Kanaf;
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Kanaf AI.
- * @author GKR
- */
-public final class Kanaf extends AbstractNpcAI {
+@Service
+public class Kanaf extends AbstractNpcAI {
 	// NPCs
 	private static final int KANAF = 32346;
 	

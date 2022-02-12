@@ -9,12 +9,10 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.network.NpcStringId;
+import org.springframework.stereotype.Service;
 
-/**
- * Nemo AI.
- * @author St3eT
- */
-public final class Nemo extends AbstractNpcAI {
+@Service
+public class Nemo extends AbstractNpcAI {
 	// NPC
 	private static final int NEMO = 32735; // Nemo
 	private static final int MAGUEN = 18839; // Wild Maguen

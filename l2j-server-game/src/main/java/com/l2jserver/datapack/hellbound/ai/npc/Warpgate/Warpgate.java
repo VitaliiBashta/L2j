@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.hellbound.ai.npc.Warpgate;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.datapack.quests.Q00130_PathToHellbound.Q00130_PathToHellbound;
@@ -13,12 +11,12 @@ import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.zone.L2ZoneType;
+import org.springframework.stereotype.Service;
 
-/**
- * Warpgate teleport AI.
- * @author _DS_
- */
-public final class Warpgate extends AbstractNpcAI {
+import static com.l2jserver.gameserver.config.Configuration.general;
+
+@Service
+public class Warpgate extends AbstractNpcAI {
 	// NPCs
 	private static final int[] WARPGATES = {
 		32314,

@@ -22,7 +22,7 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.model.zone.L2ZoneType;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
-import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,11 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.l2jserver.gameserver.config.Configuration.rates;
 
-/**
- * Energy Seeds AI.
- *
- * @author Gigiikun
- */
+@Service
 public class EnergySeeds extends AbstractNpcAI {
   private static final int HOWTOOPPOSEEVIL_CHANCE = 60;
   private static final int RATE = 1;

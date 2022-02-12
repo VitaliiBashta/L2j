@@ -1,9 +1,6 @@
 
 package com.l2jserver.datapack.gracia.ai.npc.Nottingale;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.datapack.quests.Q10273_GoodDayToFly.Q10273_GoodDayToFly;
 import com.l2jserver.gameserver.instancemanager.AirShipManager;
@@ -12,12 +9,13 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.network.serverpackets.RadarControl;
+import org.springframework.stereotype.Service;
 
-/**
- * Nottingale AI
- * @author xban1x
- */
-public final class Nottingale extends AbstractNpcAI {
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+public class Nottingale extends AbstractNpcAI {
 	// NPC
 	private static final int NOTTINGALE = 32627;
 	// Misc

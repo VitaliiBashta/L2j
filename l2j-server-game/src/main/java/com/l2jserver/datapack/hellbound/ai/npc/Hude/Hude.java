@@ -6,12 +6,10 @@ import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.gameserver.data.xml.impl.MultisellData;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Hude AI.
- * @author DS
- */
-public final class Hude extends AbstractNpcAI {
+@Service
+public class Hude extends AbstractNpcAI {
 	// NPCs
 	private static final int HUDE = 32298;
 	// Items

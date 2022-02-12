@@ -5,12 +5,10 @@ import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Jude AI.
- * @author DS
- */
-public final class Jude extends AbstractNpcAI {
+@Service
+public class Jude extends AbstractNpcAI {
 	// NPCs
 	private static final int JUDE = 32356;
 	private static final int NATIVE_TREASURE = 9684;

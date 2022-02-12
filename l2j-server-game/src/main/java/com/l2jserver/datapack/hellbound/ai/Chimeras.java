@@ -8,10 +8,12 @@ import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.skills.Skill;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public final class Chimeras extends AbstractNpcAI {
+@Service
+public class Chimeras extends AbstractNpcAI {
   // NPCs
   private static final int[] NPCS = {
     22349, // Chimera of Earth

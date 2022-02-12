@@ -6,12 +6,10 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Seyo AI.
- * @author St3eT
- */
-public final class Seyo extends AbstractNpcAI {
+@Service
+public class Seyo extends AbstractNpcAI {
 	// NPC
 	private static final int SEYO = 32737;
 	// Item

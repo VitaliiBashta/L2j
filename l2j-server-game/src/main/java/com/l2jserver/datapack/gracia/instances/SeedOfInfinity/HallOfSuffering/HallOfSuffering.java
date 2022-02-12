@@ -22,12 +22,14 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class HallOfSuffering extends AbstractInstance {
+@Service
+public class HallOfSuffering extends AbstractInstance {
   // NPCs
   private static final int MOUTH_OF_EKIMUS = 32537;
   private static final int TEPIOS = 32530;

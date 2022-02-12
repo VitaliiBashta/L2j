@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.hellbound.ai.npc.Quarry;
 
-import static com.l2jserver.gameserver.config.Configuration.rates;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.gameserver.ai.CtrlIntention;
@@ -16,12 +14,12 @@ import com.l2jserver.gameserver.model.holders.ItemChanceHolder;
 import com.l2jserver.gameserver.model.zone.L2ZoneType;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Quarry AI.
- * @author DS, GKR
- */
-public final class Quarry extends AbstractNpcAI {
+import static com.l2jserver.gameserver.config.Configuration.rates;
+
+@Service
+public class Quarry extends AbstractNpcAI {
 	// NPCs
 	private static final int SLAVE = 32299;
 	// Items

@@ -1,10 +1,6 @@
 
 package com.l2jserver.datapack.gracia.ai.npc.GeneralDilios;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.model.L2Spawn;
 import com.l2jserver.gameserver.model.actor.L2Npc;
@@ -12,12 +8,14 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
+import org.springframework.stereotype.Service;
 
-/**
- * Dilios AI
- * @author JIV, Sephiroth, Apocalipce
- */
-public final class GeneralDilios extends AbstractNpcAI {
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Service
+public class GeneralDilios extends AbstractNpcAI {
 	private static final int GENERAL_ID = 32549;
 	private static final int GUARD_ID = 32619;
 	

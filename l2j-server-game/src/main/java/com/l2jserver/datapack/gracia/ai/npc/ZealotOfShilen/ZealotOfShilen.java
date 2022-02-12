@@ -7,12 +7,10 @@ import com.l2jserver.gameserver.model.actor.L2Attackable;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Zealot of Shilen AI.
- * @author nonom
- */
-public final class ZealotOfShilen extends AbstractNpcAI {
+@Service
+public class ZealotOfShilen extends AbstractNpcAI {
 	// NPCs
 	private static final int ZEALOT = 18782;
 	private static final int[] GUARDS = {

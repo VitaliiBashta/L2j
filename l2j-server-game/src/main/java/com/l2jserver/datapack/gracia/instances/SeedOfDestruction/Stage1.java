@@ -1,23 +1,6 @@
 
 package com.l2jserver.datapack.gracia.instances.SeedOfDestruction;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-import static com.l2jserver.gameserver.config.Configuration.server;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-
 import com.l2jserver.datapack.instances.AbstractInstance;
 import com.l2jserver.gameserver.GeoData;
 import com.l2jserver.gameserver.ai.CtrlIntention;
@@ -45,19 +28,25 @@ import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
-/**
- * Seed of Destruction instance zone.<br>
- * TODO:
- * <ul>
- * <li>No random mob spawns after mob kill.</li>
- * <li>Implement Seed of Destruction Defense state and one party instances.</li>
- * <li>Use proper zone spawn system.</li>
- * </ul>
- * Please maintain consistency between the Seed scripts.
- * @author Gigiikun
- */
-public final class Stage1 extends AbstractInstance {
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
+import static com.l2jserver.gameserver.config.Configuration.server;
+
+@Service
+public class Stage1 extends AbstractInstance {
 	protected class SOD1World extends InstanceWorld {
 		protected List<L2PcInstance> playersInside = new ArrayList<>();
 		protected Map<L2Npc, Boolean> npcList = new HashMap<>();

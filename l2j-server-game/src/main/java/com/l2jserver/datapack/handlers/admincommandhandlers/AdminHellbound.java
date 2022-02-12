@@ -1,17 +1,15 @@
 
 package com.l2jserver.datapack.handlers.admincommandhandlers;
 
-import java.util.StringTokenizer;
-
 import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.gameserver.handler.IAdminCommandHandler;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Hellbound admin command.
- * @author DS, Gladicek
- */
+import java.util.StringTokenizer;
+
+@Service
 public class AdminHellbound implements IAdminCommandHandler {
 	private static final String[] ADMIN_COMMANDS = {
 		"admin_hellbound_setlevel",

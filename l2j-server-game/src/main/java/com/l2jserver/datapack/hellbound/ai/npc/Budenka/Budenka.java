@@ -4,12 +4,10 @@ package com.l2jserver.datapack.hellbound.ai.npc.Budenka;
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Budenka AI.
- * @author St3eT
- */
-public final class Budenka extends AbstractNpcAI {
+@Service
+public class Budenka extends AbstractNpcAI {
 	// NPCs
 	private static final int BUDENKA = 32294;
 	// Items

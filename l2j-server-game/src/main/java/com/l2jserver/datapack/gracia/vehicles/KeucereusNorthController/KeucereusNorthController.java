@@ -4,8 +4,10 @@ package com.l2jserver.datapack.gracia.vehicles.KeucereusNorthController;
 import com.l2jserver.datapack.gracia.vehicles.AirShipController;
 import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.VehiclePathPoint;
+import org.springframework.stereotype.Service;
 
-public final class KeucereusNorthController extends AirShipController {
+@Service
+public class KeucereusNorthController extends AirShipController {
 	private static final int DOCK_ZONE = 50602;
 	private static final int LOCATION = 100;
 	private static final int CONTROLLER_ID = 32606;

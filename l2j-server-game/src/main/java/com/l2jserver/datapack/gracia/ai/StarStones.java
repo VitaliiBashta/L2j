@@ -7,13 +7,11 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.SystemMessageId;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Star Stones AI.
- * @author Gigiikun
- */
+@Service
 public class StarStones extends AbstractNpcAI {
 	// @formatter:off
 	private static final int[] MOBS =

@@ -7,12 +7,10 @@ import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
+import org.springframework.stereotype.Service;
 
-/**
- * Manages Naia's cast on the Hellbound Core
- * @author GKR
- */
-public final class HellboundCore extends AbstractNpcAI {
+@Service
+public class HellboundCore extends AbstractNpcAI {
 	// NPCs
 	private static final int NAIA = 18484;
 	private static final int HELLBOUND_CORE = 32331;

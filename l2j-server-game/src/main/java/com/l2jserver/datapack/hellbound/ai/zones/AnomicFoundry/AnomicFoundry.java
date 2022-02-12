@@ -1,9 +1,6 @@
 
 package com.l2jserver.datapack.hellbound.ai.zones.AnomicFoundry;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.gameserver.ai.CtrlIntention;
@@ -17,12 +14,13 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Anomic Foundry.
- * @author GKR
- */
-public final class AnomicFoundry extends AbstractNpcAI {
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Service
+public class AnomicFoundry extends AbstractNpcAI {
 	// NPCs
 	private static int LABORER = 22396;
 	private static int FOREMAN = 22397;

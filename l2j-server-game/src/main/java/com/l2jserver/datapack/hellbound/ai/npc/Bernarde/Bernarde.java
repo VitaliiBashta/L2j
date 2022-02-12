@@ -5,12 +5,10 @@ import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.datapack.hellbound.HellboundEngine;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Bernarde AI.
- * @author DS
- */
-public final class Bernarde extends AbstractNpcAI {
+@Service
+public class Bernarde extends AbstractNpcAI {
 	// NPCs
 	private static final int BERNARDE = 32300;
 	// Misc

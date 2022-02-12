@@ -1,21 +1,19 @@
 
 package com.l2jserver.datapack.hellbound.ai.zones.BaseTower;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.data.xml.impl.DoorData;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.base.ClassId;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
+import org.springframework.stereotype.Service;
 
-/**
- * Base Tower.
- * @author GKR
- */
-public final class BaseTower extends AbstractNpcAI {
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Service
+public class BaseTower extends AbstractNpcAI {
 	// NPCs
 	private static final int GUZEN = 22362;
 	private static final int KENDAL = 32301;

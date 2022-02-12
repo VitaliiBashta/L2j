@@ -4,12 +4,10 @@ package com.l2jserver.datapack.hellbound.ai.npc.Falk;
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Falk AI.
- * @author DS
- */
-public final class Falk extends AbstractNpcAI {
+@Service
+public class Falk extends AbstractNpcAI {
 	// NPCs
 	private static final int FALK = 32297;
 	// Items

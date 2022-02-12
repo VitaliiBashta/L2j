@@ -15,11 +15,10 @@ import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
+import org.springframework.stereotype.Service;
 
-/**
- * @author DS
- */
-public final class AirShipGludioGracia extends Quest implements Runnable {
+@Service
+public class AirShipGludioGracia extends Quest implements Runnable {
 	private static final int[] CONTROLLERS = {
 		32607,
 		32609

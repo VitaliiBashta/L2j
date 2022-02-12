@@ -1,16 +1,6 @@
 
 package com.l2jserver.datapack.hellbound.ai.zones.TullyWorkshop;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.ai.CtrlIntention;
@@ -34,12 +24,20 @@ import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.util.MinionList;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Tully's Workshop.
- * @author GKR
- */
-public final class TullyWorkshop extends AbstractNpcAI {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+
+@Service
+public class TullyWorkshop extends AbstractNpcAI {
 	// NPC's
 	private static final int AGENT = 32372;
 	private static final int CUBE_68 = 32467;

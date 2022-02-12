@@ -9,12 +9,10 @@ import com.l2jserver.gameserver.model.actor.instance.L2DoorInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Natives AI.
- * @author DS, GKR
- */
-public final class Natives extends AbstractNpcAI {
+@Service
+public class Natives extends AbstractNpcAI {
 	// NPCs
 	private static final int NATIVE = 32362;
 	private static final int INSURGENT = 32363;

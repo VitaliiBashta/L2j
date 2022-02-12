@@ -1,11 +1,6 @@
 
 package com.l2jserver.datapack.hellbound;
 
-import static com.l2jserver.gameserver.config.Configuration.rates;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.data.xml.impl.DoorData;
 import com.l2jserver.gameserver.instancemanager.GlobalVariablesManager;
@@ -14,13 +9,15 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2DoorInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.util.Broadcast;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-/**
- * Hellbound Engine.
- * @author Zoey76
- */
-public final class HellboundEngine extends AbstractNpcAI {
-	
+import static com.l2jserver.gameserver.config.Configuration.rates;
+
+@Service
+public class HellboundEngine extends AbstractNpcAI {
+
 	private static final Logger LOG = LoggerFactory.getLogger(HellboundEngine.class);
 	
 	// @formatter:off
@@ -45,12 +42,15 @@ public final class HellboundEngine extends AbstractNpcAI {
 	private int _cachedLevel = -1;
 	private int _maxTrust = 0;
 	private int _minTrust = 0;
-	
-	public HellboundEngine() {
+
+  private final HellboundPointData hellboundPointData;
+
+  public HellboundEngine(HellboundPointData hellboundPointData) {
 		super(HellboundEngine.class.getSimpleName(), "hellbound");
-		
-		addKillId(HellboundPointData.getInstance().getPointsInfo().keySet());
-		
+    this.hellboundPointData = hellboundPointData;
+
+    addKillId(hellboundPointData.getPointsInfo().keySet());
+
 		startQuestTimer(UPDATE_EVENT, 1000, null, null);
 		
 		LOG.info("Level {}.", getLevel());
@@ -185,7 +185,6 @@ public final class HellboundEngine extends AbstractNpcAI {
 	@Override
 	public String onKill(L2Npc npc, L2PcInstance killer, boolean isSummon) {
 		final int npcId = npc.getId();
-		final HellboundPointData hellboundPointData = HellboundPointData.getInstance();
 		if (hellboundPointData.getPointsInfo().containsKey(npcId)) {
 			if ((getLevel() >= hellboundPointData.getMinHbLvl(npcId)) && (getLevel() <= hellboundPointData.getMaxHbLvl(npcId)) && ((hellboundPointData.getLowestTrustLimit(npcId) == 0) || (getTrust() > hellboundPointData.getLowestTrustLimit(npcId)))) {
 				updateTrust(hellboundPointData.getPointsAmount(npcId), true);
@@ -296,6 +295,6 @@ public final class HellboundEngine extends AbstractNpcAI {
 	}
 	
 	private static class SingletonHolder {
-		protected static final HellboundEngine INSTANCE = new HellboundEngine();
+    protected static final HellboundEngine INSTANCE = new HellboundEngine(null);
 	}
 }

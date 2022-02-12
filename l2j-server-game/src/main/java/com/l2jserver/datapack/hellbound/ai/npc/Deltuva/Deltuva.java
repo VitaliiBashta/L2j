@@ -7,12 +7,10 @@ import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.QuestState;
+import org.springframework.stereotype.Service;
 
-/**
- * Deltuva AI.
- * @author GKR
- */
-public final class Deltuva extends AbstractNpcAI {
+@Service
+public class Deltuva extends AbstractNpcAI {
 	// NPCs
 	private static final int DELTUVA = 32313;
 	// Location

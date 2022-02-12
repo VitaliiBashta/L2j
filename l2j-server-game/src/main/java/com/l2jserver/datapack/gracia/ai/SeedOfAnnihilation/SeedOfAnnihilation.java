@@ -1,10 +1,6 @@
 
 package com.l2jserver.datapack.gracia.ai.SeedOfAnnihilation;
 
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.instancemanager.ZoneManager;
 import com.l2jserver.gameserver.model.Location;
@@ -16,11 +12,13 @@ import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.zone.L2ZoneType;
 import com.l2jserver.gameserver.model.zone.type.L2EffectZone;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Seed Of Annihilation AI.
- * @author Gigiikun
- */
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
 public class SeedOfAnnihilation extends AbstractNpcAI {
 	private static final Map<Integer, Location> TELEPORT_ZONES = new HashMap<>();
 	private static final int ANNIHILATION_FURNACE = 18928;

@@ -4,8 +4,10 @@ package com.l2jserver.datapack.gracia.vehicles.SoDController;
 import com.l2jserver.datapack.gracia.vehicles.AirShipController;
 import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.VehiclePathPoint;
+import org.springframework.stereotype.Service;
 
-public final class SoDController extends AirShipController {
+@Service
+public class SoDController extends AirShipController {
 	private static final int DOCK_ZONE = 50601;
 	private static final int LOCATION = 102;
 	private static final int CONTROLLER_ID = 32605;

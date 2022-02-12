@@ -6,12 +6,10 @@ import com.l2jserver.gameserver.GameTimeController;
 import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Shadai AI.
- * @author GKR
- */
-public final class Shadai extends AbstractNpcAI {
+@Service
+public class Shadai extends AbstractNpcAI {
 	// NPCs
 	private static final int SHADAI = 32347;
 	// Locations

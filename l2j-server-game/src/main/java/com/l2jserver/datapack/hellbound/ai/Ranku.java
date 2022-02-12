@@ -9,11 +9,13 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.util.MinionList;
+import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class Ranku extends AbstractNpcAI {
+@Service
+public class Ranku extends AbstractNpcAI {
 	// NPCs
 	private static final int RANKU = 25542;
 	private static final int MINION = 32305;

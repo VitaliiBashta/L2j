@@ -5,12 +5,10 @@ import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
+import org.springframework.stereotype.Service;
 
-/**
- * Typhoon's AI.
- * @author GKR
- */
-public final class Typhoon extends AbstractNpcAI {
+@Service
+public class Typhoon extends AbstractNpcAI {
 	// NPCs
 	private static final int TYPHOON = 25539;
 	// Skills

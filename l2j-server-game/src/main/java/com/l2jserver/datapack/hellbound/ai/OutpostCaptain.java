@@ -7,12 +7,10 @@ import com.l2jserver.gameserver.data.xml.impl.DoorData;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2DoorInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Outpost Captain's AI.
- * @author DS
- */
-public final class OutpostCaptain extends AbstractNpcAI {
+@Service
+public class OutpostCaptain extends AbstractNpcAI {
 	// NPCs
 	private static final int CAPTAIN = 18466;
 	private static final int[] DEFENDERS = {

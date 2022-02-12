@@ -1,20 +1,18 @@
 
 package com.l2jserver.datapack.gracia.ai;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.datatables.SpawnTable;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Lindvior Scene AI.
- * @author nonom
- */
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
+@Service
 public class Lindvior extends AbstractNpcAI {
 	private static final int LINDVIOR_CAMERA = 18669;
 	private static final int TOMARIS = 32552;
