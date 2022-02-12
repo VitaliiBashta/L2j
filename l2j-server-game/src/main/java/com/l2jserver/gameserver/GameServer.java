@@ -205,7 +205,6 @@ public class GameServer {
     ScriptEngineManager.getInstance().runMainOnscripts();
 
     DayNightSpawnManager.getInstance().trim().notifyChangeMode();
-    FourSepulchersManager.getInstance().init();
     DimensionalRiftManager.getInstance();
     RaidBossSpawnManager.getInstance();
 

@@ -18,23 +18,6 @@
  */
 package com.l2jserver.gameserver.instancemanager;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-import static com.l2jserver.gameserver.config.Configuration.server;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.datatables.SpawnTable;
@@ -46,24 +29,39 @@ import com.l2jserver.gameserver.model.entity.DimensionalRift;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
-/**
- * Dimensional Rift manager.
- * @author kombat
- */
-public final class DimensionalRiftManager {
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
+import static com.l2jserver.gameserver.config.Configuration.server;
+
+@Service
+public class DimensionalRiftManager {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(DimensionalRiftManager.class);
 	
 	private final Map<Byte, Map<Byte, DimensionalRiftRoom>> _rooms = new HashMap<>(7);
 	
 	private static final int DIMENSIONAL_FRAGMENT_ITEM_ID = 7079;
-	
+
+	private final QuestManager questManager;
 	public static DimensionalRiftManager getInstance() {
 		return SingletonHolder._instance;
 	}
 	
-	protected DimensionalRiftManager() {
+	protected DimensionalRiftManager(QuestManager questManager) {
+		this.questManager = questManager;
 		loadRooms();
 		loadSpawns();
 	}
@@ -391,6 +389,6 @@ public final class DimensionalRiftManager {
 	}
 	
 	private static class SingletonHolder {
-		protected static final DimensionalRiftManager _instance = new DimensionalRiftManager();
+		protected static final DimensionalRiftManager _instance = new DimensionalRiftManager(null);
 	}
 }

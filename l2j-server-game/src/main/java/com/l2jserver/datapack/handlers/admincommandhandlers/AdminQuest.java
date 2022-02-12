@@ -27,6 +27,12 @@ public class AdminQuest implements IAdminCommandHandler {
     "admin_quest_info"
   };
 
+  private final QuestManager questManager;
+
+  public AdminQuest(QuestManager questManager) {
+    this.questManager = questManager;
+  }
+
   @Override
   public boolean useAdminCommand(String command, L2PcInstance activeChar) {
     if (activeChar == null) {
@@ -51,13 +57,13 @@ public class AdminQuest implements IAdminCommandHandler {
         // try the first param as id
         try {
           int questId = Integer.parseInt(parts[1]);
-          if (QuestManager.getInstance().reload(questId)) {
+          if (questManager.reload(questId)) {
             activeChar.sendMessage("Quest Reloaded Successfully.");
           } else {
             activeChar.sendMessage("Quest Reloaded Failed");
           }
         } catch (NumberFormatException e) {
-          if (QuestManager.getInstance().reload(parts[1])) {
+          if (questManager.reload(parts[1])) {
             activeChar.sendMessage("Quest Reloaded Successfully.");
           } else {
             activeChar.sendMessage("Quest Reloaded Failed");
@@ -72,8 +78,8 @@ public class AdminQuest implements IAdminCommandHandler {
       } else {
         Quest q =
             Util.isDigit(parts[1])
-                ? QuestManager.getInstance().getQuest(Integer.parseInt(parts[1]))
-                : QuestManager.getInstance().getQuest(parts[1]);
+                ? questManager.getQuest(Integer.parseInt(parts[1]))
+                : questManager.getQuest(parts[1]);
 
         if (q != null) {
           if (q.unload()) {
@@ -122,7 +128,7 @@ public class AdminQuest implements IAdminCommandHandler {
       }
     } else if (command.startsWith("admin_quest_info ")) {
       final String questName = command.substring("admin_quest_info ".length());
-      final Quest quest = QuestManager.getInstance().getQuest(questName);
+      final Quest quest = questManager.getQuest(questName);
       String events = "", npcs = "", items = "", timers = "";
       int counter = 0;
       if (quest == null) {

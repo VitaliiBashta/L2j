@@ -1,21 +1,18 @@
 
 package com.l2jserver.datapack.quests.Q10279_MutatedKaneusOren;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.l2jserver.gameserver.enums.audio.Sound;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.quest.State;
+import org.springframework.stereotype.Service;
 
-/**
- * Mutated Kaneus - Oren (10279)<br>
- * Original Jython script by Gnacik on 2010-06-29.
- * @author nonom
- */
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
 public class Q10279_MutatedKaneusOren extends Quest {
 	// NPCs
 	private static final int MOUEN = 30196;

@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.ai.npc.TerritoryManagers;
 
-import static com.l2jserver.gameserver.config.Configuration.territoryWar;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.data.xml.impl.MultisellData;
 import com.l2jserver.gameserver.enums.Race;
@@ -19,14 +17,13 @@ import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
 import com.l2jserver.gameserver.network.serverpackets.ExBrExtraUserInfo;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.network.serverpackets.UserInfo;
+import org.springframework.stereotype.Service;
 
-/**
- * Retail AI for Territory Managers.
- * @author Zoey76
- * @version 2.6.1.0
- */
-public final class TerritoryManagers extends AbstractNpcAI {
-	
+import static com.l2jserver.gameserver.config.Configuration.territoryWar;
+
+@Service
+public class TerritoryManagers extends AbstractNpcAI {
+
 	private static final int[] PRECIOUS_SOUL_1_ITEM_IDS = {
 		7587,
 		7588,
@@ -46,10 +43,13 @@ public final class TerritoryManagers extends AbstractNpcAI {
 		7592,
 		7593
 	};
-	
-	public TerritoryManagers() {
+
+  private final QuestManager questManager;
+
+  public TerritoryManagers(QuestManager questManager) {
 		super(TerritoryManagers.class.getSimpleName(), "ai/npc");
-		
+    this.questManager = questManager;
+
 		for (int i = 0; i < 9; i++) {
 			addFirstTalkId(36490 + i);
 			addTalkId(36490 + i);
@@ -121,10 +121,10 @@ public final class TerritoryManagers extends AbstractNpcAI {
 					player.setNoble(true);
 					player.sendPacket(new UserInfo(player));
 					player.sendPacket(new ExBrExtraUserInfo(player));
-					// Complete the sub-class related quest.
-					// Complete quest Seeds of Chaos (236) for Kamael characters.
-					// Complete quest Mimir's Elixir (235) for other races characters.
-					final Quest q = QuestManager.getInstance().getQuest((player.getRace() == Race.KAMAEL) ? 236 : 235);
+            // Complete the sub-class related quest.
+            // Complete quest Seeds of Chaos (236) for Kamael characters.
+            // Complete quest Mimir's Elixir (235) for other races characters.
+            final Quest q = questManager.getQuest((player.getRace() == Race.KAMAEL) ? 236 : 235);
 					if (q != null) {
 						QuestState qs = player.getQuestState(q.getName());
 						if (qs == null) {

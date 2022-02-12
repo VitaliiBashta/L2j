@@ -26,6 +26,11 @@ public class AdminShowQuests implements IAdminCommandHandler {
   private static final String[] ADMIN_COMMANDS = {"admin_charquestmenu", "admin_setcharquest"};
 
   private static final String[] _states = {"CREATED", "STARTED", "COMPLETED"};
+  private final QuestManager questManager;
+
+  public AdminShowQuests(QuestManager questManager) {
+    this.questManager = questManager;
+  }
 
   private static void showFirstQuestMenu(L2PcInstance target, L2PcInstance actor) {
     StringBuilder replyMSG =
@@ -68,7 +73,64 @@ public class AdminShowQuests implements IAdminCommandHandler {
     actor.sendPacket(adminReply);
   }
 
-  private static void showQuestMenu(L2PcInstance target, L2PcInstance actor, String[] val) {
+  private void setQuestVar(L2PcInstance target, L2PcInstance actor, String[] val) {
+    QuestState qs = target.getQuestState(val[0]);
+    String[] outval = new String[3];
+
+    if ("state".equals(val[1])) {
+      switch (val[2]) {
+        case "COMPLETED":
+          {
+            qs.exitQuest("1".equals(val[3]));
+            break;
+          }
+        case "DELETE":
+          {
+            Quest.deleteQuestInDb(qs, true);
+            qs.exitQuest(true);
+            target.sendPacket(new QuestList());
+            target.sendPacket(new ExShowQuestMark(qs.getQuest().getId()));
+            target.delQuestState(qs.getQuestName());
+            actor.sendMessage(
+                "Removed quest " + qs.getQuest().getDescr() + " from " + target.getName() + ".");
+            break;
+          }
+        case "CREATE":
+          {
+            qs =
+                QuestManager.getInstance().getQuest(Integer.parseInt(val[0])).newQuestState(target);
+            qs.startQuest();
+            target.sendPacket(new QuestList());
+            target.sendPacket(new ExShowQuestMark(qs.getQuest().getId()));
+            val[0] = qs.getQuest().getName();
+            break;
+          }
+        case "CC":
+          {
+            qs =
+                QuestManager.getInstance().getQuest(Integer.parseInt(val[0])).newQuestState(target);
+            qs.exitQuest(false);
+            target.sendPacket(new QuestList());
+            target.sendPacket(new ExShowQuestMark(qs.getQuest().getId()));
+            val[0] = qs.getQuest().getName();
+            break;
+          }
+      }
+    } else {
+      if (val[2].equals("delete")) {
+        qs.unset(val[1]);
+      } else {
+        qs.set(val[1], val[2]);
+      }
+      target.sendPacket(new QuestList());
+      target.sendPacket(new ExShowQuestMark(qs.getQuest().getId()));
+    }
+    outval[0] = "name";
+    outval[1] = val[0];
+    showQuestMenu(target, actor, outval);
+  }
+
+  private void showQuestMenu(L2PcInstance target, L2PcInstance actor, String[] val) {
     // TODO(Zoey76): Refactor this into smaller methods and separate database access logic from HTML
     // creation.
     try (Connection con = ConnectionFactory.getInstance().getConnection()) {
@@ -222,7 +284,7 @@ public class AdminShowQuests implements IAdminCommandHandler {
             String qname = null;
             QuestState qs = null;
 
-            Quest quest = QuestManager.getInstance().getQuest(qnumber);
+            Quest quest = questManager.getQuest(qnumber);
             if (quest != null) {
               qname = quest.getName();
               qs = target.getQuestState(qname);
@@ -347,63 +409,6 @@ public class AdminShowQuests implements IAdminCommandHandler {
       actor.sendMessage("There was an error.");
       _log.warning(AdminShowQuests.class.getSimpleName() + ": " + e.getMessage());
     }
-  }
-
-  private static void setQuestVar(L2PcInstance target, L2PcInstance actor, String[] val) {
-    QuestState qs = target.getQuestState(val[0]);
-    String[] outval = new String[3];
-
-    if ("state".equals(val[1])) {
-      switch (val[2]) {
-        case "COMPLETED":
-          {
-            qs.exitQuest("1".equals(val[3]));
-            break;
-          }
-        case "DELETE":
-          {
-            Quest.deleteQuestInDb(qs, true);
-            qs.exitQuest(true);
-            target.sendPacket(new QuestList());
-            target.sendPacket(new ExShowQuestMark(qs.getQuest().getId()));
-            target.delQuestState(qs.getQuestName());
-            actor.sendMessage(
-                "Removed quest " + qs.getQuest().getDescr() + " from " + target.getName() + ".");
-            break;
-          }
-        case "CREATE":
-          {
-            qs =
-                QuestManager.getInstance().getQuest(Integer.parseInt(val[0])).newQuestState(target);
-            qs.startQuest();
-            target.sendPacket(new QuestList());
-            target.sendPacket(new ExShowQuestMark(qs.getQuest().getId()));
-            val[0] = qs.getQuest().getName();
-            break;
-          }
-        case "CC":
-          {
-            qs =
-                QuestManager.getInstance().getQuest(Integer.parseInt(val[0])).newQuestState(target);
-            qs.exitQuest(false);
-            target.sendPacket(new QuestList());
-            target.sendPacket(new ExShowQuestMark(qs.getQuest().getId()));
-            val[0] = qs.getQuest().getName();
-            break;
-          }
-      }
-    } else {
-      if (val[2].equals("delete")) {
-        qs.unset(val[1]);
-      } else {
-        qs.set(val[1], val[2]);
-      }
-      target.sendPacket(new QuestList());
-      target.sendPacket(new ExShowQuestMark(qs.getQuest().getId()));
-    }
-    outval[0] = "name";
-    outval[1] = val[0];
-    showQuestMenu(target, actor, outval);
   }
 
   @Override

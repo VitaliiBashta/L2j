@@ -22,6 +22,12 @@ public class AdminEvents implements IAdminCommandHandler {
     "admin_event_bypass"
   };
 
+  private final QuestManager questManager;
+
+  public AdminEvents(QuestManager questManager) {
+    this.questManager = questManager;
+  }
+
   @Override
   public String[] getAdminCommandList() {
     return ADMIN_COMMANDS;
@@ -51,7 +57,7 @@ public class AdminEvents implements IAdminCommandHandler {
     if (command.startsWith("admin_event_start")) {
       try {
         if (event_name != null) {
-          Event event = (Event) QuestManager.getInstance().getQuest(event_name);
+          Event event = (Event) questManager.getQuest(event_name);
           if (event != null) {
             if (event.eventStart(activeChar)) {
               activeChar.sendMessage("Event " + event_name + " started.");
@@ -70,7 +76,7 @@ public class AdminEvents implements IAdminCommandHandler {
     } else if (command.startsWith("admin_event_stop")) {
       try {
         if (event_name != null) {
-          Event event = (Event) QuestManager.getInstance().getQuest(event_name);
+          Event event = (Event) questManager.getQuest(event_name);
           if (event != null) {
             if (event.eventStop()) {
               activeChar.sendMessage("Event " + event_name + " stopped.");
@@ -89,7 +95,7 @@ public class AdminEvents implements IAdminCommandHandler {
     } else if (command.startsWith("admin_event_bypass")) {
       try {
         if (event_name != null) {
-          Event event = (Event) QuestManager.getInstance().getQuest(event_name);
+          Event event = (Event) questManager.getQuest(event_name);
           if (event != null) {
             event.eventBypass(activeChar, _event_bypass);
           }
@@ -107,7 +113,7 @@ public class AdminEvents implements IAdminCommandHandler {
     final NpcHtmlMessage html = new NpcHtmlMessage();
     html.setFile(activeChar.getHtmlPrefix(), "data/html/admin/gm_events.htm");
     final StringBuilder cList = new StringBuilder(500);
-    for (Quest event : QuestManager.getInstance().getScripts().values()) {
+    for (Quest event : questManager.getScripts().values()) {
       if (event instanceof Event) {
         StringUtil.append(
             cList,

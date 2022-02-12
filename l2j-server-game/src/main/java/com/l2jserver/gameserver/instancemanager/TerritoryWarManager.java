@@ -1,21 +1,3 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.instancemanager;
 
 import com.l2jserver.commons.database.ConnectionFactory;
@@ -23,7 +5,13 @@ import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.data.sql.impl.ClanTable;
 import com.l2jserver.gameserver.data.xml.impl.SkillTreesData;
 import com.l2jserver.gameserver.datatables.SkillData;
-import com.l2jserver.gameserver.model.*;
+import com.l2jserver.gameserver.model.L2Clan;
+import com.l2jserver.gameserver.model.L2SiegeClan;
+import com.l2jserver.gameserver.model.L2SkillLearn;
+import com.l2jserver.gameserver.model.L2Spawn;
+import com.l2jserver.gameserver.model.L2World;
+import com.l2jserver.gameserver.model.Location;
+import com.l2jserver.gameserver.model.TerritoryWard;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2DoorInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
@@ -39,8 +27,13 @@ import com.l2jserver.gameserver.network.serverpackets.L2GameServerPacket;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Broadcast;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
@@ -51,8 +44,9 @@ import static com.l2jserver.gameserver.config.Configuration.character;
 import static com.l2jserver.gameserver.config.Configuration.territoryWar;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
-public final class TerritoryWarManager implements Siegable {
-	
+@Service
+public class TerritoryWarManager implements Siegable {
+
 	private static final Logger _log = Logger.getLogger(TerritoryWarManager.class.getName());
 	
 	private static final String DELETE = "DELETE FROM territory_registrations WHERE castleId = ? and registeredId = ?";
@@ -92,8 +86,13 @@ public final class TerritoryWarManager implements Siegable {
 		TERRITORY_ITEM_IDS.put(88, 13764);
 		TERRITORY_ITEM_IDS.put(89, 13765);
 	}
-	
-	protected TerritoryWarManager() {
+
+  private final QuestManager questManager;
+  private final ConnectionFactory connectionFactory;
+
+  protected TerritoryWarManager(QuestManager questManager, ConnectionFactory connectionFactory) {
+    this.questManager = questManager;
+    this.connectionFactory = connectionFactory;
 		load();
 	}
 	
@@ -853,7 +852,7 @@ public final class TerritoryWarManager implements Siegable {
 	}
 	
 	protected boolean updatePlayerTWStateFlags(boolean clear) {
-		Quest twQuest = QuestManager.getInstance().getQuest(qn);
+    Quest twQuest = questManager.getQuest(qn);
 		if (twQuest == null) {
 			_log.warning(getClass().getSimpleName() + ": missing main Quest!");
 			return false;
@@ -1376,6 +1375,6 @@ public final class TerritoryWarManager implements Siegable {
 	}
 	
 	private static class SingletonHolder {
-		protected static final TerritoryWarManager _instance = new TerritoryWarManager();
+    protected static final TerritoryWarManager _instance = new TerritoryWarManager(null, null);
 	}
 }

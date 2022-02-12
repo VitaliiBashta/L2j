@@ -5,12 +5,14 @@ import com.l2jserver.gameserver.GameTimeController;
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.ai.CtrlIntention;
 import com.l2jserver.gameserver.enums.audio.Music;
+import com.l2jserver.gameserver.instancemanager.QuestManager;
 import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
+import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -18,6 +20,7 @@ import java.util.Map;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
 
+@Service
 public class MC_Show extends AbstractNpcAI {
   private static final Map<String, ShoutInfo> TALKS = new HashMap<>();
   private static final Map<String, WalkInfo> WALKS = new HashMap<>();
@@ -55,17 +58,15 @@ public class MC_Show extends AbstractNpcAI {
     NpcStringId.WELL_I_WISH_I_COULD_CONTINUE_ALL_NIGHT_LONG_BUT_THIS_IS_IT_FOR_TODAY_THANK_YOU,
     NpcStringId.WE_LOVE_YOU
   };
+  private final QuestManager questManager;
 
-  public MC_Show() {
+  public MC_Show(QuestManager questManager) {
     super(MC_Show.class.getSimpleName(), "ai/fantasy_isle");
+    this.questManager = questManager;
     addSpawnId(
         32433, 32431, 32432, 32442, 32443, 32444, 32445, 32446, 32424, 32425, 32426, 32427, 32428);
     load();
     scheduleTimer();
-  }
-
-  public static void main(String[] args) {
-    new MC_Show();
   }
 
   private void load() {
@@ -204,7 +205,8 @@ public class MC_Show extends AbstractNpcAI {
     }
     // TODO startRepeatingQuestTimer("Start", diff, 14400000, null, null);
     // missing option to provide different initial delay
-    ThreadPoolManager.getInstance().scheduleGeneralAtFixedRate(new StartMCShow(), diff, 14400000L);
+    ThreadPoolManager.getInstance()
+        .scheduleGeneralAtFixedRate(new StartMCShow(questManager), diff, 14400000L);
   }
 
   private void autoChat(L2Npc npc, NpcStringId npcString, int type) {

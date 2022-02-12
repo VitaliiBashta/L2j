@@ -1,19 +1,17 @@
 
 package com.l2jserver.datapack.quests.Q10291_FireDragonDestroyer;
 
-import java.util.function.Function;
-
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.quest.State;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Fire Dragon Destroyer (10291)
- * @author malyelfik
- */
+import java.util.function.Function;
+
+@Service
 public class Q10291_FireDragonDestroyer extends Quest {
 	// NPC
 	private static final int KLEIN = 31540;

@@ -36,7 +36,11 @@ import com.l2jserver.gameserver.model.events.impl.character.OnCreatureKill;
 import com.l2jserver.gameserver.model.events.impl.character.OnCreatureZoneEnter;
 import com.l2jserver.gameserver.model.events.impl.character.OnCreatureZoneExit;
 import com.l2jserver.gameserver.model.events.impl.character.npc.*;
-import com.l2jserver.gameserver.model.events.impl.character.npc.attackable.*;
+import com.l2jserver.gameserver.model.events.impl.character.npc.attackable.OnAttackableAggroRangeEnter;
+import com.l2jserver.gameserver.model.events.impl.character.npc.attackable.OnAttackableAttack;
+import com.l2jserver.gameserver.model.events.impl.character.npc.attackable.OnAttackableFactionCall;
+import com.l2jserver.gameserver.model.events.impl.character.npc.attackable.OnAttackableHate;
+import com.l2jserver.gameserver.model.events.impl.character.npc.attackable.OnAttackableKill;
 import com.l2jserver.gameserver.model.events.impl.character.player.*;
 import com.l2jserver.gameserver.model.events.impl.character.trap.OnTrapAction;
 import com.l2jserver.gameserver.model.events.impl.item.OnItemBypassEvent;
@@ -45,7 +49,12 @@ import com.l2jserver.gameserver.model.events.impl.olympiad.OnOlympiadMatchResult
 import com.l2jserver.gameserver.model.events.impl.sieges.castle.OnCastleSiegeFinish;
 import com.l2jserver.gameserver.model.events.impl.sieges.castle.OnCastleSiegeOwnerChange;
 import com.l2jserver.gameserver.model.events.impl.sieges.castle.OnCastleSiegeStart;
-import com.l2jserver.gameserver.model.events.listeners.*;
+import com.l2jserver.gameserver.model.events.listeners.AbstractEventListener;
+import com.l2jserver.gameserver.model.events.listeners.AnnotationEventListener;
+import com.l2jserver.gameserver.model.events.listeners.ConsumerEventListener;
+import com.l2jserver.gameserver.model.events.listeners.DummyEventListener;
+import com.l2jserver.gameserver.model.events.listeners.FunctionEventListener;
+import com.l2jserver.gameserver.model.events.listeners.RunnableEventListener;
 import com.l2jserver.gameserver.model.events.returns.AbstractEventReturn;
 import com.l2jserver.gameserver.model.events.returns.TerminateReturn;
 import com.l2jserver.gameserver.model.holders.ItemHolder;
@@ -62,8 +71,11 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.model.zone.L2ZoneType;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.SystemMessageId;
-import com.l2jserver.gameserver.network.serverpackets.*;
-import com.l2jserver.gameserver.scripting.ScriptManager;
+import com.l2jserver.gameserver.network.serverpackets.ExShowScreenMessage;
+import com.l2jserver.gameserver.network.serverpackets.InventoryUpdate;
+import com.l2jserver.gameserver.network.serverpackets.SpecialCamera;
+import com.l2jserver.gameserver.network.serverpackets.StatusUpdate;
+import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.MinionList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -77,7 +89,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static com.l2jserver.gameserver.config.Configuration.*;
+import static com.l2jserver.gameserver.config.Configuration.character;
+import static com.l2jserver.gameserver.config.Configuration.customs;
+import static com.l2jserver.gameserver.config.Configuration.rates;
 
 
 public abstract class AbstractScript implements INamable {
@@ -1574,8 +1588,7 @@ public abstract class AbstractScript implements INamable {
 		return true;
 	}
 	
-	public abstract ScriptManager<?> getManager();
-	
+
 	/**
 	 * Provides delayed (Depending on {@link com.l2jserver.gameserver.model.actor.L2Attackable#getOnKillDelay()}) callback operation when L2Attackable dies from a player.
 	 * @param callback

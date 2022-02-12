@@ -37,6 +37,11 @@ public class AdminGrandBoss implements IAdminCommandHandler {
     "admin_grandboss_minions",
     "admin_grandboss_abort",
   };
+  private final QuestManager questManager;
+
+  public AdminGrandBoss(QuestManager questManager) {
+    this.questManager = questManager;
+  }
 
   @Override
   public boolean useAdminCommand(String command, L2PcInstance activeChar) {
@@ -277,15 +282,15 @@ public class AdminGrandBoss implements IAdminCommandHandler {
   }
 
   private Quest getAntharasAI() {
-    return QuestManager.getInstance().getQuest(Antharas.class.getSimpleName());
+    return questManager.getQuest(Antharas.class.getSimpleName());
   }
 
   private Quest getBaiumAI() {
-    return QuestManager.getInstance().getQuest(Baium.class.getSimpleName());
+    return questManager.getQuest(Baium.class.getSimpleName());
   }
 
   private Quest getQueenAntAI() {
-    return QuestManager.getInstance().getQuest(QueenAnt.class.getSimpleName());
+    return questManager.getQuest(QueenAnt.class.getSimpleName());
   }
 
   @Override

@@ -18,18 +18,18 @@
  */
 package com.l2jserver.gameserver.instancemanager;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
+import com.l2jserver.commons.database.ConnectionFactory;
+import com.l2jserver.gameserver.ItemsAutoDestroy;
+import com.l2jserver.gameserver.ThreadPoolManager;
+import com.l2jserver.gameserver.model.L2World;
+import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.l2jserver.commons.database.ConnectionFactory;
-import com.l2jserver.gameserver.ItemsAutoDestroy;
-import com.l2jserver.gameserver.ThreadPoolManager;
-import com.l2jserver.gameserver.model.L2World;
-import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
+import static com.l2jserver.gameserver.config.Configuration.general;
 
 /**
  * This class manage all items on ground.
@@ -199,10 +199,6 @@ public final class ItemsOnGroundManager implements Runnable {
 		}
 	}
 	
-	/**
-	 * Gets the single instance of {@code ItemsOnGroundManager}.
-	 * @return single instance of {@code ItemsOnGroundManager}
-	 */
 	public static ItemsOnGroundManager getInstance() {
 		return SingletonHolder._instance;
 	}
