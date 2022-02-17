@@ -7,12 +7,10 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.skills.BuffInfo;
 import com.l2jserver.gameserver.model.skills.Skill;
+import org.springframework.stereotype.Service;
 
-/**
- * Tar Beetle AI
- * @author nonom, malyelfik
- */
-public final class TarBeetle extends AbstractNpcAI {
+@Service
+public class TarBeetle extends AbstractNpcAI {
 	// NPC
 	private static final int TAR_BEETLE = 18804;
 	// Skills

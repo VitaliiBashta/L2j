@@ -15,13 +15,10 @@ import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Baby Pets AI.
- * @author St3eT
- * @since 2.6.0.0
- */
-public final class BabyPets extends AbstractNpcAI {
+@Service
+public class BabyPets extends AbstractNpcAI {
 	// NPCs
 	private static final int[] BABY_PETS = {
 		12780, // Baby Buffalo

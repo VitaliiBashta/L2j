@@ -8,12 +8,10 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Katenar AI for quests Certified Soul Breaker (65)
- * @author ivantotov
- */
-public final class Katenar extends AbstractNpcAI {
+@Service
+public class Katenar extends AbstractNpcAI {
 	// NPC
 	private static final int KATENAR = 32242;
 	// Item

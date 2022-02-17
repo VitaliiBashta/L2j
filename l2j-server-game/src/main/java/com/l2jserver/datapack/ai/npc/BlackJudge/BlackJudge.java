@@ -7,11 +7,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.itemcontainer.Inventory;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.EtcStatusUpdate;
+import org.springframework.stereotype.Service;
 
-/**
- * Black Judge AI.
- * @author St3eT
- */
+@Service
 public class BlackJudge extends AbstractNpcAI {
 	// NPC
 	private static final int BLACK_JUDGE = 30981;

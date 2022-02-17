@@ -9,33 +9,26 @@ import com.l2jserver.datapack.ai.individual.Baium.Baium;
 import com.l2jserver.datapack.ai.npc.Abercrombie.Abercrombie;
 import com.l2jserver.datapack.ai.npc.Alarm.Alarm;
 import com.l2jserver.datapack.ai.npc.Alexandria.Alexandria;
-import com.l2jserver.datapack.ai.npc.Asamah.Asamah;
 import com.l2jserver.datapack.ai.npc.AvantGarde.AvantGarde;
-import com.l2jserver.datapack.ai.npc.BlackJudge.BlackJudge;
 import com.l2jserver.datapack.ai.npc.BlackMarketeerOfMammon.BlackMarketeerOfMammon;
 import com.l2jserver.datapack.ai.npc.CastleAmbassador.CastleAmbassador;
 import com.l2jserver.datapack.ai.npc.CastleBlacksmith.CastleBlacksmith;
 import com.l2jserver.datapack.ai.npc.CastleChamberlain.CastleChamberlain;
 import com.l2jserver.datapack.ai.npc.CastleCourtMagician.CastleCourtMagician;
 import com.l2jserver.datapack.ai.npc.CastleMercenaryManager.CastleMercenaryManager;
-import com.l2jserver.datapack.ai.npc.CastleSiegeManager.CastleSiegeManager;
 import com.l2jserver.datapack.ai.npc.CastleTeleporter.CastleTeleporter;
 import com.l2jserver.datapack.ai.npc.CastleWarehouse.CastleWarehouse;
 import com.l2jserver.datapack.ai.npc.ClanTrader.ClanTrader;
 import com.l2jserver.datapack.ai.npc.ClassMaster.ClassMaster;
 import com.l2jserver.datapack.ai.npc.Dorian.Dorian;
 import com.l2jserver.datapack.ai.npc.DragonVortex.DragonVortex;
-import com.l2jserver.datapack.ai.npc.EchoCrystals.EchoCrystals;
 import com.l2jserver.datapack.ai.npc.FameManager.FameManager;
 import com.l2jserver.datapack.ai.npc.Fisherman.Fisherman;
 import com.l2jserver.datapack.ai.npc.ForgeOfTheGods.ForgeOfTheGods;
-import com.l2jserver.datapack.ai.npc.ForgeOfTheGods.Rooney;
-import com.l2jserver.datapack.ai.npc.ForgeOfTheGods.TarBeetle;
 import com.l2jserver.datapack.ai.npc.FortressArcherCaptain.FortressArcherCaptain;
 import com.l2jserver.datapack.ai.npc.FortressSiegeManager.FortressSiegeManager;
 import com.l2jserver.datapack.ai.npc.FreyasSteward.FreyasSteward;
 import com.l2jserver.datapack.ai.npc.Jinia.Jinia;
-import com.l2jserver.datapack.ai.npc.Katenar.Katenar;
 import com.l2jserver.datapack.ai.npc.KetraOrcSupport.KetraOrcSupport;
 import com.l2jserver.datapack.ai.npc.Kier.Kier;
 import com.l2jserver.datapack.ai.npc.ManorManager.ManorManager;
@@ -44,15 +37,12 @@ import com.l2jserver.datapack.ai.npc.Minigame.Minigame;
 import com.l2jserver.datapack.ai.npc.MonumentOfHeroes.MonumentOfHeroes;
 import com.l2jserver.datapack.ai.npc.NevitsHerald.NevitsHerald;
 import com.l2jserver.datapack.ai.npc.NpcBuffers.NpcBuffers;
-import com.l2jserver.datapack.ai.npc.NpcBuffers.impl.CabaleBuffer;
-import com.l2jserver.datapack.ai.npc.PriestOfBlessing.PriestOfBlessing;
 import com.l2jserver.datapack.ai.npc.Rafforty.Rafforty;
 import com.l2jserver.datapack.ai.npc.Rignos.Rignos;
 import com.l2jserver.datapack.ai.npc.Selina.Selina;
 import com.l2jserver.datapack.ai.npc.Sirra.Sirra;
 import com.l2jserver.datapack.ai.npc.SubclassCertification.SubclassCertification;
 import com.l2jserver.datapack.ai.npc.Summons.MerchantGolem.GolemTrader;
-import com.l2jserver.datapack.ai.npc.Summons.Pets.BabyPets;
 import com.l2jserver.datapack.ai.npc.Summons.Pets.ImprovedBabyPets;
 import com.l2jserver.datapack.ai.npc.Summons.Servitors.Servitors;
 import com.l2jserver.datapack.ai.npc.SupportUnitCaptain.SupportUnitCaptain;
@@ -115,33 +105,26 @@ public class AILoader {
     Abercrombie.class,
     Alarm.class,
     Alexandria.class,
-    Asamah.class,
     AvantGarde.class,
-    BlackJudge.class,
     BlackMarketeerOfMammon.class,
     CastleAmbassador.class,
     CastleBlacksmith.class,
     CastleCourtMagician.class,
     CastleChamberlain.class,
     CastleMercenaryManager.class,
-    CastleSiegeManager.class,
     CastleTeleporter.class,
     CastleWarehouse.class,
     ClanTrader.class,
     ClassMaster.class,
     Dorian.class,
     DragonVortex.class,
-    EchoCrystals.class,
     FameManager.class,
     Fisherman.class,
     ForgeOfTheGods.class,
-    Rooney.class,
-    TarBeetle.class,
     FortressArcherCaptain.class,
     FortressSiegeManager.class,
     FreyasSteward.class,
     Jinia.class,
-    Katenar.class,
     KetraOrcSupport.class,
     Kier.class,
     ManorManager.class,
@@ -150,15 +133,12 @@ public class AILoader {
     MonumentOfHeroes.class,
     NevitsHerald.class,
     NpcBuffers.class,
-    CabaleBuffer.class,
-    PriestOfBlessing.class,
     Rignos.class,
     Rafforty.class,
     Selina.class,
     Sirra.class,
     SubclassCertification.class,
     GolemTrader.class,
-    BabyPets.class,
     ImprovedBabyPets.class,
     Servitors.class,
     SupportUnitCaptain.class,

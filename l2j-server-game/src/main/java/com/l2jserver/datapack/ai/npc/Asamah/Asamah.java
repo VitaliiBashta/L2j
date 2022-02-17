@@ -6,13 +6,10 @@ import com.l2jserver.datapack.quests.Q00111_ElrokianHuntersProof.Q00111_Elrokian
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.QuestState;
+import org.springframework.stereotype.Service;
 
-/**
- * Asamah AI.
- * @author Adry_85
- * @since 2.6.0.0
- */
-public final class Asamah extends AbstractNpcAI {
+@Service
+public class Asamah extends AbstractNpcAI {
 	// NPC
 	private static final int ASAMAH = 32115;
 	
