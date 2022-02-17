@@ -19,13 +19,15 @@ import com.l2jserver.gameserver.model.zone.type.L2BossZone;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.l2jserver.gameserver.config.Configuration.grandBoss;
 
-public final class Orfen extends AbstractNpcAI {
+@Service
+public class Orfen extends AbstractNpcAI {
   private static final Location[] POS = {
     new Location(43728, 17220, -4342),
     new Location(55024, 17368, -5412),
@@ -45,27 +47,26 @@ public final class Orfen extends AbstractNpcAI {
   private static final int RAIKEL_LEOS = 29016;
   // private static final int RIBA = 29017;
   private static final int RIBA_IREN = 29018;
-
-  private static boolean _IsTeleported;
   private static final List<L2Attackable> MINIONS = new CopyOnWriteArrayList<>();
-  private static L2BossZone ZONE;
-
   private static final byte ALIVE = 0;
   private static final byte DEAD = 1;
-
   // Skills
   private static final SkillHolder PARALYSIS = new SkillHolder(4064);
   private static final SkillHolder NPC_MORTAL_BLOW = new SkillHolder(4067, 4);
   private static final SkillHolder ORFEN_HEAL = new SkillHolder(4516);
+  private static boolean _IsTeleported;
+  private static L2BossZone ZONE;
+  private final GrandBossManager grandBossManager;
 
-  public Orfen() {
+  public Orfen(GrandBossManager grandBossManager) {
     super(Orfen.class.getSimpleName(), "ai/individual");
+    this.grandBossManager = grandBossManager;
     int[] mobs = {ORFEN, RAIKEL_LEOS, RIBA_IREN};
     registerMobs(mobs);
     _IsTeleported = false;
-    ZONE = GrandBossManager.getInstance().getZone(POS[0]);
-    StatsSet info = GrandBossManager.getInstance().getStatsSet(ORFEN);
-    int status = GrandBossManager.getInstance().getBossStatus(ORFEN);
+    ZONE = this.grandBossManager.getZone(POS[0]);
+    StatsSet info = grandBossManager.getStatsSet(ORFEN);
+    int status = grandBossManager.getBossStatus(ORFEN);
     if (status == DEAD) {
       // load the unlock date and time for Orfen from DB
       long temp = info.getLong("respawn_time") - System.currentTimeMillis();
@@ -85,7 +86,7 @@ public final class Orfen extends AbstractNpcAI {
           loc = POS[3];
         }
         L2GrandBossInstance orfen = (L2GrandBossInstance) addSpawn(ORFEN, loc, false, 0);
-        GrandBossManager.getInstance().setBossStatus(ORFEN, ALIVE);
+        grandBossManager.setBossStatus(ORFEN, ALIVE);
         spawnBoss(orfen);
       }
     } else {
@@ -102,16 +103,8 @@ public final class Orfen extends AbstractNpcAI {
     }
   }
 
-  public void setSpawnPoint(L2Npc npc, int index) {
-    ((L2Attackable) npc).clearAggroList();
-    npc.getAI().setIntention(CtrlIntention.AI_INTENTION_IDLE, null, null);
-    L2Spawn spawn = npc.getSpawn();
-    spawn.setLocation(POS[index]);
-    npc.teleToLocation(POS[index], false);
-  }
-
   public void spawnBoss(L2GrandBossInstance npc) {
-    GrandBossManager.getInstance().addBoss(npc);
+    grandBossManager.addBoss(npc);
     npc.broadcastPacket(Music.BS01_A_7000.getPacket());
     startQuestTimer("check_orfen_pos", 10000, npc, null, true);
     // Spawn minions
@@ -134,6 +127,32 @@ public final class Orfen extends AbstractNpcAI {
   }
 
   @Override
+  public String onAttack(L2Npc npc, L2PcInstance attacker, int damage, boolean isSummon) {
+    int npcId = npc.getId();
+    if (npcId == ORFEN) {
+      if (!_IsTeleported && ((npc.getCurrentHp() - damage) < (npc.getMaxHp() / 2))) {
+        _IsTeleported = true;
+        setSpawnPoint(npc, 0);
+      } else if (npc.isInsideRadius(attacker, 1000, false, false)
+          && !npc.isInsideRadius(attacker, 300, false, false)
+          && (getRandom(10) == 0)) {
+        NpcSay packet = new NpcSay(npc.getObjectId(), Say2.NPC_ALL, npcId, TEXT[getRandom(3)]);
+        packet.addStringParameter(attacker.getName().toString());
+        npc.broadcastPacket(packet);
+        attacker.teleToLocation(npc.getLocation());
+        npc.setTarget(attacker);
+        npc.doCast(PARALYSIS);
+      }
+    } else if (npcId == RIBA_IREN) {
+      if (!npc.isCastingNow() && ((npc.getCurrentHp() - damage) < (npc.getMaxHp() / 2.0))) {
+        npc.setTarget(attacker);
+        npc.doCast(ORFEN_HEAL);
+      }
+    }
+    return super.onAttack(npc, attacker, damage, isSummon);
+  }
+
+  @Override
   public String onAdvEvent(String event, L2Npc npc, L2PcInstance player) {
     if (event.equalsIgnoreCase("orfen_unlock")) {
       int i = getRandom(10);
@@ -146,7 +165,7 @@ public final class Orfen extends AbstractNpcAI {
         loc = POS[3];
       }
       L2GrandBossInstance orfen = (L2GrandBossInstance) addSpawn(ORFEN, loc, false, 0);
-      GrandBossManager.getInstance().setBossStatus(ORFEN, ALIVE);
+      grandBossManager.setBossStatus(ORFEN, ALIVE);
       spawnBoss(orfen);
     } else if (event.equalsIgnoreCase("check_orfen_pos")) {
       if ((_IsTeleported && (npc.getCurrentHp() > (npc.getMaxHp() * 0.95)))
@@ -178,6 +197,41 @@ public final class Orfen extends AbstractNpcAI {
       MINIONS.add(mob);
     }
     return super.onAdvEvent(event, npc, player);
+  }
+
+  @Override
+  public String onKill(L2Npc npc, L2PcInstance killer, boolean isSummon) {
+    if (npc.getId() == ORFEN) {
+      npc.broadcastPacket(Music.BS02_D_7000.getPacket());
+      grandBossManager.setBossStatus(ORFEN, DEAD);
+      // Calculate Min and Max respawn times randomly.
+      long respawnTime =
+          grandBoss().getIntervalOfOrfenSpawn()
+              + getRandom(
+                  -grandBoss().getRandomOfOrfenSpawn(), grandBoss().getRandomOfOrfenSpawn());
+      respawnTime *= 3600000;
+      startQuestTimer("orfen_unlock", respawnTime, null, null);
+      // also save the respawn time so that the info is maintained past reboots
+      StatsSet info = grandBossManager.getStatsSet(ORFEN);
+      info.set("respawn_time", System.currentTimeMillis() + respawnTime);
+      grandBossManager.setStatsSet(ORFEN, info);
+      cancelQuestTimer("check_minion_loc", npc, null);
+      cancelQuestTimer("check_orfen_pos", npc, null);
+      startQuestTimer("despawn_minions", 20000, null, null);
+      cancelQuestTimers("spawn_minion");
+    } else if ((grandBossManager.getBossStatus(ORFEN) == ALIVE) && (npc.getId() == RAIKEL_LEOS)) {
+      MINIONS.remove(npc);
+      startQuestTimer("spawn_minion", 360000, npc, null);
+    }
+    return super.onKill(npc, killer, isSummon);
+  }
+
+  public void setSpawnPoint(L2Npc npc, int index) {
+    ((L2Attackable) npc).clearAggroList();
+    npc.getAI().setIntention(CtrlIntention.AI_INTENTION_IDLE, null, null);
+    L2Spawn spawn = npc.getSpawn();
+    spawn.setLocation(POS[index]);
+    npc.teleToLocation(POS[index], false);
   }
 
   @Override
@@ -224,59 +278,5 @@ public final class Orfen extends AbstractNpcAI {
       }
     }
     return super.onFactionCall(npc, caller, attacker, isSummon);
-  }
-
-  @Override
-  public String onAttack(L2Npc npc, L2PcInstance attacker, int damage, boolean isSummon) {
-    int npcId = npc.getId();
-    if (npcId == ORFEN) {
-      if (!_IsTeleported && ((npc.getCurrentHp() - damage) < (npc.getMaxHp() / 2))) {
-        _IsTeleported = true;
-        setSpawnPoint(npc, 0);
-      } else if (npc.isInsideRadius(attacker, 1000, false, false)
-          && !npc.isInsideRadius(attacker, 300, false, false)
-          && (getRandom(10) == 0)) {
-        NpcSay packet = new NpcSay(npc.getObjectId(), Say2.NPC_ALL, npcId, TEXT[getRandom(3)]);
-        packet.addStringParameter(attacker.getName().toString());
-        npc.broadcastPacket(packet);
-        attacker.teleToLocation(npc.getLocation());
-        npc.setTarget(attacker);
-        npc.doCast(PARALYSIS);
-      }
-    } else if (npcId == RIBA_IREN) {
-      if (!npc.isCastingNow() && ((npc.getCurrentHp() - damage) < (npc.getMaxHp() / 2.0))) {
-        npc.setTarget(attacker);
-        npc.doCast(ORFEN_HEAL);
-      }
-    }
-    return super.onAttack(npc, attacker, damage, isSummon);
-  }
-
-  @Override
-  public String onKill(L2Npc npc, L2PcInstance killer, boolean isSummon) {
-    if (npc.getId() == ORFEN) {
-      npc.broadcastPacket(Music.BS02_D_7000.getPacket());
-      GrandBossManager.getInstance().setBossStatus(ORFEN, DEAD);
-      // Calculate Min and Max respawn times randomly.
-      long respawnTime =
-          grandBoss().getIntervalOfOrfenSpawn()
-              + getRandom(
-                  -grandBoss().getRandomOfOrfenSpawn(), grandBoss().getRandomOfOrfenSpawn());
-      respawnTime *= 3600000;
-      startQuestTimer("orfen_unlock", respawnTime, null, null);
-      // also save the respawn time so that the info is maintained past reboots
-      StatsSet info = GrandBossManager.getInstance().getStatsSet(ORFEN);
-      info.set("respawn_time", System.currentTimeMillis() + respawnTime);
-      GrandBossManager.getInstance().setStatsSet(ORFEN, info);
-      cancelQuestTimer("check_minion_loc", npc, null);
-      cancelQuestTimer("check_orfen_pos", npc, null);
-      startQuestTimer("despawn_minions", 20000, null, null);
-      cancelQuestTimers("spawn_minion");
-    } else if ((GrandBossManager.getInstance().getBossStatus(ORFEN) == ALIVE)
-        && (npc.getId() == RAIKEL_LEOS)) {
-      MINIONS.remove(npc);
-      startQuestTimer("spawn_minion", 360000, npc, null);
-    }
-    return super.onKill(npc, killer, isSummon);
   }
 }

@@ -38,9 +38,11 @@ public class AdminGrandBoss implements IAdminCommandHandler {
     "admin_grandboss_abort",
   };
   private final QuestManager questManager;
+  private final GrandBossManager grandBossManager;
 
-  public AdminGrandBoss(QuestManager questManager) {
+  public AdminGrandBoss(QuestManager questManager, GrandBossManager grandBossManager) {
     this.questManager = questManager;
+    this.grandBossManager = grandBossManager;
   }
 
   @Override
@@ -173,7 +175,7 @@ public class AdminGrandBoss implements IAdminCommandHandler {
 
   private void manageHtml(L2PcInstance activeChar, int grandBossId) {
     if (Arrays.asList(ANTHARAS, VALAKAS, BAIUM, QUEENANT, ORFEN, CORE).contains(grandBossId)) {
-      final int bossStatus = GrandBossManager.getInstance().getBossStatus(grandBossId);
+      final int bossStatus = grandBossManager.getBossStatus(grandBossId);
       L2NoRestartZone bossZone = null;
       String textColor = null;
       String text = null;
@@ -261,7 +263,7 @@ public class AdminGrandBoss implements IAdminCommandHandler {
         }
       }
 
-      final StatsSet info = GrandBossManager.getInstance().getStatsSet(grandBossId);
+      final StatsSet info = grandBossManager.getStatsSet(grandBossId);
       final String bossRespawn =
           new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(info.getLong("respawn_time"));
 

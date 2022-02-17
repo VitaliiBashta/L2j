@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import static com.l2jserver.gameserver.config.Configuration.general;
 
 @Service
-public class NpcData extends  IXmlReader {
+public class NpcData extends IXmlReader {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(NpcData.class);
 	
@@ -487,6 +487,15 @@ public class NpcData extends  IXmlReader {
 		return id;
 	}
 	
+	public void loadNpcsSkillLearn() {
+		_npcs.values().forEach(template -> {
+			final List<ClassId> teachInfo = skillLearnData.getSkillLearnData(template.getId());
+			if (teachInfo != null) {
+				template.addTeachInfo(teachInfo);
+			}
+		});
+	}
+	
 	/**
 	 * Gets the clan id
 	 * @param clanName the clan name to get its id
@@ -521,6 +530,15 @@ public class NpcData extends  IXmlReader {
 	}
 	
 	/**
+	 * Gets the all of level.
+	 * @param lvls of all the templates to get.
+	 * @return the template list for the given level.
+	 */
+	public List<L2NpcTemplate> getAllOfLevel(int... lvls) {
+		return getTemplates(template -> Util.contains(lvls, template.getLevel()));
+	}
+	
+	/**
 	 * Gets all templates matching the filter.
 	 * @param filter
 	 * @return the template list for the given filter
@@ -531,15 +549,6 @@ public class NpcData extends  IXmlReader {
 			.filter(filter)
 			.collect(Collectors.toList());
 		//@formatter:on
-	}
-	
-	/**
-	 * Gets the all of level.
-	 * @param lvls of all the templates to get.
-	 * @return the template list for the given level.
-	 */
-	public List<L2NpcTemplate> getAllOfLevel(int... lvls) {
-		return getTemplates(template -> Util.contains(lvls, template.getLevel()));
 	}
 	
 	/**
@@ -568,17 +577,6 @@ public class NpcData extends  IXmlReader {
 	public List<L2NpcTemplate> getAllNpcOfClassType(String... classTypes) {
 		return getTemplates(template -> Util.contains(classTypes, template.getType(), true));
 	}
-	
-	public void loadNpcsSkillLearn() {
-		_npcs.values().forEach(template -> {
-			final List<ClassId> teachInfo = skillLearnData.getSkillLearnData(template.getId());
-			if (teachInfo != null) {
-				template.addTeachInfo(teachInfo);
-			}
-		});
-	}
-	
-
 	
 	private static class SingletonHolder {
 		protected static final NpcData INSTANCE = new NpcData(null, null, null);

@@ -164,7 +164,6 @@ public class GameServer {
     DoorData.getInstance();
     CastleManager.getInstance().loadInstances();
     NpcBufferTable.getInstance();
-    GrandBossManager.getInstance().initZones();
     EventDroplist.getInstance();
 
     printSection("Auction Manager");

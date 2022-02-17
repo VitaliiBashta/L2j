@@ -21,6 +21,11 @@ public class AdminFightCalculator implements IAdminCommandHandler {
   private static final String[] ADMIN_COMMANDS = {
     "admin_fight_calculator", "admin_fight_calculator_show", "admin_fcs",
   };
+  private final NpcData npcData;
+
+  public AdminFightCalculator(NpcData npcData) {
+    this.npcData = npcData;
+  }
 
   // TODO: remove from gm list etc etc
   @Override
@@ -65,17 +70,16 @@ public class AdminFightCalculator implements IAdminCommandHandler {
       }
       if (s.equals("mid2")) {
         mid2 = Integer.parseInt(st.nextToken());
-        continue;
       }
     }
 
     L2NpcTemplate npc1 = null;
     if (mid1 != 0) {
-      npc1 = NpcData.getInstance().getTemplate(mid1);
+      npc1 = npcData.getTemplate(mid1);
     }
     L2NpcTemplate npc2 = null;
     if (mid2 != 0) {
-      npc2 = NpcData.getInstance().getTemplate(mid2);
+      npc2 = npcData.getTemplate(mid2);
     }
 
     final NpcHtmlMessage adminReply = new NpcHtmlMessage();
@@ -112,7 +116,7 @@ public class AdminFightCalculator implements IAdminCommandHandler {
                   + "</center>"
                   + "</body></html>");
     } else if ((lvl1 != 0) && (npc1 == null)) {
-      final List<L2NpcTemplate> npcs = NpcData.getInstance().getAllOfLevel(lvl1);
+      final List<L2NpcTemplate> npcs = npcData.getAllOfLevel(lvl1);
       final StringBuilder sb =
           StringUtil.startAppend(
               50 + (npcs.size() * 200),
@@ -137,7 +141,7 @@ public class AdminFightCalculator implements IAdminCommandHandler {
       sb.append("</table></body></html>");
       replyMSG = sb.toString();
     } else if ((lvl2 != 0) && (npc2 == null)) {
-      final List<L2NpcTemplate> npcs = NpcData.getInstance().getAllOfLevel(lvl2);
+      final List<L2NpcTemplate> npcs = npcData.getAllOfLevel(lvl2);
       final StringBuilder sb =
           StringUtil.startAppend(
               50 + (npcs.size() * 200),
@@ -398,8 +402,8 @@ public class AdminFightCalculator implements IAdminCommandHandler {
     activeChar.sendPacket(adminReply);
 
     if (params.length() != 0) {
-      ((L2MonsterInstance) npc1).deleteMe();
-      ((L2MonsterInstance) npc2).deleteMe();
+      npc1.deleteMe();
+      npc2.deleteMe();
     }
   }
 }

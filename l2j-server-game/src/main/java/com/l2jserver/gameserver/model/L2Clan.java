@@ -127,22 +127,6 @@ public class L2Clan implements Identifiable {
 		getWarehouse().restore();
 	}
 	
-	/**
-	 * Called only if a new clan is created
-	 * @param clanId A valid clan Id to create
-	 * @param clanName A valid clan name
-	 */
-	public L2Clan(int clanId, String clanName) {
-		_clanId = clanId;
-		name = clanName;
-		initializePrivs();
-	}
-	
-	@Override
-	public int getId() {
-		return _clanId;
-	}
-	
 	public void initializePrivs() {
 		for (int i = 1; i < 10; i++) {
 			_privs.put(i, new RankPrivs(i, 0, new EnumIntBitmask<>(ClanPrivilege.class, false)));
@@ -214,6 +198,17 @@ public class L2Clan implements Identifiable {
 		}
 	}
 	
+	/**
+	 * Called only if a new clan is created
+	 * @param clanId A valid clan Id to create
+	 * @param clanName A valid clan name
+	 */
+	public L2Clan(int clanId, String clanName) {
+		_clanId = clanId;
+		name = clanName;
+		initializePrivs();
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -224,7 +219,6 @@ public class L2Clan implements Identifiable {
 	
 	/**
 	 * Adds a clan member to the clan.
-	 * @param member the clan member.
 	 */
 	private void addClanMember(L2ClanMember member) {
 		_members.put(member.getObjectId(), member);
@@ -528,6 +522,13 @@ public class L2Clan implements Identifiable {
 	
 	public ItemContainer getWarehouse() {
 		return _warehouse;
+	}
+	
+	/**
+	 * @return the alliance crest Id.
+	 */
+	public int getAllyCrestId() {
+		return _allyCrestId;
 	}
 	
 	public void setClanId(int clanId) {
@@ -989,65 +990,33 @@ public class L2Clan implements Identifiable {
 		_crestId = crestId;
 	}
 	
-	public boolean isNoticeEnabled() {
-		return _noticeEnabled;
+	/**
+	 * @param allyCrestId the alliance crest Id to be set.
+	 */
+	public void setAllyCrestId(int allyCrestId) {
+		_allyCrestId = allyCrestId;
 	}
 	
-	public void setNoticeEnabled(boolean enabled) {
-		storeNotice(_notice, enabled);
+	/**
+	 * @return Returns the clan CrestLargeId
+	 */
+	public int getCrestLargeId() {
+		return _crestLargeId;
 	}
 	
-	private void storeNotice(String notice, boolean enabled) {
-		if (notice == null) {
-			notice = "";
-		}
-
-		if (notice.length() > MAX_NOTICE_LENGTH) {
-			notice = notice.substring(0, MAX_NOTICE_LENGTH - 1);
-		}
-
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("INSERT INTO clan_notices (clan_id,notice,enabled) values (?,?,?) ON DUPLICATE KEY UPDATE notice=?,enabled=?")) {
-			ps.setInt(1, getId());
-			ps.setString(2, notice);
-			if (enabled) {
-				ps.setString(3, "true");
-			} else {
-				ps.setString(3, "false");
-			}
-			ps.setString(4, notice);
-			if (enabled) {
-				ps.setString(5, "true");
-			} else {
-				ps.setString(5, "false");
-			}
-			ps.execute();
-		} catch (Exception e) {
-			_log.log(Level.WARNING, "Error could not store clan notice: " + e.getMessage(), e);
-		}
-
-		_notice = notice;
-		_noticeEnabled = enabled;
+	/**
+	 * @param crestLargeId The id of pledge LargeCrest.
+	 */
+	public void setCrestLargeId(int crestLargeId) {
+		_crestLargeId = crestLargeId;
 	}
 	
 	public void setNotice(String notice) {
 		storeNotice(notice, _noticeEnabled);
 	}
 	
-	/**
-	 * Used to add a skill to skill list of this L2Clan
-	 * @param newSkill
-	 * @return
-	 */
-	public Skill addSkill(Skill newSkill) {
-		Skill oldSkill = null;
-
-		if (newSkill != null) {
-			// Replace oldSkill by newSkill or Add the newSkill
-			oldSkill = _skills.put(newSkill.getId(), newSkill);
-		}
-
-		return oldSkill;
+	public void setRank(int rank) {
+		_rank = rank;
 	}
 	
 	/**
@@ -1123,6 +1092,63 @@ public class L2Clan implements Identifiable {
 		return oldSkill;
 	}
 	
+	public boolean isNoticeEnabled() {
+		return _noticeEnabled;
+	}
+	
+	public void setNoticeEnabled(boolean enabled) {
+		storeNotice(_notice, enabled);
+	}
+	
+	private void storeNotice(String notice, boolean enabled) {
+		if (notice == null) {
+			notice = "";
+		}
+
+		if (notice.length() > MAX_NOTICE_LENGTH) {
+			notice = notice.substring(0, MAX_NOTICE_LENGTH - 1);
+		}
+
+		try (var con = ConnectionFactory.getInstance().getConnection();
+			var ps = con.prepareStatement("INSERT INTO clan_notices (clan_id,notice,enabled) values (?,?,?) ON DUPLICATE KEY UPDATE notice=?,enabled=?")) {
+			ps.setInt(1, getId());
+			ps.setString(2, notice);
+			if (enabled) {
+				ps.setString(3, "true");
+			} else {
+				ps.setString(3, "false");
+			}
+			ps.setString(4, notice);
+			if (enabled) {
+				ps.setString(5, "true");
+			} else {
+				ps.setString(5, "false");
+			}
+			ps.execute();
+		} catch (Exception e) {
+			_log.log(Level.WARNING, "Error could not store clan notice: " + e.getMessage(), e);
+		}
+
+		_notice = notice;
+		_noticeEnabled = enabled;
+	}
+	
+	/**
+	 * Used to add a skill to skill list of this L2Clan
+	 * @param newSkill
+	 * @return
+	 */
+	public Skill addSkill(Skill newSkill) {
+		Skill oldSkill = null;
+
+		if (newSkill != null) {
+			// Replace oldSkill by newSkill or Add the newSkill
+			oldSkill = _skills.put(newSkill.getId(), newSkill);
+		}
+
+		return oldSkill;
+	}
+	
 	public SubPledge createSubPledge(L2PcInstance player, int pledgeType, int leaderId, String subPledgeName) {
 		SubPledge subPledge = null;
 		pledgeType = getAvailablePledgeTypes(pledgeType);
@@ -1181,17 +1207,6 @@ public class L2Clan implements Identifiable {
 		return subPledge;
 	}
 	
-	public L2ClanMember[] getMembers() {
-		return _members.values().toArray(new L2ClanMember[0]);
-	}
-	
-	public void broadcastClanStatus() {
-		for (L2PcInstance member : getOnlineMembers(0)) {
-			member.sendPacket(PledgeShowMemberListDeleteAll.STATIC_PACKET);
-			member.sendPacket(new PledgeShowMemberListAll(this, member));
-		}
-	}
-	
 	public String getNotice() {
 		if (_notice == null) {
 			return "";
@@ -1199,8 +1214,35 @@ public class L2Clan implements Identifiable {
 		return _notice;
 	}
 	
+	@Override
+	public int getId() {
+		return _clanId;
+	}
+	
 	public int getRank() {
 		return _rank;
+	}
+	
+	public void setRankPrivs(int rank, int privs) {
+		final var rankPrivileges = _privs.get(rank);
+		if (rankPrivileges != null) {
+			rankPrivileges.setPrivs(privs);
+
+			DAOFactory.getInstance().getClanDAO().storePrivileges(getId(), rank, privs);
+
+			for (var cm : getMembers()) {
+				if (cm.isOnline() && (cm.getPlayerInstance() != null) && (cm.getPowerGrade() == rank)) {
+					cm.getPlayerInstance().getClanPrivileges().setBitmask(privs);
+					cm.getPlayerInstance().sendPacket(new UserInfo(cm.getPlayerInstance()));
+					cm.getPlayerInstance().sendPacket(new ExBrExtraUserInfo(cm.getPlayerInstance()));
+				}
+			}
+			broadcastClanStatus();
+		} else {
+			_privs.put(rank, new RankPrivs(rank, 0, privs));
+
+			DAOFactory.getInstance().getClanDAO().storePrivileges(getId(), rank, privs);
+		}
 	}
 	
 	public final Skill[] getAllSkills() {
@@ -1211,61 +1253,12 @@ public class L2Clan implements Identifiable {
 		return _skills;
 	}
 	
-	public int getSubPledgeMembersCount(int subpl) {
-		int result = 0;
-		for (L2ClanMember temp : _members.values()) {
-			if (temp.getPledgeType() == subpl) {
-				result++;
-			}
-		}
-		return result;
-	}
-	
 	public Skill addNewSkill(Skill newSkill) {
 		return addNewSkill(newSkill, -2);
 	}
 	
-	/**
-	 * @param pledgeType the Id of the pledge type.
-	 * @return the maximum number of members allowed for a given {@code pledgeType}.
-	 */
-	public int getMaxNrOfMembers(int pledgeType) {
-		int limit = 0;
-
-		switch (pledgeType) {
-			case 0:
-				limit = switch (getLevel()) {
-					case 3 -> 30;
-					case 2 -> 20;
-					case 1 -> 15;
-					case 0 -> 10;
-					default -> 40;
-				};
-				break;
-			case -1:
-				limit = 20;
-				break;
-			case 100:
-			case 200:
-				if (getLevel() == 11) {
-					limit = 30;
-				} else {
-					limit = 20;
-				}
-				break;
-			case 1001:
-			case 1002:
-			case 2001:
-			case 2002:
-				limit = switch (getLevel()) {
-					case 9, 10, 11 -> 25;
-					default -> 10;
-				};
-				break;
-			default:
-				break;
-		}
-		return limit;
+	public L2ClanMember[] getMembers() {
+		return _members.values().toArray(new L2ClanMember[0]);
 	}
 	
 	public void addSkillEffects() {
@@ -1379,14 +1372,6 @@ public class L2Clan implements Identifiable {
 		return _subPledges.values().toArray(new SubPledge[0]);
 	}
 	
-	/**
-	 * Gets the clan level.
-	 * @return the clan level
-	 */
-	public int getLevel() {
-		return _level;
-	}
-	
 	public int getAvailablePledgeTypes(int pledgeType) {
 		if (_subPledges.get(pledgeType) != null) {
 			switch (pledgeType) {
@@ -1407,34 +1392,78 @@ public class L2Clan implements Identifiable {
 		return new EnumIntBitmask<>(ClanPrivilege.class, false);
 	}
 	
-	public void setRankPrivs(int rank, int privs) {
-		final var rankPrivileges = _privs.get(rank);
-		if (rankPrivileges != null) {
-			rankPrivileges.setPrivs(privs);
-			
-			DAOFactory.getInstance().getClanDAO().storePrivileges(getId(), rank, privs);
-			
-			for (var cm : getMembers()) {
-				if (cm.isOnline() && (cm.getPlayerInstance() != null) && (cm.getPowerGrade() == rank)) {
-					cm.getPlayerInstance().getClanPrivileges().setBitmask(privs);
-					cm.getPlayerInstance().sendPacket(new UserInfo(cm.getPlayerInstance()));
-					cm.getPlayerInstance().sendPacket(new ExBrExtraUserInfo(cm.getPlayerInstance()));
-				}
-			}
-			broadcastClanStatus();
-		} else {
-			_privs.put(rank, new RankPrivs(rank, 0, privs));
-			
-			DAOFactory.getInstance().getClanDAO().storePrivileges(getId(), rank, privs);
+	public void broadcastClanStatus() {
+		for (L2PcInstance member : getOnlineMembers(0)) {
+			member.sendPacket(PledgeShowMemberListDeleteAll.STATIC_PACKET);
+			member.sendPacket(new PledgeShowMemberListAll(this, member));
 		}
 	}
 	
 	/**
-	 * Sets the clan level.
-	 * @param level the level to set
+	 * @param exclude the object Id to exclude from list.
+	 * @return all online members excluding the one with object id {code exclude}.
 	 */
-	public void setLevel(int level) {
-		_level = level;
+	public List<L2PcInstance> getOnlineMembers(int exclude) {
+		final List<L2PcInstance> onlineMembers = new ArrayList<>();
+		for (L2ClanMember temp : _members.values()) {
+			if ((temp != null) && temp.isOnline() && (temp.getObjectId() != exclude)) {
+				onlineMembers.add(temp.getPlayerInstance());
+			}
+		}
+		return onlineMembers;
+	}
+	
+	public int getSubPledgeMembersCount(int subpl) {
+		int result = 0;
+		for (L2ClanMember temp : _members.values()) {
+			if (temp.getPledgeType() == subpl) {
+				result++;
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * @param pledgeType the Id of the pledge type.
+	 * @return the maximum number of members allowed for a given {@code pledgeType}.
+	 */
+	public int getMaxNrOfMembers(int pledgeType) {
+		int limit = 0;
+
+		switch (pledgeType) {
+			case 0:
+				limit = switch (getLevel()) {
+					case 3 -> 30;
+					case 2 -> 20;
+					case 1 -> 15;
+					case 0 -> 10;
+					default -> 40;
+				};
+				break;
+			case -1:
+				limit = 20;
+				break;
+			case 100:
+			case 200:
+				if (getLevel() == 11) {
+					limit = 30;
+				} else {
+					limit = 20;
+				}
+				break;
+			case 1001:
+			case 1002:
+			case 2001:
+			case 2002:
+				limit = switch (getLevel()) {
+					case 9, 10, 11 -> 25;
+					default -> 10;
+				};
+				break;
+			default:
+				break;
+		}
+		return limit;
 	}
 	
 	/**
@@ -1585,10 +1614,6 @@ public class L2Clan implements Identifiable {
 		player.sendMessage("Alliance " + allyName + " has been created.");
 	}
 	
-	public void setRank(int rank) {
-		_rank = rank;
-	}
-	
 	public int getAuctionBidAt() {
 		return _auctionBidAt;
 	}
@@ -1649,6 +1674,22 @@ public class L2Clan implements Identifiable {
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Gets the clan level.
+	 * @return the clan level
+	 */
+	public int getLevel() {
+		return _level;
+	}
+	
+	/**
+	 * Sets the clan level.
+	 * @param level the level to set
+	 */
+	public void setLevel(int level) {
+		_level = level;
 	}
 	
 	public void dissolveAlly(L2PcInstance player) {
@@ -1729,34 +1770,6 @@ public class L2Clan implements Identifiable {
 				}
 			}
 		}
-	}
-	
-	/**
-	 * @return the alliance crest Id.
-	 */
-	public int getAllyCrestId() {
-		return _allyCrestId;
-	}
-	
-	/**
-	 * @param allyCrestId the alliance crest Id to be set.
-	 */
-	public void setAllyCrestId(int allyCrestId) {
-		_allyCrestId = allyCrestId;
-	}
-	
-	/**
-	 * @param exclude the object Id to exclude from list.
-	 * @return all online members excluding the one with object id {code exclude}.
-	 */
-	public List<L2PcInstance> getOnlineMembers(int exclude) {
-		final List<L2PcInstance> onlineMembers = new ArrayList<>();
-		for (L2ClanMember temp : _members.values()) {
-			if ((temp != null) && temp.isOnline() && (temp.getObjectId() != exclude)) {
-				onlineMembers.add(temp.getPlayerInstance());
-			}
-		}
-		return onlineMembers;
 	}
 	
 	public boolean levelUpClan(L2PcInstance player) {
@@ -2023,13 +2036,6 @@ public class L2Clan implements Identifiable {
 	}
 	
 	/**
-	 * @return Returns the clan CrestLargeId
-	 */
-	public int getCrestLargeId() {
-		return _crestLargeId;
-	}
-	
-	/**
 	 * Change the clan crest. If crest id is 0, crest is removed. New crest id is saved to database.
 	 * @param crestId if 0, crest is removed, else new crest id is set and saved to database
 	 */
@@ -2037,9 +2043,9 @@ public class L2Clan implements Identifiable {
 		if (getCrestId() != 0) {
 			CrestTable.getInstance().removeCrest(getCrestId());
 		}
-		
+
 		setCrestId(crestId);
-		
+
 		try (var con = ConnectionFactory.getInstance().getConnection();
 			var ps = con.prepareStatement("UPDATE clan_data SET crest_id = ? WHERE clan_id = ?")) {
 			ps.setInt(1, crestId);
@@ -2048,17 +2054,10 @@ public class L2Clan implements Identifiable {
 		} catch (Exception e) {
 			_log.log(Level.WARNING, "Could not update crest for clan " + getName() + " [" + getId() + "] : " + e.getMessage(), e);
 		}
-		
+
 		for (L2PcInstance member : getOnlineMembers(0)) {
 			member.broadcastUserInfo();
 		}
-	}
-	
-	/**
-	 * @param crestLargeId The id of pledge LargeCrest.
-	 */
-	public void setCrestLargeId(int crestLargeId) {
-		_crestLargeId = crestLargeId;
 	}
 	
 	/**

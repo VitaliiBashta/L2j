@@ -38,9 +38,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * @author DaRkRaGe
- */
 public class L2BossZone extends L2ZoneType {
 	private final int[] _oustLoc;
 	private int _timeInvade;

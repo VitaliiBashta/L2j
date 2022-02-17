@@ -1,11 +1,5 @@
 package com.l2jserver.datapack.ai.individual.Antharas;
 
-import static com.l2jserver.gameserver.config.Configuration.grandBoss;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.ai.CtrlIntention;
 import com.l2jserver.gameserver.enums.MountType;
@@ -30,8 +24,16 @@ import com.l2jserver.gameserver.network.serverpackets.SocialAction;
 import com.l2jserver.gameserver.network.serverpackets.SpecialCamera;
 import com.l2jserver.gameserver.util.Broadcast;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-public final class Antharas extends AbstractNpcAI {
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.l2jserver.gameserver.config.Configuration.grandBoss;
+
+@Service
+public class Antharas extends AbstractNpcAI {
 	// NPC
 	private static final int ANTHARAS = 29068; // Antharas
 	private static final int BEHEMOTH = 29069; // Behemoth Dragon
@@ -40,6 +42,8 @@ public final class Antharas extends AbstractNpcAI {
 	private static final int HEART = 13001; // Heart of Warding
 	private static final int CUBE = 31859; // Teleportation Cubic
 	private static final Map<Integer, Location> INVISIBLE_NPC = new HashMap<>();
+  private final GrandBossManager grandBossManager;
+
 	{
 		INVISIBLE_NPC.put(29077, new Location(177229, 113298, -7735)); // antaras_clear_npc_1
 		INVISIBLE_NPC.put(29078, new Location(176707, 113585, -7735)); // antaras_clear_npc_2
@@ -101,9 +105,10 @@ public final class Antharas extends AbstractNpcAI {
 	private static int attacker_1_hate = 0;
 	private static int attacker_2_hate = 0;
 	private static int attacker_3_hate = 0;
-	
-	public Antharas() {
+
+  public Antharas(GrandBossManager grandBossManager) {
 		super(Antharas.class.getSimpleName(), "ai/individual");
+    this.grandBossManager = grandBossManager;
 		addStartNpc(HEART, CUBE);
 		addTalkId(HEART, CUBE);
 		addFirstTalkId(HEART);
@@ -114,8 +119,8 @@ public final class Antharas extends AbstractNpcAI {
 		addSpellFinishedId(ANTHARAS);
 		addAttackId(ANTHARAS, BOMBER, BEHEMOTH, TERASQUE);
 		addKillId(ANTHARAS, TERASQUE, BEHEMOTH);
-		
-		final StatsSet info = GrandBossManager.getInstance().getStatsSet(ANTHARAS);
+
+    final StatsSet info = grandBossManager.getStatsSet(ANTHARAS);
 		final int curr_hp = info.getInt("currentHP");
 		final int curr_mp = info.getInt("currentMP");
 		final int loc_x = info.getInt("loc_x");
@@ -572,19 +577,21 @@ public final class Antharas extends AbstractNpcAI {
 	}
 	
 	private int getStatus() {
-		return GrandBossManager.getInstance().getBossStatus(ANTHARAS);
-	}
-	
-	private void addBoss(L2GrandBossInstance grandboss) {
-		GrandBossManager.getInstance().addBoss(grandboss);
+    return grandBossManager.getBossStatus(ANTHARAS);
 	}
 	
 	private void setStatus(int status) {
-		GrandBossManager.getInstance().setBossStatus(ANTHARAS, status);
+    grandBossManager.setBossStatus(ANTHARAS, status);
 	}
-	
+
+  private void addBoss(L2GrandBossInstance grandboss) {
+    grandBossManager.addBoss(grandboss);
+  }
+
 	private void setRespawn(long respawnTime) {
-		GrandBossManager.getInstance().getStatsSet(ANTHARAS).set("respawn_time", (System.currentTimeMillis() + respawnTime));
+    grandBossManager
+        .getStatsSet(ANTHARAS)
+        .set("respawn_time", (System.currentTimeMillis() + respawnTime));
 	}
 	
 	private void refreshAiParams(L2PcInstance attacker, int damage) {

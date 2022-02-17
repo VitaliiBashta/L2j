@@ -21,18 +21,15 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.model.zone.L2ZoneType;
 import com.l2jserver.gameserver.model.zone.type.L2BossZone;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.l2jserver.gameserver.config.Configuration.grandBoss;
 
-/**
- * Queen Ant AI
- * @author Emperorc
- * @author Maneco2
- */
-public final class QueenAnt extends AbstractNpcAI {
+@Service
+public class QueenAnt extends AbstractNpcAI {
 	// NPCs
 	private static final int QUEEN = 29001;
 	private static final int LARVA = 29002;
@@ -71,15 +68,17 @@ public final class QueenAnt extends AbstractNpcAI {
 	// Variables
 	private static L2BossZone _zone;
 	private static final String ATTACK_FLAG = "ATTACK_FLAG";
+  private final GrandBossManager grandBossManager;
 	private L2MonsterInstance _queen = null;
 	private L2MonsterInstance _larva = null;
 	private final List<L2MonsterInstance> _nurses = new CopyOnWriteArrayList<>();
 	// Status
 	private static final int ALIVE = 0;
 	private static final int DEAD = 1;
-	
-	public QueenAnt() {
+
+  public QueenAnt(GrandBossManager grandBossManager) {
 		super(QueenAnt.class.getSimpleName(), "ai/individual");
+    this.grandBossManager = grandBossManager;
 		addKillId(MOBS);
 		addSpawnId(MOBS);
 		addExitZoneId(ZONE);
@@ -87,10 +86,10 @@ public final class QueenAnt extends AbstractNpcAI {
 		addSkillSeeId(QUEEN);
 		addMoveFinishedId(QUEEN);
 		addAttackId(QUEEN, NURSE, GUARD, ROYAL);
-		
-		_zone = GrandBossManager.getInstance().getZone(QUEEN_X, QUEEN_Y, QUEEN_Z);
-		final StatsSet info = GrandBossManager.getInstance().getStatsSet(QUEEN);
-		if (GrandBossManager.getInstance().getBossStatus(QUEEN) == DEAD) {
+
+    _zone = this.grandBossManager.getZone(QUEEN_X, QUEEN_Y, QUEEN_Z);
+    final StatsSet info = grandBossManager.getStatsSet(QUEEN);
+    if (grandBossManager.getBossStatus(QUEEN) == DEAD) {
 			final long remain = info.getLong("respawn_time") - System.currentTimeMillis();
 			if (remain > 0) {
 				startQuestTimer("QUEEN_UNLOCK", remain, null, null);
@@ -114,106 +113,19 @@ public final class QueenAnt extends AbstractNpcAI {
 			spawnBoss(queen);
 		}
 	}
-	
-	@Override
-	public String onAdvEvent(String event, L2Npc npc, L2PcInstance player) {
-		switch (event) {
-			case "CHECK_ZONE": {
-				if (npc != null) {
-					addMoveToDesire(npc, new Location(-21610, 181594, -5734, 0), 0);
-					if (_zone.isInsideZone(npc)) {
-						cancelQuestTimers("CHECK_ZONE");
-					}
-				}
-				break;
-			}
-			case "CORE_AI": {
-				if ((npc != null) && (npc.isCoreAIDisabled()) && (_zone.isInsideZone(npc))) {
-					((L2Attackable) npc).clearAggroList();
-					npc.disableCoreAI(false);
-					npc.setIsImmobilized(false);
-					npc.getVariables().set(ATTACK_FLAG, false);
-				}
-				break;
-			}
-			case "CORE_MOVEMENT": {
-				if (npc != null) {
-					final L2Object obj = npc.getTarget();
-					if ((obj != null) && (_queen != null) && (obj.isPlayer()) && (_zone.isInsideZone(obj))) {
-						_queen.setIsImmobilized(false);
-					}
-					npc.getVariables().set(ATTACK_FLAG, false);
-				}
-				break;
-			}
-			case "HEAL": {
-				if ((npc != null) && (!npc.isCastingNow())) {
-					if ((_larva != null) && (_queen != null)) {
-						if (_larva.getCurrentHp() < _larva.getMaxHp()) {
-							if (npc.calculateDistance(_larva, false, false) < 2500) {
-								addSkillCastDesire(npc, _larva, getRandomBoolean() ? HEAL_QUEEN_ANT_1 : HEAL_QUEEN_ANT_2, 100L);
-							} else {
-								addMoveToDesire(npc, LARVA_LOCATION, 0);
-							}
-						} else if (_queen.getCurrentHp() < _queen.getMaxHp()) {
-							addSkillCastDesire(npc, _queen, HEAL_QUEEN_ANT_1, 1000000L);
-						}
-					}
-					if ((!npc.isMoving()) && (npc.getAI().getIntention() == CtrlIntention.AI_INTENTION_ATTACK)) {
-						((L2Attackable) npc).clearAggroList();
-						npc.getAI().setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
-					}
-				}
-				break;
-			}
-			case "ACTION": {
-				if ((getRandom(100) < 30) && (npc != null) && (!npc.isInCombat())) {
-					if (getRandom(100) < 50) {
-						npc.broadcastSocialAction(3);
-					} else {
-						npc.broadcastSocialAction(4);
-					}
-				}
-				break;
-			}
-			case "QUEEN_UNLOCK": {
-				L2GrandBossInstance queen = (L2GrandBossInstance) addSpawn(QUEEN, QUEEN_X, QUEEN_Y, QUEEN_Z, 0, false, 0);
-				GrandBossManager.getInstance().setBossStatus(QUEEN, ALIVE);
-				spawnBoss(queen);
-				break;
-			}
-			case "RAID_CURSE": {
-				if ((player != null) && (!_zone.isInsideZone(player))) {
-					cancelQuestTimers("RAID_CURSE");
-				} else if ((player != null) && (!player.isDead()) && (_zone.isInsideZone(player)) && (_queen != null) && (!_queen.isDead())) {
-					if ((player.getLevel() - _queen.getLevel()) > 8) {
-						if (player.isMageClass()) {
-							if (!player.isAffectedBySkill(RAID_CURSE.getSkillId())) {
-								_queen.broadcastPacket(new MagicSkillUse(_queen, player, RAID_CURSE.getSkillId(), 1, 300, 0));
-								RAID_CURSE.getSkill().applyEffects(_queen, player);
-							}
-						} else {
-							if (!player.isAffectedBySkill(RAID_CURSE_2.getSkillId())) {
-								_queen.broadcastPacket(new MagicSkillUse(_queen, player, RAID_CURSE_2.getSkillId(), 1, 300, 0));
-								RAID_CURSE_2.getSkill().applyEffects(_queen, player);
-							}
-						}
-					}
-				}
-				break;
-			}
-			case "RESPAWN_QUEEN": {
-				if (GrandBossManager.getInstance().getBossStatus(QUEEN) == DEAD) {
-					GrandBossManager.getInstance().getStatsSet(QUEEN).set("respawn_time", 0);
-					cancelQuestTimers("QUEEN_UNLOCK");
-					notifyEvent("QUEEN_UNLOCK", null, null);
-				} else {
-					player.sendMessage(getClass().getSimpleName() + ": You cant respawn Queen Ant while Queen Ant is alive!");
-				}
-				break;
-			}
-		}
-		return super.onAdvEvent(event, npc, player);
+
+  private void spawnBoss(L2GrandBossInstance npc) {
+    if (getRandom(100) < 33) {
+      _zone.movePlayersTo(TELE_LOCATION_1);
+    } else if (getRandom(100) < 50) {
+      _zone.movePlayersTo(TELE_LOCATION_2);
+    } else {
+      _zone.movePlayersTo(TELE_LOCATION_3);
+    }
+    grandBossManager.addBoss(npc);
+    npc.broadcastPacket(Music.BS01_A_10000.getPacket());
+    _queen = npc;
+    _larva = (L2MonsterInstance) addSpawn(LARVA, LARVA_LOCATION, false, 0);
 	}
 	
 	@Override
@@ -331,16 +243,159 @@ public final class QueenAnt extends AbstractNpcAI {
 		startQuestTimer("RAID_CURSE", 3000, _queen, player, true);
 		return super.onEnterZone(character, zone);
 	}
-	
+
+  @Override
+  public String onAdvEvent(String event, L2Npc npc, L2PcInstance player) {
+    switch (event) {
+      case "CHECK_ZONE":
+        {
+          if (npc != null) {
+            addMoveToDesire(npc, new Location(-21610, 181594, -5734, 0), 0);
+            if (_zone.isInsideZone(npc)) {
+              cancelQuestTimers("CHECK_ZONE");
+            }
+          }
+          break;
+        }
+      case "CORE_AI":
+        {
+          if ((npc != null) && (npc.isCoreAIDisabled()) && (_zone.isInsideZone(npc))) {
+            ((L2Attackable) npc).clearAggroList();
+            npc.disableCoreAI(false);
+            npc.setIsImmobilized(false);
+            npc.getVariables().set(ATTACK_FLAG, false);
+          }
+          break;
+        }
+      case "CORE_MOVEMENT":
+        {
+          if (npc != null) {
+            final L2Object obj = npc.getTarget();
+            if ((obj != null)
+                && (_queen != null)
+                && (obj.isPlayer())
+                && (_zone.isInsideZone(obj))) {
+              _queen.setIsImmobilized(false);
+            }
+            npc.getVariables().set(ATTACK_FLAG, false);
+          }
+          break;
+        }
+      case "HEAL":
+        {
+          if ((npc != null) && (!npc.isCastingNow())) {
+            if ((_larva != null) && (_queen != null)) {
+              if (_larva.getCurrentHp() < _larva.getMaxHp()) {
+                if (npc.calculateDistance(_larva, false, false) < 2500) {
+                  addSkillCastDesire(
+                      npc, _larva, getRandomBoolean() ? HEAL_QUEEN_ANT_1 : HEAL_QUEEN_ANT_2, 100L);
+                } else {
+                  addMoveToDesire(npc, LARVA_LOCATION, 0);
+                }
+              } else if (_queen.getCurrentHp() < _queen.getMaxHp()) {
+                addSkillCastDesire(npc, _queen, HEAL_QUEEN_ANT_1, 1000000L);
+              }
+            }
+            if ((!npc.isMoving())
+                && (npc.getAI().getIntention() == CtrlIntention.AI_INTENTION_ATTACK)) {
+              ((L2Attackable) npc).clearAggroList();
+              npc.getAI().setIntention(CtrlIntention.AI_INTENTION_ACTIVE);
+            }
+          }
+          break;
+        }
+      case "ACTION":
+        {
+          if ((getRandom(100) < 30) && (npc != null) && (!npc.isInCombat())) {
+            if (getRandom(100) < 50) {
+              npc.broadcastSocialAction(3);
+            } else {
+              npc.broadcastSocialAction(4);
+            }
+          }
+          break;
+        }
+      case "QUEEN_UNLOCK":
+        {
+          L2GrandBossInstance queen =
+              (L2GrandBossInstance) addSpawn(QUEEN, QUEEN_X, QUEEN_Y, QUEEN_Z, 0, false, 0);
+          grandBossManager.setBossStatus(QUEEN, ALIVE);
+          spawnBoss(queen);
+          break;
+        }
+      case "RAID_CURSE":
+        {
+          if ((player != null) && (!_zone.isInsideZone(player))) {
+            cancelQuestTimers("RAID_CURSE");
+          } else if ((player != null)
+              && (!player.isDead())
+              && (_zone.isInsideZone(player))
+              && (_queen != null)
+              && (!_queen.isDead())) {
+            if ((player.getLevel() - _queen.getLevel()) > 8) {
+              if (player.isMageClass()) {
+                if (!player.isAffectedBySkill(RAID_CURSE.getSkillId())) {
+                  _queen.broadcastPacket(
+                      new MagicSkillUse(_queen, player, RAID_CURSE.getSkillId(), 1, 300, 0));
+                  RAID_CURSE.getSkill().applyEffects(_queen, player);
+                }
+              } else {
+                if (!player.isAffectedBySkill(RAID_CURSE_2.getSkillId())) {
+                  _queen.broadcastPacket(
+                      new MagicSkillUse(_queen, player, RAID_CURSE_2.getSkillId(), 1, 300, 0));
+                  RAID_CURSE_2.getSkill().applyEffects(_queen, player);
+                }
+              }
+            }
+          }
+          break;
+        }
+      case "RESPAWN_QUEEN":
+        {
+          if (grandBossManager.getBossStatus(QUEEN) == DEAD) {
+            grandBossManager.getStatsSet(QUEEN).set("respawn_time", 0);
+            cancelQuestTimers("QUEEN_UNLOCK");
+            notifyEvent("QUEEN_UNLOCK", null, null);
+          } else {
+            player.sendMessage(
+                getClass().getSimpleName()
+                    + ": You cant respawn Queen Ant while Queen Ant is alive!");
+          }
+          break;
+        }
+    }
+    return super.onAdvEvent(event, npc, player);
+  }
+
+  @Override
+  public String onExitZone(L2Character character, L2ZoneType zone) {
+    if ((character.isAttackable())
+        && (character.isRaid())
+        && (!_zone.isInsideZone(_queen))
+        && (_queen != null)) {
+      _queen.disableCoreAI(true);
+      _queen.setIsImmobilized(false);
+      startQuestTimer("CHECK_ZONE", 1000, _queen, null, true);
+    }
+    return super.onExitZone(character, zone);
+  }
+
+  @Override
+  public void onMoveFinished(L2Npc npc) {
+    startQuestTimer("CORE_AI", 100, npc, null);
+  }
+
 	@Override
 	public String onKill(L2Npc npc, L2PcInstance killer, boolean isSummon) {
 		if (npc.getId() == QUEEN) {
 			cancelQuestTimers("HEAL");
 			cancelQuestTimers("ACTION");
 			npc.broadcastPacket(Music.BS02_D_10000.getPacket());
-			GrandBossManager.getInstance().setBossStatus(QUEEN, DEAD);
+      grandBossManager.setBossStatus(QUEEN, DEAD);
 			final long respawnTime = (grandBoss().getIntervalOfQueenAntSpawn() + getRandom(-grandBoss().getRandomOfQueenAntSpawn(), grandBoss().getRandomOfQueenAntSpawn())) * 3600000;
-			GrandBossManager.getInstance().getStatsSet(QUEEN).set("respawn_time", (System.currentTimeMillis() + respawnTime));
+      grandBossManager
+          .getStatsSet(QUEEN)
+          .set("respawn_time", (System.currentTimeMillis() + respawnTime));
 			startQuestTimer("QUEEN_UNLOCK", respawnTime, null, null);
 			_nurses.clear();
 			_queen = null;
@@ -362,36 +417,7 @@ public final class QueenAnt extends AbstractNpcAI {
 				}
 			}
 		}
-		
+
 		return super.onKill(npc, killer, isSummon);
-	}
-	
-	@Override
-	public String onExitZone(L2Character character, L2ZoneType zone) {
-		if ((character.isAttackable()) && (character.isRaid()) && (!_zone.isInsideZone(_queen)) && (_queen != null)) {
-			_queen.disableCoreAI(true);
-			_queen.setIsImmobilized(false);
-			startQuestTimer("CHECK_ZONE", 1000, _queen, null, true);
-		}
-		return super.onExitZone(character, zone);
-	}
-	
-	@Override
-	public void onMoveFinished(L2Npc npc) {
-		startQuestTimer("CORE_AI", 100, npc, null);
-	}
-	
-	private void spawnBoss(L2GrandBossInstance npc) {
-		if (getRandom(100) < 33) {
-			_zone.movePlayersTo(TELE_LOCATION_1);
-		} else if (getRandom(100) < 50) {
-			_zone.movePlayersTo(TELE_LOCATION_2);
-		} else {
-			_zone.movePlayersTo(TELE_LOCATION_3);
-		}
-		GrandBossManager.getInstance().addBoss(npc);
-		npc.broadcastPacket(Music.BS01_A_10000.getPacket());
-		_queen = npc;
-		_larva = (L2MonsterInstance) addSpawn(LARVA, LARVA_LOCATION, false, 0);
 	}
 }

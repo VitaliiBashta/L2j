@@ -1,7 +1,5 @@
 package com.l2jserver.datapack.ai.individual.Baium;
 
-import static com.l2jserver.gameserver.config.Configuration.grandBoss;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.ai.CtrlIntention;
 import com.l2jserver.gameserver.enums.CategoryType;
@@ -26,6 +24,8 @@ import com.l2jserver.gameserver.network.serverpackets.Earthquake;
 import com.l2jserver.gameserver.network.serverpackets.ExShowScreenMessage;
 import com.l2jserver.gameserver.network.serverpackets.SocialAction;
 import com.l2jserver.gameserver.util.Util;
+
+import static com.l2jserver.gameserver.config.Configuration.grandBoss;
 
 public final class Baium extends AbstractNpcAI {
 	// NPCs
@@ -74,9 +74,11 @@ public final class Baium extends AbstractNpcAI {
 	// Misc
 	private L2GrandBossInstance _baium = null;
 	private static long _lastAttack = 0;
-	
-	public Baium() {
+  private final GrandBossManager grandBossManager;
+
+  public Baium(GrandBossManager grandBossManager) {
 		super(Baium.class.getSimpleName(), "ai/individual");
+    this.grandBossManager = grandBossManager;
 		addFirstTalkId(ANG_VORTEX);
 		addTalkId(ANG_VORTEX, TELE_CUBE, BAIUM_STONE);
 		addStartNpc(ANG_VORTEX, TELE_CUBE, BAIUM_STONE);
@@ -84,8 +86,8 @@ public final class Baium extends AbstractNpcAI {
 		addKillId(BAIUM);
 		addSeeCreatureId(BAIUM);
 		addSpellFinishedId(BAIUM);
-		
-		final StatsSet info = GrandBossManager.getInstance().getStatsSet(BAIUM);
+
+    final StatsSet info = grandBossManager.getStatsSet(BAIUM);
 		final int curr_hp = info.getInt("currentHP");
 		final int curr_mp = info.getInt("currentMP");
 		final int loc_x = info.getInt("loc_x");
@@ -489,19 +491,21 @@ public final class Baium extends AbstractNpcAI {
 	}
 	
 	private int getStatus() {
-		return GrandBossManager.getInstance().getBossStatus(BAIUM);
-	}
-	
-	private void addBoss(L2GrandBossInstance grandboss) {
-		GrandBossManager.getInstance().addBoss(grandboss);
+    return grandBossManager.getBossStatus(BAIUM);
 	}
 	
 	private void setStatus(int status) {
-		GrandBossManager.getInstance().setBossStatus(BAIUM, status);
+    grandBossManager.setBossStatus(BAIUM, status);
 	}
-	
+
+  private void addBoss(L2GrandBossInstance grandboss) {
+    grandBossManager.addBoss(grandboss);
+  }
+
 	private void setRespawn(long respawnTime) {
-		GrandBossManager.getInstance().getStatsSet(BAIUM).set("respawn_time", (System.currentTimeMillis() + respawnTime));
+    grandBossManager
+        .getStatsSet(BAIUM)
+        .set("respawn_time", (System.currentTimeMillis() + respawnTime));
 	}
 	
 	private void manageSkills(L2Npc npc) {

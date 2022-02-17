@@ -46,10 +46,15 @@ public class Wedding implements IVoicedCommandHandler {
 
   private final ConnectionFactory connectionFactory;
   private final CoupleManager coupleManager;
+  private final GrandBossManager grandBossManager;
 
-  public Wedding(ConnectionFactory connectionFactory, CoupleManager coupleManager) {
+  public Wedding(
+      ConnectionFactory connectionFactory,
+      CoupleManager coupleManager,
+      GrandBossManager grandBossManager) {
     this.connectionFactory = connectionFactory;
     this.coupleManager = coupleManager;
+    this.grandBossManager = grandBossManager;
   }
 
 	@Override
@@ -206,8 +211,8 @@ public class Wedding implements IVoicedCommandHandler {
 			_log.severe("Married but couldn't find parter for " + activeChar.getName());
 			return false;
 		}
-		
-		if (GrandBossManager.getInstance().getZone(activeChar) != null) {
+
+    if (grandBossManager.getZone(activeChar) != null) {
 			activeChar.sendMessage("You are inside a Boss Zone.");
 			return false;
 		}
@@ -221,8 +226,8 @@ public class Wedding implements IVoicedCommandHandler {
 			activeChar.sendMessage("While you are holding a Cursed Weapon you can't go to your love!");
 			return false;
 		}
-		
-		if (GrandBossManager.getInstance().getZone(activeChar) != null) {
+
+    if (grandBossManager.getZone(activeChar) != null) {
 			activeChar.sendMessage("You are inside a Boss Zone.");
 			return false;
 		}
@@ -298,8 +303,8 @@ public class Wedding implements IVoicedCommandHandler {
 			activeChar.sendMessage("Your partner is holding a Cursed Weapon and you can't go to your love!");
 			return false;
 		}
-		
-		if (GrandBossManager.getInstance().getZone(partner) != null) {
+
+    if (grandBossManager.getZone(partner) != null) {
 			activeChar.sendMessage("Your partner is inside a Boss Zone.");
 			return false;
 		}

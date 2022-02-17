@@ -35,10 +35,12 @@ public class GrandBossTeleporters extends AbstractNpcAI {
 
   private static int playerCount = 0;
   private final QuestManager questManager;
+  private final GrandBossManager grandBossManager;
 
-  public GrandBossTeleporters(QuestManager questManager) {
+  public GrandBossTeleporters(QuestManager questManager, GrandBossManager grandBossManager) {
     super(GrandBossTeleporters.class.getSimpleName(), "ai/npc/Teleports");
     this.questManager = questManager;
+    this.grandBossManager = grandBossManager;
     addStartNpc(NPCs);
     addTalkId(NPCs);
   }
@@ -66,14 +68,14 @@ public class GrandBossTeleporters extends AbstractNpcAI {
       case 31385:
         {
           if (valakasAI() != null) {
-            int status = GrandBossManager.getInstance().getBossStatus(29028);
+            int status = grandBossManager.getBossStatus(29028);
 
             if ((status == 0) || (status == 1)) {
               if (playerCount >= 200) {
                 htmltext = "31385-03.htm";
               } else if (st.getInt("allowEnter") == 1) {
                 st.unset("allowEnter");
-                L2BossZone zone = GrandBossManager.getInstance().getZone(212852, -114842, -1632);
+                L2BossZone zone = grandBossManager.getZone(212852, -114842, -1632);
 
                 if (zone != null) {
                   zone.allowPlayerEntry(player, 30);
@@ -87,11 +89,11 @@ public class GrandBossTeleporters extends AbstractNpcAI {
                 playerCount++;
 
                 if (status == 0) {
-                  L2GrandBossInstance valakas = GrandBossManager.getInstance().getBoss(29028);
+                  L2GrandBossInstance valakas = grandBossManager.getBoss(29028);
                   valakasAI()
                       .startQuestTimer(
                           "beginning", grandBoss().getValakasWaitTime(), valakas, null);
-                  GrandBossManager.getInstance().setBossStatus(29028, 1);
+                  grandBossManager.setBossStatus(29028, 1);
                 }
               } else {
                 htmltext = "31385-04.htm";
