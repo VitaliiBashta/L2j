@@ -5,16 +5,15 @@ import com.l2jserver.gameserver.model.L2SkillLearn;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.events.ListenersContainer;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
-import com.l2jserver.gameserver.model.interfaces.INamable;
 import com.l2jserver.gameserver.model.zone.type.L2ResidenceZone;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractResidence extends ListenersContainer implements INamable {
+public abstract class AbstractResidence extends ListenersContainer {
 	private final int _residenceId;
-	private String _name;
-	
+  private String name;
+
 	private L2ResidenceZone _zone = null;
 	private final List<SkillHolder> _residentialSkills = new ArrayList<>();
 	
@@ -38,14 +37,13 @@ public abstract class AbstractResidence extends ListenersContainer implements IN
 		return _residenceId;
 	}
 	
-	@Override
 	public final String getName() {
-		return _name;
+    return name;
 	}
 	
 	// TODO: Remove it later when both castles and forts are loaded from same table.
 	public final void setName(String name) {
-		_name = name;
+    this.name = name;
 	}
 	
 	public L2ResidenceZone getResidenceZone() {

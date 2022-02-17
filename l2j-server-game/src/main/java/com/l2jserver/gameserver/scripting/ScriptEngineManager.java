@@ -4,7 +4,6 @@ import com.l2jserver.datapack.conquerablehalls.DevastatedCastle.DevastatedCastle
 import com.l2jserver.datapack.conquerablehalls.FortressOfTheDead.FortressOfTheDead;
 import com.l2jserver.datapack.conquerablehalls.RainbowSpringsChateau.RainbowSpringsChateau;
 import com.l2jserver.datapack.conquerablehalls.flagwar.BanditStronghold.BanditStronghold;
-import com.l2jserver.datapack.conquerablehalls.flagwar.WildBeastReserve.WildBeastReserve;
 import com.l2jserver.datapack.custom.events.Elpies.Elpies;
 import com.l2jserver.datapack.custom.events.Race.Race;
 import com.l2jserver.datapack.custom.events.TvT.TvTManager.TvTManager;
@@ -19,7 +18,6 @@ import com.l2jserver.datapack.vehicles.BoatGiranTalking;
 import com.l2jserver.datapack.vehicles.BoatGludinRune;
 import com.l2jserver.datapack.vehicles.BoatInnadrilTour;
 import com.l2jserver.datapack.vehicles.BoatRunePrimeval;
-import com.l2jserver.datapack.vehicles.BoatTalkingGludin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,13 +36,11 @@ public final class ScriptEngineManager {
           Elpies.class,
           Race.class,
           TvTManager.class,
-          BoatTalkingGludin.class,
           BoatGiranTalking.class,
           BoatInnadrilTour.class,
           BoatGludinRune.class,
           BoatRunePrimeval.class,
           BanditStronghold.class,
-          WildBeastReserve.class,
           DevastatedCastle.class,
           FortressOfTheDead.class,
           RainbowSpringsChateau.class,

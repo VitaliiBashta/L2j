@@ -1,6 +1,5 @@
 package com.l2jserver.gameserver.model;
 
-import com.l2jserver.gameserver.Context;
 import com.l2jserver.gameserver.enums.InstanceType;
 import com.l2jserver.gameserver.enums.ShotType;
 import com.l2jserver.gameserver.handler.ActionHandler;
@@ -16,7 +15,12 @@ import com.l2jserver.gameserver.model.actor.knownlist.ObjectKnownList;
 import com.l2jserver.gameserver.model.actor.poly.ObjectPoly;
 import com.l2jserver.gameserver.model.entity.Instance;
 import com.l2jserver.gameserver.model.events.ListenersContainer;
-import com.l2jserver.gameserver.model.interfaces.*;
+import com.l2jserver.gameserver.model.interfaces.IDecayable;
+import com.l2jserver.gameserver.model.interfaces.ILocational;
+import com.l2jserver.gameserver.model.interfaces.IPositionable;
+import com.l2jserver.gameserver.model.interfaces.ISpawnable;
+import com.l2jserver.gameserver.model.interfaces.IUniqueId;
+import com.l2jserver.gameserver.model.interfaces.Identifiable;
 import com.l2jserver.gameserver.model.zone.ZoneId;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.ActionFailed;
@@ -32,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** Base class for all interactive objects. */
 public abstract class L2Object extends ListenersContainer
-    implements Identifiable, INamable, ISpawnable, IUniqueId, IDecayable, IPositionable {
+    implements Identifiable, ISpawnable, IUniqueId, IDecayable, IPositionable {
   /** X coordinate */
   private final AtomicInteger _x = new AtomicInteger(0);
   /** Y coordinate */
@@ -43,15 +47,17 @@ public abstract class L2Object extends ListenersContainer
   private final AtomicInteger _heading = new AtomicInteger(0);
   /** Instance id of object. 0 - Global */
   private final AtomicInteger _instanceId = new AtomicInteger(0);
+
   private final Map<Class<?>, Object> scripts = new ConcurrentHashMap<>(1);
   /** Name */
-  private String _name;
+  private String name;
   /** Object ID */
   private int _objectId;
   /** World Region */
   private L2WorldRegion _worldRegion;
   /** Instance type */
   private InstanceType _instanceType = null;
+
   private boolean _isVisible;
   private boolean _isInvisible;
   private ObjectKnownList _knownList;
@@ -62,22 +68,8 @@ public abstract class L2Object extends ListenersContainer
     initKnownList();
   }
 
-  /**
-   * Gets the instance type of object.
-   *
-   * @return the instance type
-   */
-  public final InstanceType getInstanceType() {
-    return _instanceType;
-  }
-
-  /**
-   * Sets the instance type.
-   *
-   * @param newInstanceType the instance type to set
-   */
-  protected final void setInstanceType(InstanceType newInstanceType) {
-    _instanceType = newInstanceType;
+  public void initKnownList() {
+    _knownList = new ObjectKnownList(this);
   }
 
   /**
@@ -101,6 +93,24 @@ public abstract class L2Object extends ListenersContainer
     }
 
     player.sendPacket(ActionFailed.STATIC_PACKET);
+  }
+
+  /**
+   * Gets the instance type of object.
+   *
+   * @return the instance type
+   */
+  public final InstanceType getInstanceType() {
+    return _instanceType;
+  }
+
+  /**
+   * Sets the instance type.
+   *
+   * @param newInstanceType the instance type to set
+   */
+  protected final void setInstanceType(InstanceType newInstanceType) {
+    _instanceType = newInstanceType;
   }
 
   public void onActionShift(L2PcInstance player) {
@@ -142,6 +152,13 @@ public abstract class L2Object extends ListenersContainer
     L2World.getInstance().removeObject(this);
     IdFactory.getInstance().releaseId(getObjectId());
     _objectId = IdFactory.getInstance().getNextId();
+  }
+
+  public final void setIsVisible(boolean value) {
+    _isVisible = value;
+    if (!_isVisible) {
+      setWorldRegion(null);
+    }
   }
 
   @Override
@@ -229,11 +246,12 @@ public abstract class L2Object extends ListenersContainer
     return getWorldRegion() != null;
   }
 
-  public final void setIsVisible(boolean value) {
-    _isVisible = value;
-    if (!_isVisible) {
-      setWorldRegion(null);
-    }
+  public ObjectKnownList getKnownList() {
+    return _knownList;
+  }
+
+  public final void setKnownList(ObjectKnownList value) {
+    _knownList = value;
   }
 
   public void toggleVisible() {
@@ -243,31 +261,14 @@ public abstract class L2Object extends ListenersContainer
       spawnMe();
     }
   }
-
-  public ObjectKnownList getKnownList() {
-    return _knownList;
-  }
-
-  public final void setKnownList(ObjectKnownList value) {
-    _knownList = value;
-  }
-
-  public void initKnownList() {
-    _knownList = new ObjectKnownList(this);
-  }
-
-  @Override
-  public String getName() {
-    return _name;
-  }
-
-  public void setName(String value) {
-    _name = value;
-  }
-
-  @Override
-  public int getObjectId() {
-    return _objectId;
+  /**
+   * @param <T>
+   * @param script
+   * @return
+   */
+  public final <T> Object addScript(Object script) {
+    scripts.put(script.getClass(), script);
+    return script;
   }
 
   public final ObjectPoly getPoly() {
@@ -275,23 +276,9 @@ public abstract class L2Object extends ListenersContainer
     return Objects.requireNonNullElseGet(poly, () -> (ObjectPoly) addScript(new ObjectPoly(this)));
   }
 
-  public abstract void sendInfo(L2PcInstance activeChar);
-
-  public void sendPacket(L2GameServerPacket mov) {}
-
-  public void sendPacket(SystemMessageId id) {}
-
-  public L2PcInstance getActingPlayer() {
-    return null;
-  }
-
-  /**
-   * Verify if object is instance of L2Attackable.
-   *
-   * @return {@code true} if object is instance of L2Attackable, {@code false} otherwise
-   */
-  public boolean isAttackable() {
-    return false;
+  @SuppressWarnings("unchecked")
+  public final <T> T getScript(Class<T> script) {
+    return (T) scripts.get(script);
   }
 
   /**
@@ -303,12 +290,34 @@ public abstract class L2Object extends ListenersContainer
     return false;
   }
 
+  public void sendPacket(SystemMessageId id) {}
+
+  /**
+   * Verify if object is instance of L2Attackable.
+   *
+   * @return {@code true} if object is instance of L2Attackable, {@code false} otherwise
+   */
+  public boolean isAttackable() {
+    return false;
+  }
+
+  public abstract void sendInfo(L2PcInstance activeChar);
   /**
    * Verify if object is instance of L2DoorInstance.
    *
    * @return {@code true} if object is instance of L2DoorInstance, {@code false} otherwise
    */
   public boolean isDoor() {
+    return false;
+  }
+
+  public void sendPacket(L2GameServerPacket mov) {}
+  /**
+   * Verify if object is instance of L2Npc.
+   *
+   * @return {@code true} if object is instance of L2Npc, {@code false} otherwise
+   */
+  public boolean isNpc() {
     return false;
   }
 
@@ -321,12 +330,15 @@ public abstract class L2Object extends ListenersContainer
     return false;
   }
 
+  public L2PcInstance getActingPlayer() {
+    return null;
+  }
   /**
-   * Verify if object is instance of L2Npc.
+   * Verifies if the object is a walker NPC.
    *
-   * @return {@code true} if object is instance of L2Npc, {@code false} otherwise
+   * @return {@code true} if object is a walker NPC, {@code false} otherwise
    */
-  public boolean isNpc() {
+  public boolean isWalker() {
     return false;
   }
 
@@ -336,15 +348,6 @@ public abstract class L2Object extends ListenersContainer
    * @return {@code true} if object is instance of L2PetInstance, {@code false} otherwise
    */
   public boolean isPet() {
-    return false;
-  }
-
-  /**
-   * Verify if object is instance of L2PcInstance.
-   *
-   * @return {@code true} if object is instance of L2PcInstance, {@code false} otherwise
-   */
-  public boolean isPlayer() {
     return false;
   }
 
@@ -394,12 +397,23 @@ public abstract class L2Object extends ListenersContainer
   }
 
   /**
-   * Verifies if the object is a walker NPC.
+   * Verify if object is instance of L2PcInstance.
    *
-   * @return {@code true} if object is a walker NPC, {@code false} otherwise
+   * @return {@code true} if object is instance of L2PcInstance, {@code false} otherwise
    */
-  public boolean isWalker() {
+  public boolean isPlayer() {
     return false;
+  }
+  /**
+   * Calculates distance between this L2Object and given location.
+   *
+   * @param loc the location object
+   * @param includeZAxis if {@code true} Z axis will be included
+   * @param squared if {@code true} return will be squared
+   * @return distance between object and given location.
+   */
+  public final double calculateDistance(ILocational loc, boolean includeZAxis, boolean squared) {
+    return calculateDistance(loc.getX(), loc.getY(), loc.getZ(), includeZAxis, squared);
   }
 
   /**
@@ -457,24 +471,9 @@ public abstract class L2Object extends ListenersContainer
    * @param script
    * @return
    */
-  public final <T> Object addScript(Object script) {
-    scripts.put(script.getClass(), script);
-    return script;
-  }
-
-  /**
-   * @param <T>
-   * @param script
-   * @return
-   */
   @SuppressWarnings("unchecked")
   public final <T> T removeScript(Class<T> script) {
     return (T) scripts.remove(script);
-  }
-
-  @SuppressWarnings("unchecked")
-  public final <T> T getScript(Class<T> script) {
-    return (T) scripts.get(script);
   }
 
   public void removeStatusListener(L2Character object) {}
@@ -546,6 +545,30 @@ public abstract class L2Object extends ListenersContainer
   }
 
   /**
+   * Calculates distance between this L2Object and given x, y , z.
+   *
+   * @param x the X coordinate
+   * @param y the Y coordinate
+   * @param z the Z coordinate
+   * @param includeZAxis if {@code true} Z axis will be included
+   * @param squared if {@code true} return will be squared
+   * @return distance between object and given x, y, z.
+   */
+  public final double calculateDistance(
+      int x, int y, int z, boolean includeZAxis, boolean squared) {
+    final double distance =
+        Math.pow(x - getX(), 2)
+            + Math.pow(y - getY(), 2)
+            + (includeZAxis ? Math.pow(z - getZ(), 2) : 0);
+    return (squared) ? distance : Math.sqrt(distance);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return ((obj instanceof L2Object) && (((L2Object) obj).getObjectId() == getObjectId()));
+  }
+
+  /**
    * Gets the X coordinate.
    *
    * @return the X coordinate
@@ -603,6 +626,50 @@ public abstract class L2Object extends ListenersContainer
   @Override
   public void setZ(int newZ) {
     _z.set(newZ);
+  }
+
+  @Override
+  public int getObjectId() {
+    return _objectId;
+  }
+  /**
+   * Sets the x, y, z coordinate.
+   *
+   * @param newX the X coordinate
+   * @param newY the Y coordinate
+   * @param newZ the Z coordinate
+   */
+
+  @Override
+  public final void setXYZ(int newX, int newY, int newZ) {
+    assert getWorldRegion() != null;
+
+    setX(newX);
+    setY(newY);
+    setZ(newZ);
+
+    try {
+      if (L2World.getInstance().getRegion(getLocation()) != getWorldRegion()) {
+        updateWorldRegion();
+      }
+    } catch (Exception e) {
+      badCoords();
+    }
+  }
+
+  @Override
+  public String toString() {
+    return getName() + " [" + getObjectId() + "]";
+  }
+  /**
+   * Sets the x, y, z coordinate.
+   *
+   * @param loc the location object
+   */
+
+  @Override
+  public void setXYZ(ILocational loc) {
+    setXYZ(loc.getX(), loc.getY(), loc.getZ());
   }
 
   /**
@@ -718,71 +785,6 @@ public abstract class L2Object extends ListenersContainer
   }
 
   /**
-   * Sets the x, y, z coordinate.
-   *
-   * @param newX the X coordinate
-   * @param newY the Y coordinate
-   * @param newZ the Z coordinate
-   */
-  @Override
-  public final void setXYZ(int newX, int newY, int newZ) {
-    assert getWorldRegion() != null;
-
-    setX(newX);
-    setY(newY);
-    setZ(newZ);
-
-    try {
-      if (L2World.getInstance().getRegion(getLocation()) != getWorldRegion()) {
-        updateWorldRegion();
-      }
-    } catch (Exception e) {
-      badCoords();
-    }
-  }
-
-  /**
-   * Sets the x, y, z coordinate.
-   *
-   * @param loc the location object
-   */
-  @Override
-  public void setXYZ(ILocational loc) {
-    setXYZ(loc.getX(), loc.getY(), loc.getZ());
-  }
-
-  /**
-   * Calculates distance between this L2Object and given x, y , z.
-   *
-   * @param x the X coordinate
-   * @param y the Y coordinate
-   * @param z the Z coordinate
-   * @param includeZAxis if {@code true} Z axis will be included
-   * @param squared if {@code true} return will be squared
-   * @return distance between object and given x, y, z.
-   */
-  public final double calculateDistance(
-      int x, int y, int z, boolean includeZAxis, boolean squared) {
-    final double distance =
-        Math.pow(x - getX(), 2)
-            + Math.pow(y - getY(), 2)
-            + (includeZAxis ? Math.pow(z - getZ(), 2) : 0);
-    return (squared) ? distance : Math.sqrt(distance);
-  }
-
-  /**
-   * Calculates distance between this L2Object and given location.
-   *
-   * @param loc the location object
-   * @param includeZAxis if {@code true} Z axis will be included
-   * @param squared if {@code true} return will be squared
-   * @return distance between object and given location.
-   */
-  public final double calculateDistance(ILocational loc, boolean includeZAxis, boolean squared) {
-    return calculateDistance(loc.getX(), loc.getY(), loc.getZ(), includeZAxis, squared);
-  }
-
-  /**
    * Calculates the angle in degrees from this object to the given object.<br>
    * The return value can be described as how much this object has to turn<br>
    * to have the given object directly in front of it.
@@ -818,6 +820,14 @@ public abstract class L2Object extends ListenersContainer
           new ExSendUIEvent(
               getActingPlayer(), hide, false, endTime - startTime, 0, instance.getTimerText()));
     }
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String value) {
+    name = value;
   }
 
   /** @return {@code true} if this object is invisible, {@code false} otherwise. */
@@ -866,13 +876,7 @@ public abstract class L2Object extends ListenersContainer
     }
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    return ((obj instanceof L2Object) && (((L2Object) obj).getObjectId() == getObjectId()));
-  }
 
-  @Override
-  public String toString() {
-    return getName() + " [" + getObjectId() + "]";
-  }
+
+
 }

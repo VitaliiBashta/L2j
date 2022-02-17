@@ -1253,7 +1253,6 @@ public class Quest extends AbstractScript implements Identifiable {
     }
   }
 
-  @Override
   public String getName() {
     return name;
   }

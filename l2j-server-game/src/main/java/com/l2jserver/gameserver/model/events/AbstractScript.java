@@ -59,7 +59,6 @@ import com.l2jserver.gameserver.model.events.returns.AbstractEventReturn;
 import com.l2jserver.gameserver.model.events.returns.TerminateReturn;
 import com.l2jserver.gameserver.model.holders.ItemHolder;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
-import com.l2jserver.gameserver.model.interfaces.INamable;
 import com.l2jserver.gameserver.model.interfaces.IPositionable;
 import com.l2jserver.gameserver.model.itemcontainer.Inventory;
 import com.l2jserver.gameserver.model.itemcontainer.PcInventory;
@@ -94,7 +93,7 @@ import static com.l2jserver.gameserver.config.Configuration.customs;
 import static com.l2jserver.gameserver.config.Configuration.rates;
 
 
-public abstract class AbstractScript implements INamable {
+public abstract class AbstractScript {
 	
 	protected static final Logger LOG = LogManager.getLogger(AbstractScript.class);
 	

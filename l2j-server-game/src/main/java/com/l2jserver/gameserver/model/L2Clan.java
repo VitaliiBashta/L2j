@@ -1,21 +1,3 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.model;
 
 import com.l2jserver.commons.database.ConnectionFactory;
@@ -36,7 +18,6 @@ import com.l2jserver.gameserver.model.events.impl.character.player.clan.OnPlayer
 import com.l2jserver.gameserver.model.events.impl.character.player.clan.OnPlayerClanLeaderChange;
 import com.l2jserver.gameserver.model.events.impl.character.player.clan.OnPlayerClanLeft;
 import com.l2jserver.gameserver.model.events.impl.character.player.clan.OnPlayerClanLvlUp;
-import com.l2jserver.gameserver.model.interfaces.INamable;
 import com.l2jserver.gameserver.model.interfaces.Identifiable;
 import com.l2jserver.gameserver.model.itemcontainer.ClanWarehouse;
 import com.l2jserver.gameserver.model.itemcontainer.ItemContainer;
@@ -48,39 +29,43 @@ import com.l2jserver.gameserver.network.serverpackets.PledgeSkillList.SubPledgeS
 import com.l2jserver.gameserver.util.EnumIntBitmask;
 import com.l2jserver.gameserver.util.Util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.l2jserver.gameserver.config.Configuration.*;
+import static com.l2jserver.gameserver.config.Configuration.character;
+import static com.l2jserver.gameserver.config.Configuration.clan;
+import static com.l2jserver.gameserver.config.Configuration.fortress;
+import static com.l2jserver.gameserver.config.Configuration.general;
 import static java.util.concurrent.TimeUnit.DAYS;
 
-public class L2Clan implements Identifiable, INamable {
+public class L2Clan implements Identifiable {
 	
-	private static final Logger _log = Logger.getLogger(L2Clan.class.getName());
-	
-	// SQL queries
-	private static final String INSERT_CLAN_DATA = "INSERT INTO clan_data (clan_id,clan_name,clan_level,hasCastle,blood_alliance_count,blood_oath_count,ally_id,ally_name,leader_id,crest_id,crest_large_id,ally_crest_id,new_leader_id) values (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-	private static final String SELECT_CLAN_DATA = "SELECT * FROM clan_data where clan_id=?";
-	
-	// Ally Penalty Types
 	/** Clan left ally */
 	public static final int PENALTY_TYPE_CLAN_LEFT = 1;
 	/** Clan was dismissed from ally */
 	public static final int PENALTY_TYPE_CLAN_DISMISSED = 2;
 	/** Leader clan dismiss clan from ally */
 	public static final int PENALTY_TYPE_DISMISS_CLAN = 3;
+	
+	// Ally Penalty Types
 	/** Leader clan dissolve ally */
 	public static final int PENALTY_TYPE_DISSOLVE_ALLY = 4;
-	// Sub-unit types
 	/** Clan subunit type of Academy */
 	public static final int SUBUNIT_ACADEMY = -1;
 	/** Clan subunit type of Royal Guard A */
 	public static final int SUBUNIT_ROYAL1 = 100;
 	/** Clan subunit type of Royal Guard B */
 	public static final int SUBUNIT_ROYAL2 = 200;
+	// Sub-unit types
 	/** Clan subunit type of Order of Knights A-1 */
 	public static final int SUBUNIT_KNIGHT1 = 1001;
 	/** Clan subunit type of Order of Knights A-2 */
@@ -89,12 +74,25 @@ public class L2Clan implements Identifiable, INamable {
 	public static final int SUBUNIT_KNIGHT3 = 2001;
 	/** Clan subunit type of Order of Knights B-2 */
 	public static final int SUBUNIT_KNIGHT4 = 2002;
-	
-	private String _name;
+	private static final Logger _log = Logger.getLogger(L2Clan.class.getName());
+	// SQL queries
+	private static final String INSERT_CLAN_DATA = "INSERT INTO clan_data (clan_id,clan_name,clan_level,hasCastle,blood_alliance_count,blood_oath_count,ally_id,ally_name,leader_id,crest_id,crest_large_id,ally_crest_id,new_leader_id) values (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+	private static final String SELECT_CLAN_DATA = "SELECT * FROM clan_data where clan_id=?";
+	private static final int MAX_NOTICE_LENGTH = 8192;
+	private final Map<Integer, L2ClanMember> _members = new ConcurrentHashMap<>();
+	private final ItemContainer _warehouse = new ClanWarehouse(this);
+	private final Set<Integer> _atWarWith = ConcurrentHashMap.newKeySet();
+	private final Set<Integer> _atWarAttackers = ConcurrentHashMap.newKeySet();
+	/** Map(Integer, L2Skill) containing all skills of the L2Clan */
+	private final Map<Integer, Skill> _skills = new ConcurrentHashMap<>();
+	private final Map<Integer, RankPrivs> _privs = new ConcurrentHashMap<>();
+	private final Map<Integer, SubPledge> _subPledges = new ConcurrentHashMap<>();
+	private final Map<Integer, Skill> _subPledgeSkills = new ConcurrentHashMap<>();
+	private final AtomicInteger _siegeKills = new AtomicInteger();
+	private final AtomicInteger _siegeDeaths = new AtomicInteger();
+	private String name;
 	private int _clanId;
 	private L2ClanMember _leader;
-	private final Map<Integer, L2ClanMember> _members = new ConcurrentHashMap<>();
-	
 	private String _allyName;
 	private int _allyId;
 	private int _level;
@@ -112,27 +110,11 @@ public class L2Clan implements Identifiable, INamable {
 	private long _dissolvingExpiryTime;
 	private int _bloodAllianceCount;
 	private int _bloodOathCount;
-	
-	private final ItemContainer _warehouse = new ClanWarehouse(this);
-	private final Set<Integer> _atWarWith = ConcurrentHashMap.newKeySet();
-	private final Set<Integer> _atWarAttackers = ConcurrentHashMap.newKeySet();
-	
-	/** Map(Integer, L2Skill) containing all skills of the L2Clan */
-	private final Map<Integer, Skill> _skills = new ConcurrentHashMap<>();
-	private final Map<Integer, RankPrivs> _privs = new ConcurrentHashMap<>();
-	private final Map<Integer, SubPledge> _subPledges = new ConcurrentHashMap<>();
-	private final Map<Integer, Skill> _subPledgeSkills = new ConcurrentHashMap<>();
-	
 	private int _reputationScore = 0;
 	private int _rank = 0;
-	
 	private String _notice;
 	private boolean _noticeEnabled = false;
-	private static final int MAX_NOTICE_LENGTH = 8192;
 	private int _newLeaderId;
-	
-	private final AtomicInteger _siegeKills = new AtomicInteger();
-	private final AtomicInteger _siegeDeaths = new AtomicInteger();
 	
 	/**
 	 * Called if a clan is referenced only by id. In this case all other data needs to be fetched from db
@@ -152,7 +134,7 @@ public class L2Clan implements Identifiable, INamable {
 	 */
 	public L2Clan(int clanId, String clanName) {
 		_clanId = clanId;
-		_name = clanName;
+		name = clanName;
 		initializePrivs();
 	}
 	
@@ -161,105 +143,83 @@ public class L2Clan implements Identifiable, INamable {
 		return _clanId;
 	}
 	
-	public void setClanId(int clanId) {
-		_clanId = clanId;
-	}
-	
-	public int getLeaderId() {
-		return (_leader != null ? _leader.getObjectId() : 0);
-	}
-	
-	public L2ClanMember getLeader() {
-		return _leader;
-	}
-	
-	public void setLeader(L2ClanMember leader) {
-		_leader = leader;
-		_members.put(leader.getObjectId(), leader);
-	}
-	
-	public void setNewLeader(L2ClanMember member) {
-		final L2PcInstance newLeader = member.getPlayerInstance();
-		final L2ClanMember exMember = getLeader();
-		final L2PcInstance exLeader = exMember.getPlayerInstance();
-		
-		// Notify to scripts
-		EventDispatcher.getInstance().notifyEventAsync(new OnPlayerClanLeaderChange(exMember, member, this));
-		
-		if (exLeader != null) {
-			if (exLeader.isFlying()) {
-				exLeader.dismount();
-			}
-			
-			if (getLevel() >= SiegeManager.getInstance().getSiegeClanMinLevel()) {
-				SiegeManager.getInstance().removeSiegeSkills(exLeader);
-			}
-			exLeader.getClanPrivileges().clear();
-			exLeader.broadcastUserInfo();
-			
-		} else {
-			try (var con = ConnectionFactory.getInstance().getConnection();
-				var ps = con.prepareStatement("UPDATE characters SET clan_privs = ? WHERE charId = ?")) {
-				ps.setInt(1, 0);
-				ps.setInt(2, getLeaderId());
-				ps.execute();
-			} catch (Exception e) {
-				_log.log(Level.WARNING, "Couldn't update clan privs for old clan leader", e);
-			}
+	public void initializePrivs() {
+		for (int i = 1; i < 10; i++) {
+			_privs.put(i, new RankPrivs(i, 0, new EnumIntBitmask<>(ClanPrivilege.class, false)));
 		}
-		
-		setLeader(member);
-		if (getNewLeaderId() != 0) {
-			setNewLeaderId(0, true);
-		}
-		updateClanInDB();
-		
-		if (exLeader != null) {
-			exLeader.setPledgeClass(L2ClanMember.calculatePledgeClass(exLeader));
-			exLeader.broadcastUserInfo();
-			exLeader.checkItemRestriction();
-		}
-		
-		if (newLeader != null) {
-			newLeader.setPledgeClass(L2ClanMember.calculatePledgeClass(newLeader));
-			newLeader.getClanPrivileges().setAll();
-			
-			if (getLevel() >= SiegeManager.getInstance().getSiegeClanMinLevel()) {
-				SiegeManager.getInstance().addSiegeSkills(newLeader);
-			}
-			newLeader.broadcastUserInfo();
-		} else {
-			try (var con = ConnectionFactory.getInstance().getConnection();
-				var ps = con.prepareStatement("UPDATE characters SET clan_privs = ? WHERE charId = ?")) {
-				ps.setInt(1, EnumIntBitmask.getAllBitmask(ClanPrivilege.class));
-				ps.setInt(2, getLeaderId());
-				ps.execute();
-			} catch (Exception e) {
-				_log.log(Level.WARNING, "Couldn't update clan privs for new clan leader", e);
-			}
-		}
-		
-		broadcastClanStatus();
-		broadcastToOnlineMembers(SystemMessage.getSystemMessage(SystemMessageId.CLAN_LEADER_PRIVILEGES_HAVE_BEEN_TRANSFERRED_TO_C1).addString(member.getName()));
-		
-		_log.log(Level.INFO, "Leader of Clan: " + getName() + " changed to: " + member.getName() + " ex leader: " + exMember.getName());
 	}
 	
-	public String getLeaderName() {
-		if (_leader == null) {
-			_log.warning(L2Clan.class.getName() + ": Clan " + getName() + " without clan leader!");
-			return "";
+	private void restore() {
+		try (var con = ConnectionFactory.getInstance().getConnection();
+			var ps = con.prepareStatement(SELECT_CLAN_DATA)) {
+			ps.setInt(1, getId());
+			try (var clanData = ps.executeQuery()) {
+				if (clanData.next()) {
+					setName(clanData.getString("clan_name"));
+					setLevel(clanData.getInt("clan_level"));
+					setCastleId(clanData.getInt("hasCastle"));
+					_bloodAllianceCount = clanData.getInt("blood_alliance_count");
+					_bloodOathCount = clanData.getInt("blood_oath_count");
+					setAllyId(clanData.getInt("ally_id"));
+					setAllyName(clanData.getString("ally_name"));
+					setAllyPenaltyExpiryTime(clanData.getLong("ally_penalty_expiry_time"), clanData.getInt("ally_penalty_type"));
+					if (getAllyPenaltyExpiryTime() < System.currentTimeMillis()) {
+						setAllyPenaltyExpiryTime(0, 0);
+					}
+					setCharPenaltyExpiryTime(clanData.getLong("char_penalty_expiry_time"));
+
+					if ((getCharPenaltyExpiryTime() + DAYS.toMillis(character().getDaysBeforeJoinAClan())) < System.currentTimeMillis()) {
+						setCharPenaltyExpiryTime(0);
+					}
+					setDissolvingExpiryTime(clanData.getLong("dissolving_expiry_time"));
+
+					setCrestId(clanData.getInt("crest_id"));
+					setCrestLargeId(clanData.getInt("crest_large_id"));
+					setAllyCrestId(clanData.getInt("ally_crest_id"));
+
+					setReputationScore(clanData.getInt("reputation_score"), false);
+					setAuctionBidAt(clanData.getInt("auction_bid_at"), false);
+					setNewLeaderId(clanData.getInt("new_leader_id"), false);
+
+					final int leaderId = (clanData.getInt("leader_id"));
+
+					ps.clearParameters();
+
+					try (var select = con.prepareStatement("SELECT char_name,level,classid,charId,title,power_grade,subpledge,apprentice,sponsor,sex,race FROM characters WHERE clanid=?")) {
+						select.setInt(1, getId());
+						try (var clanMember = select.executeQuery()) {
+							while (clanMember.next()) {
+								final var member = new L2ClanMember(this, clanMember);
+								if (member.getObjectId() == leaderId) {
+									setLeader(member);
+								} else {
+									addClanMember(member);
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if (general().debug() && (getName() != null)) {
+				_log.info("Restored clan data for \"" + getName() + "\" from database.");
+			}
+
+			restoreSubPledges();
+			restoreRankPrivs();
+			restoreSkills();
+			restoreNotice();
+		} catch (Exception ex) {
+			_log.log(Level.SEVERE, "Error restoring clan data for clan " + getId() + "!", ex);
 		}
-		return _leader.getName();
 	}
 	
-	@Override
 	public String getName() {
-		return _name;
+		return name;
 	}
 	
 	public void setName(String name) {
-		_name = name;
+		this.name = name;
 	}
 	
 	/**
@@ -270,446 +230,106 @@ public class L2Clan implements Identifiable, INamable {
 		_members.put(member.getObjectId(), member);
 	}
 	
-	/**
-	 * Adds a clan member to the clan.<br>
-	 * Using a different constructor, to make it easier to read.
-	 * @param player the clan member
-	 */
-	public void addClanMember(L2PcInstance player) {
-		final L2ClanMember member = new L2ClanMember(this, player);
-		member.setPlayerInstance(player);
-		addClanMember(member);
-		
-		player.setClan(this);
-		player.setPledgeClass(L2ClanMember.calculatePledgeClass(player));
-		player.sendPacket(new PledgeShowMemberListUpdate(player));
-		player.sendPacket(new PledgeSkillList(this));
-		
-		addSkillEffects(player);
-		
-		// Notify to scripts
-		EventDispatcher.getInstance().notifyEventAsync(new OnPlayerClanJoin(member, this));
-	}
-	
-	/**
-	 * Updates player status in clan.
-	 * @param player the player to be updated.
-	 */
-	public void updateClanMember(L2PcInstance player) {
-		final L2ClanMember member = new L2ClanMember(player.getClan(), player);
-		if (player.isClanLeader()) {
-			setLeader(member);
-		}
-		
-		addClanMember(member);
-	}
-	
-	/**
-	 * @param name the name of the required clan member.
-	 * @return the clan member for a given name.
-	 */
-	public L2ClanMember getClanMember(String name) {
-		for (L2ClanMember temp : _members.values()) {
-			if (temp.getName().equals(name)) {
-				return temp;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * @param objectId the required clan member object Id.
-	 * @return the clan member for a given {@code objectId}.
-	 */
-	public L2ClanMember getClanMember(int objectId) {
-		return _members.get(objectId);
-	}
-	
-	/**
-	 * @param objectId the object Id of the member that will be removed.
-	 * @param clanJoinExpiryTime time penalty to join a clan.
-	 */
-	public void removeClanMember(int objectId, long clanJoinExpiryTime) {
-		final L2ClanMember exMember = _members.remove(objectId);
-		if (exMember == null) {
-			_log.warning("Member Object ID: " + objectId + " not found in clan while trying to remove");
-			return;
-		}
-		final int subPledgeLeader = getLeaderSubPledge(objectId);
-		if (subPledgeLeader != 0) {
-			// Sub-unit leader withdraws, position becomes vacant and leader should appoint new via NPC
-			getSubPledge(subPledgeLeader).setLeaderId(0);
-			updateSubPledgeInDB(subPledgeLeader);
-		}
-		
-		if (exMember.getApprentice() != 0) {
-			final L2ClanMember apprentice = getClanMember(exMember.getApprentice());
-			if (apprentice != null) {
-				if (apprentice.getPlayerInstance() != null) {
-					apprentice.getPlayerInstance().setSponsor(0);
-				} else {
-					apprentice.setApprenticeAndSponsor(0, 0);
-				}
-				
-				apprentice.saveApprenticeAndSponsor(0, 0);
-			}
-		}
-		if (exMember.getSponsor() != 0) {
-			final L2ClanMember sponsor = getClanMember(exMember.getSponsor());
-			if (sponsor != null) {
-				if (sponsor.getPlayerInstance() != null) {
-					sponsor.getPlayerInstance().setApprentice(0);
-				} else {
-					sponsor.setApprenticeAndSponsor(0, 0);
-				}
-				
-				sponsor.saveApprenticeAndSponsor(0, 0);
-			}
-		}
-		exMember.saveApprenticeAndSponsor(0, 0);
-		if (character().removeCastleCirclets()) {
-			CastleManager.getInstance().removeCirclet(exMember, getCastleId());
-		}
-		
-		final L2PcInstance player = exMember.getPlayerInstance();
-		if (player != null) {
-			if (!player.isNoble()) {
-				player.setTitle("");
-			}
-			player.setApprentice(0);
-			player.setSponsor(0);
-			
-			if (player.isClanLeader()) {
-				SiegeManager.getInstance().removeSiegeSkills(player);
-				player.setClanCreateExpiryTime(System.currentTimeMillis() + DAYS.toMillis(character().getDaysBeforeCreateAClan()));
-			}
-			// remove Clan skills from Player
-			removeSkillEffects(player);
-			
-			// remove Residential skills
-			if (player.getClan().getCastleId() > 0) {
-				CastleManager.getInstance().getCastleByOwner(player.getClan()).removeResidentialSkills(player);
-			}
-			if (player.getClan().getFortId() > 0) {
-				FortManager.getInstance().getFortByOwner(player.getClan()).removeResidentialSkills(player);
-			}
-			player.sendSkillList();
-			
-			player.setClan(null);
-			
-			// players leaving from clan academy have no penalty
-			if (exMember.getPledgeType() != -1) {
-				player.setClanJoinExpiryTime(clanJoinExpiryTime);
-			}
-			
-			player.setPledgeClass(L2ClanMember.calculatePledgeClass(player));
-			player.broadcastUserInfo();
-			// disable clan tab
-			player.sendPacket(PledgeShowMemberListDeleteAll.STATIC_PACKET);
-		} else {
-			removeMemberInDatabase(exMember.getObjectId(), clanJoinExpiryTime, getLeaderId() == objectId ? System.currentTimeMillis() + DAYS.toMillis(character().getDaysBeforeCreateAClan()) : 0);
-		}
-		
-		// Notify to scripts
-		EventDispatcher.getInstance().notifyEventAsync(new OnPlayerClanLeft(exMember, this));
-	}
-	
-	public L2ClanMember[] getMembers() {
-		return _members.values().toArray(new L2ClanMember[0]);
-	}
-	
-	public int getMembersCount() {
-		return _members.size();
-	}
-	
-	public int getSubPledgeMembersCount(int subpl) {
-		int result = 0;
-		for (L2ClanMember temp : _members.values()) {
-			if (temp.getPledgeType() == subpl) {
-				result++;
-			}
-		}
-		return result;
-	}
-	
-	/**
-	 * @param pledgeType the Id of the pledge type.
-	 * @return the maximum number of members allowed for a given {@code pledgeType}.
-	 */
-	public int getMaxNrOfMembers(int pledgeType) {
-		int limit = 0;
-		
-		switch (pledgeType) {
-			case 0:
-				limit = switch (getLevel()) {
-					case 3 -> 30;
-					case 2 -> 20;
-					case 1 -> 15;
-					case 0 -> 10;
-					default -> 40;
-				};
-				break;
-			case -1:
-				limit = 20;
-				break;
-			case 100:
-			case 200:
-				if (getLevel() == 11) {
-					limit = 30;
-				} else {
-					limit = 20;
-				}
-				break;
-			case 1001:
-			case 1002:
-			case 2001:
-			case 2002:
-				limit = switch (getLevel()) {
-					case 9, 10, 11 -> 25;
-					default -> 10;
-				};
-				break;
-			default:
-				break;
-		}
-		return limit;
-	}
-	
-	/**
-	 * @param exclude the object Id to exclude from list.
-	 * @return all online members excluding the one with object id {code exclude}.
-	 */
-	public List<L2PcInstance> getOnlineMembers(int exclude) {
-		final List<L2PcInstance> onlineMembers = new ArrayList<>();
-		for (L2ClanMember temp : _members.values()) {
-			if ((temp != null) && temp.isOnline() && (temp.getObjectId() != exclude)) {
-				onlineMembers.add(temp.getPlayerInstance());
-			}
-		}
-		return onlineMembers;
-	}
-	
-	/**
-	 * @return the online clan member count.
-	 */
-	public int getOnlineMembersCount() {
-		int count = 0;
-		for (L2ClanMember temp : _members.values()) {
-			if ((temp == null) || !temp.isOnline()) {
-				continue;
-			}
-			count++;
-		}
-		return count;
-	}
-	
-	/**
-	 * @return the alliance Id.
-	 */
-	public int getAllyId() {
-		return _allyId;
-	}
-	
-	/**
-	 * @return the alliance name.
-	 */
-	public String getAllyName() {
-		return _allyName;
-	}
-	
-	/**
-	 * @param allyCrestId the alliance crest Id to be set.
-	 */
-	public void setAllyCrestId(int allyCrestId) {
-		_allyCrestId = allyCrestId;
-	}
-	
-	/**
-	 * @return the alliance crest Id.
-	 */
-	public int getAllyCrestId() {
-		return _allyCrestId;
-	}
-	
-	/**
-	 * Gets the clan level.
-	 * @return the clan level
-	 */
-	public int getLevel() {
-		return _level;
-	}
-	
-	/**
-	 * Sets the clan level.
-	 * @param level the level to set
-	 */
-	public void setLevel(int level) {
-		_level = level;
-	}
-	
-	/**
-	 * @return the castle Id for this clan if owns a castle, zero otherwise.
-	 */
-	public int getCastleId() {
-		return _castleId;
-	}
-	
-	/**
-	 * @return the fort Id for this clan if owns a fort, zero otherwise.
-	 */
-	public int getFortId() {
-		return _fortId;
-	}
-	
-	/**
-	 * @return the hideout Id for this clan if owns a hideout, zero otherwise.
-	 */
-	public int getHideoutId() {
-		return _hideoutId;
-	}
-	
-	/**
-	 * @param crestId the Id of the clan crest to be set.
-	 */
-	public void setCrestId(int crestId) {
-		_crestId = crestId;
-	}
-	
-	/**
-	 * @return Returns the clanCrestId.
-	 */
-	public int getCrestId() {
-		return _crestId;
-	}
-	
-	/**
-	 * @param crestLargeId The id of pledge LargeCrest.
-	 */
-	public void setCrestLargeId(int crestLargeId) {
-		_crestLargeId = crestLargeId;
-	}
-	
-	/**
-	 * @return Returns the clan CrestLargeId
-	 */
-	public int getCrestLargeId() {
-		return _crestLargeId;
-	}
-	
-	/**
-	 * @param allyId The allyId to set.
-	 */
-	public void setAllyId(int allyId) {
-		_allyId = allyId;
-	}
-	
-	/**
-	 * @param allyName The allyName to set.
-	 */
-	public void setAllyName(String allyName) {
-		_allyName = allyName;
-	}
-	
-	/**
-	 * @param castleId the castle Id to set.
-	 */
-	public void setCastleId(int castleId) {
-		_castleId = castleId;
-	}
-	
-	/**
-	 * @param fortId the fort Id to set.
-	 */
-	public void setFortId(int fortId) {
-		_fortId = fortId;
-	}
-	
-	/**
-	 * @param hideoutId the hideout Id to set.
-	 */
-	public void setHideoutId(int hideoutId) {
-		_hideoutId = hideoutId;
-	}
-	
-	/**
-	 * @param id the Id of the player to be verified.
-	 * @return {code true} if the player belongs to the clan.
-	 */
-	public boolean isMember(int id) {
-		return (id != 0 && _members.containsKey(id));
-	}
-	
-	/**
-	 * @return the Blood Alliance count for this clan
-	 */
-	public int getBloodAllianceCount() {
-		return _bloodAllianceCount;
-	}
-	
-	/**
-	 * Increase Blood Alliance count by config predefined count and updates the database.
-	 */
-	public void increaseBloodAllianceCount() {
-		_bloodAllianceCount += SiegeManager.getInstance().getBloodAllianceReward();
-		updateBloodAllianceCountInDB();
-	}
-	
-	/**
-	 * Reset the Blood Alliance count to zero and updates the database.
-	 */
-	public void resetBloodAllianceCount() {
-		_bloodAllianceCount = 0;
-		updateBloodAllianceCountInDB();
-	}
-	
-	/**
-	 * Store current Blood Alliances count in database.
-	 */
-	public void updateBloodAllianceCountInDB() {
+	private void restoreNotice() {
 		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("UPDATE clan_data SET blood_alliance_count=? WHERE clan_id=?")) {
-			ps.setInt(1, getBloodAllianceCount());
-			ps.setInt(2, getId());
-			ps.execute();
+			var ps = con.prepareStatement("SELECT enabled,notice FROM clan_notices WHERE clan_id=?")) {
+			ps.setInt(1, getId());
+			try (var noticeData = ps.executeQuery()) {
+				while (noticeData.next()) {
+					_noticeEnabled = noticeData.getBoolean("enabled");
+					_notice = noticeData.getString("notice");
+				}
+			}
 		} catch (Exception e) {
-			_log.log(Level.WARNING, "Exception on updateBloodAllianceCountInDB(): " + e.getMessage(), e);
+			_log.log(Level.SEVERE, "Error restoring clan notice: " + e.getMessage(), e);
 		}
 	}
 	
-	/**
-	 * @return the Blood Oath count for this clan
-	 */
-	public int getBloodOathCount() {
-		return _bloodOathCount;
-	}
-	
-	/**
-	 * Increase Blood Oath count by config predefined count and updates the database.
-	 */
-	public void increaseBloodOathCount() {
-		_bloodOathCount += fortress().getBloodOathCount();
-		updateBloodOathCountInDB();
-	}
-	
-	/**
-	 * Reset the Blood Oath count to zero and updates the database.
-	 */
-	public void resetBloodOathCount() {
-		_bloodOathCount = 0;
-		updateBloodOathCountInDB();
-	}
-	
-	/**
-	 * Store current Blood Alliances count in database.
-	 */
-	public void updateBloodOathCountInDB() {
+	private void restoreSkills() {
 		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("UPDATE clan_data SET blood_oath_count=? WHERE clan_id=?")) {
-			ps.setInt(1, getBloodOathCount());
-			ps.setInt(2, getId());
-			ps.execute();
+			var ps = con.prepareStatement("SELECT skill_id,skill_level,sub_pledge_id FROM clan_skills WHERE clan_id=?")) {
+			// Retrieve all skills of this L2PcInstance from the database
+			ps.setInt(1, getId());
+			try (var rs = ps.executeQuery()) {
+				// Go though the recordset of this SQL query
+				while (rs.next()) {
+					int id = rs.getInt("skill_id");
+					int level = rs.getInt("skill_level");
+					// Create a L2Skill object for each record
+					Skill skill = SkillData.getInstance().getSkill(id, level);
+					// Add the L2Skill object to the L2Clan _skills
+					int subType = rs.getInt("sub_pledge_id");
+
+					if (subType == -2) {
+						_skills.put(skill.getId(), skill);
+					} else if (subType == 0) {
+						_subPledgeSkills.put(skill.getId(), skill);
+					} else {
+						SubPledge subunit = _subPledges.get(subType);
+						if (subunit != null) {
+							subunit.addNewSkill(skill);
+						} else {
+							_log.info("Missing subpledge " + subType + " for clan " + this + ", skill skipped.");
+						}
+					}
+				}
+			}
 		} catch (Exception e) {
-			_log.log(Level.WARNING, "Exception on updateBloodAllianceCountInDB(): " + e.getMessage(), e);
+			_log.log(Level.SEVERE, "Error restoring clan skills: " + e.getMessage(), e);
+		}
+	}
+	
+	private void restoreSubPledges() {
+		try (var con = ConnectionFactory.getInstance().getConnection();
+			var ps = con.prepareStatement("SELECT sub_pledge_id,name,leader_id FROM clan_subpledges WHERE clan_id=?")) {
+			// Retrieve all subpledges of this clan from the database
+			ps.setInt(1, getId());
+			try (var rs = ps.executeQuery()) {
+				while (rs.next()) {
+					int id = rs.getInt("sub_pledge_id");
+					String name = rs.getString("name");
+					int leaderId = rs.getInt("leader_id");
+					// Create a SubPledge object for each record
+					SubPledge pledge = new SubPledge(id, name, leaderId);
+					_subPledges.put(id, pledge);
+				}
+			}
+		} catch (Exception e) {
+			_log.log(Level.WARNING, "Could not restore clan sub-units: " + e.getMessage(), e);
+		}
+	}
+	
+	private void restoreRankPrivs() {
+		DAOFactory.getInstance().getClanDAO().getPrivileges(getId()).forEach((rank, privileges) -> _privs.get(rank).setPrivs(privileges));
+	}
+	
+	private void setReputationScore(int value, boolean save) {
+		if ((_reputationScore >= 0) && (value < 0)) {
+			broadcastToOnlineMembers(SystemMessage.getSystemMessage(SystemMessageId.REPUTATION_POINTS_0_OR_LOWER_CLAN_SKILLS_DEACTIVATED));
+			for (L2ClanMember member : _members.values()) {
+				if (member.isOnline() && (member.getPlayerInstance() != null)) {
+					skillsStatus(member.getPlayerInstance(), true);
+				}
+			}
+		} else if ((_reputationScore < 0) && (value >= 0)) {
+			broadcastToOnlineMembers(SystemMessage.getSystemMessage(SystemMessageId.CLAN_SKILLS_WILL_BE_ACTIVATED_SINCE_REPUTATION_IS_0_OR_HIGHER));
+			for (L2ClanMember member : _members.values()) {
+				if (member.isOnline() && (member.getPlayerInstance() != null)) {
+					skillsStatus(member.getPlayerInstance(), false);
+				}
+			}
+		}
+
+		_reputationScore = value;
+		if (_reputationScore > 100000000) {
+			_reputationScore = 100000000;
+		}
+		if (_reputationScore < -100000000) {
+			_reputationScore = -100000000;
+		}
+		broadcastToOnlineMembers(new PledgeShowInfoUpdate(this));
+		if (save) {
+			updateClanScoreInDB();
 		}
 	}
 	
@@ -724,6 +344,101 @@ public class L2Clan implements Identifiable, INamable {
 			ps.execute();
 		} catch (Exception e) {
 			_log.log(Level.WARNING, "Exception on updateClanScoreInDb(): " + e.getMessage(), e);
+		}
+	}
+	
+	public int getReputationScore() {
+		return _reputationScore;
+	}
+	
+	public void skillsStatus(L2PcInstance player, boolean disable) {
+		if (player == null) {
+			return;
+		}
+
+		for (Skill skill : _skills.values()) {
+			if (disable) {
+				player.disableSkill(skill, -1);
+			} else {
+				player.enableSkill(skill);
+			}
+		}
+
+		if (player.getPledgeType() == 0) {
+			for (Skill skill : _subPledgeSkills.values()) {
+				if (disable) {
+					player.disableSkill(skill, -1);
+				} else {
+					player.enableSkill(skill);
+				}
+			}
+		} else {
+			final SubPledge subunit = getSubPledge(player.getPledgeType());
+			if (subunit != null) {
+				for (Skill skill : subunit.getSkills()) {
+					if (disable) {
+						player.disableSkill(skill, -1);
+					} else {
+						player.enableSkill(skill);
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * used to retrieve subPledge by type
+	 * @param pledgeType
+	 * @return
+	 */
+	public final SubPledge getSubPledge(int pledgeType) {
+		return _subPledges.get(pledgeType);
+	}
+	
+	public void broadcastToOnlineMembers(L2GameServerPacket packet) {
+		for (L2ClanMember member : _members.values()) {
+			if ((member != null) && member.isOnline()) {
+				member.getPlayerInstance().sendPacket(packet);
+			}
+		}
+	}
+	
+	public void setAuctionBidAt(int id, boolean storeInDb) {
+		_auctionBidAt = id;
+
+		if (storeInDb) {
+			try (var con = ConnectionFactory.getInstance().getConnection();
+				var ps = con.prepareStatement("UPDATE clan_data SET auction_bid_at=? WHERE clan_id=?")) {
+				ps.setInt(1, id);
+				ps.setInt(2, getId());
+				ps.execute();
+			} catch (Exception e) {
+				_log.log(Level.WARNING, "Could not store auction for clan: " + e.getMessage(), e);
+			}
+		}
+	}
+	
+	public long getAllyPenaltyExpiryTime() {
+		return _allyPenaltyExpiryTime;
+	}
+	
+	public void setAllyPenaltyExpiryTime(long expiryTime, int penaltyType) {
+		_allyPenaltyExpiryTime = expiryTime;
+		_allyPenaltyType = penaltyType;
+	}
+	
+	public long getCharPenaltyExpiryTime() {
+		return _charPenaltyExpiryTime;
+	}
+	
+	public void setCharPenaltyExpiryTime(long time) {
+		_charPenaltyExpiryTime = time;
+	}
+	
+	public void setNewLeaderId(int objectId, boolean storeInDb) {
+		_newLeaderId = objectId;
+		if (storeInDb) {
+			updateClanInDB();
 		}
 	}
 	
@@ -761,6 +476,463 @@ public class L2Clan implements Identifiable, INamable {
 		} catch (Exception e) {
 			_log.log(Level.SEVERE, "Error saving clan: " + e.getMessage(), e);
 		}
+	}
+	
+	public int getLeaderId() {
+		return (_leader != null ? _leader.getObjectId() : 0);
+	}
+	
+	/**
+	 * @return the alliance Id.
+	 */
+	public int getAllyId() {
+		return _allyId;
+	}
+	
+	/**
+	 * @param allyId The allyId to set.
+	 */
+	public void setAllyId(int allyId) {
+		_allyId = allyId;
+	}
+	
+	/**
+	 * @return the alliance name.
+	 */
+	public String getAllyName() {
+		return _allyName;
+	}
+	
+	/**
+	 * @param allyName The allyName to set.
+	 */
+	public void setAllyName(String allyName) {
+		_allyName = allyName;
+	}
+	
+	public int getAllyPenaltyType() {
+		return _allyPenaltyType;
+	}
+	
+	public long getDissolvingExpiryTime() {
+		return _dissolvingExpiryTime;
+	}
+	
+	public void setDissolvingExpiryTime(long time) {
+		_dissolvingExpiryTime = time;
+	}
+	
+	public int getNewLeaderId() {
+		return _newLeaderId;
+	}
+	
+	public ItemContainer getWarehouse() {
+		return _warehouse;
+	}
+	
+	public void setClanId(int clanId) {
+		_clanId = clanId;
+	}
+	
+	public String getLeaderName() {
+		if (_leader == null) {
+			_log.warning(L2Clan.class.getName() + ": Clan " + getName() + " without clan leader!");
+			return "";
+		}
+		return _leader.getName();
+	}
+	
+	/**
+	 * Adds a clan member to the clan.<br>
+	 * Using a different constructor, to make it easier to read.
+	 * @param player the clan member
+	 */
+	public void addClanMember(L2PcInstance player) {
+		final L2ClanMember member = new L2ClanMember(this, player);
+		member.setPlayerInstance(player);
+		addClanMember(member);
+
+		player.setClan(this);
+		player.setPledgeClass(L2ClanMember.calculatePledgeClass(player));
+		player.sendPacket(new PledgeShowMemberListUpdate(player));
+		player.sendPacket(new PledgeSkillList(this));
+
+		addSkillEffects(player);
+
+		// Notify to scripts
+		EventDispatcher.getInstance().notifyEventAsync(new OnPlayerClanJoin(member, this));
+	}
+	
+	public void addSkillEffects(L2PcInstance player) {
+		if (player == null) {
+			return;
+		}
+
+		for (Skill skill : _skills.values()) {
+			if (skill.getMinPledgeClass() <= player.getPledgeClass()) {
+				player.addSkill(skill, false); // Skill is not saved to player DB
+			}
+		}
+
+		if (player.getPledgeType() == 0) {
+			for (Skill skill : _subPledgeSkills.values()) {
+				player.addSkill(skill, false); // Skill is not saved to player DB
+			}
+		} else {
+			SubPledge subunit = getSubPledge(player.getPledgeType());
+			if (subunit == null) {
+				return;
+			}
+			for (Skill skill : subunit.getSkills()) {
+				player.addSkill(skill, false); // Skill is not saved to player DB
+			}
+		}
+
+		if (_reputationScore < 0) {
+			skillsStatus(player, true);
+		}
+	}
+	
+	/**
+	 * Updates player status in clan.
+	 * @param player the player to be updated.
+	 */
+	public void updateClanMember(L2PcInstance player) {
+		final L2ClanMember member = new L2ClanMember(player.getClan(), player);
+		if (player.isClanLeader()) {
+			setLeader(member);
+		}
+
+		addClanMember(member);
+	}
+	
+	/**
+	 * @param name the name of the required clan member.
+	 * @return the clan member for a given name.
+	 */
+	public L2ClanMember getClanMember(String name) {
+		for (L2ClanMember temp : _members.values()) {
+			if (temp.getName().equals(name)) {
+				return temp;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * @param objectId the object Id of the member that will be removed.
+	 * @param clanJoinExpiryTime time penalty to join a clan.
+	 */
+	public void removeClanMember(int objectId, long clanJoinExpiryTime) {
+		final L2ClanMember exMember = _members.remove(objectId);
+		if (exMember == null) {
+			_log.warning("Member Object ID: " + objectId + " not found in clan while trying to remove");
+			return;
+		}
+		final int subPledgeLeader = getLeaderSubPledge(objectId);
+		if (subPledgeLeader != 0) {
+			// Sub-unit leader withdraws, position becomes vacant and leader should appoint new via NPC
+			getSubPledge(subPledgeLeader).setLeaderId(0);
+			updateSubPledgeInDB(subPledgeLeader);
+		}
+
+		if (exMember.getApprentice() != 0) {
+			final L2ClanMember apprentice = getClanMember(exMember.getApprentice());
+			if (apprentice != null) {
+				if (apprentice.getPlayerInstance() != null) {
+					apprentice.getPlayerInstance().setSponsor(0);
+				} else {
+					apprentice.setApprenticeAndSponsor(0, 0);
+				}
+
+				apprentice.saveApprenticeAndSponsor(0, 0);
+			}
+		}
+		if (exMember.getSponsor() != 0) {
+			final L2ClanMember sponsor = getClanMember(exMember.getSponsor());
+			if (sponsor != null) {
+				if (sponsor.getPlayerInstance() != null) {
+					sponsor.getPlayerInstance().setApprentice(0);
+				} else {
+					sponsor.setApprenticeAndSponsor(0, 0);
+				}
+
+				sponsor.saveApprenticeAndSponsor(0, 0);
+			}
+		}
+		exMember.saveApprenticeAndSponsor(0, 0);
+		if (character().removeCastleCirclets()) {
+			CastleManager.getInstance().removeCirclet(exMember, getCastleId());
+		}
+
+		final L2PcInstance player = exMember.getPlayerInstance();
+		if (player != null) {
+			if (!player.isNoble()) {
+				player.setTitle("");
+			}
+			player.setApprentice(0);
+			player.setSponsor(0);
+
+			if (player.isClanLeader()) {
+				SiegeManager.getInstance().removeSiegeSkills(player);
+				player.setClanCreateExpiryTime(System.currentTimeMillis() + DAYS.toMillis(character().getDaysBeforeCreateAClan()));
+			}
+			// remove Clan skills from Player
+			removeSkillEffects(player);
+
+			// remove Residential skills
+			if (player.getClan().getCastleId() > 0) {
+				CastleManager.getInstance().getCastleByOwner(player.getClan()).removeResidentialSkills(player);
+			}
+			if (player.getClan().getFortId() > 0) {
+				FortManager.getInstance().getFortByOwner(player.getClan()).removeResidentialSkills(player);
+			}
+			player.sendSkillList();
+
+			player.setClan(null);
+
+			// players leaving from clan academy have no penalty
+			if (exMember.getPledgeType() != -1) {
+				player.setClanJoinExpiryTime(clanJoinExpiryTime);
+			}
+
+			player.setPledgeClass(L2ClanMember.calculatePledgeClass(player));
+			player.broadcastUserInfo();
+			// disable clan tab
+			player.sendPacket(PledgeShowMemberListDeleteAll.STATIC_PACKET);
+		} else {
+			removeMemberInDatabase(exMember.getObjectId(), clanJoinExpiryTime, getLeaderId() == objectId ? System.currentTimeMillis() + DAYS.toMillis(character().getDaysBeforeCreateAClan()) : 0);
+		}
+
+		// Notify to scripts
+		EventDispatcher.getInstance().notifyEventAsync(new OnPlayerClanLeft(exMember, this));
+	}
+	
+	/**
+	 * @param objectId the required clan member object Id.
+	 * @return the clan member for a given {@code objectId}.
+	 */
+	public L2ClanMember getClanMember(int objectId) {
+		return _members.get(objectId);
+	}
+	
+	/**
+	 * @return the castle Id for this clan if owns a castle, zero otherwise.
+	 */
+	public int getCastleId() {
+		return _castleId;
+	}
+	
+	/**
+	 * @param castleId the castle Id to set.
+	 */
+	public void setCastleId(int castleId) {
+		_castleId = castleId;
+	}
+	
+	/**
+	 * @return the fort Id for this clan if owns a fort, zero otherwise.
+	 */
+	public int getFortId() {
+		return _fortId;
+	}
+	
+	/**
+	 * @param fortId the fort Id to set.
+	 */
+	public void setFortId(int fortId) {
+		_fortId = fortId;
+	}
+	
+	/**
+	 * Removes a clan member from this clan.
+	 * @param playerId the clan member object ID to be removed
+	 * @param clanJoinExpiryTime the time penalty for the player to join a new clan
+	 * @param clanCreateExpiryTime the time penalty for the player to create a new clan
+	 */
+	private void removeMemberInDatabase(int playerId, long clanJoinExpiryTime, long clanCreateExpiryTime) {
+		try (var con = ConnectionFactory.getInstance().getConnection();
+			var ps1 = con.prepareStatement("UPDATE characters SET clanid=0, title=?, clan_join_expiry_time=?, clan_create_expiry_time=?, clan_privs=0, wantspeace=0, subpledge=0, lvl_joined_academy=0, apprentice=0, sponsor=0 WHERE charId=?");
+			var ps2 = con.prepareStatement("UPDATE characters SET apprentice=0 WHERE apprentice=?");
+			var ps3 = con.prepareStatement("UPDATE characters SET sponsor=0 WHERE sponsor=?")) {
+			// Remove clan member.
+			ps1.setString(1, "");
+			ps1.setLong(2, clanJoinExpiryTime);
+			ps1.setLong(3, clanCreateExpiryTime);
+			ps1.setInt(4, playerId);
+			ps1.execute();
+			// Remove apprentice.
+			ps2.setInt(1, playerId);
+			ps2.execute();
+			// Remove sponsor.
+			ps3.setInt(1, playerId);
+			ps3.execute();
+		} catch (Exception e) {
+			_log.log(Level.SEVERE, "Error removing clan member: " + e.getMessage(), e);
+		}
+	}
+	
+	public void removeSkillEffects(L2PcInstance player) {
+		if (player == null) {
+			return;
+		}
+
+		for (Skill skill : _skills.values()) {
+			player.removeSkill(skill, false); // Skill is not saved to player DB
+		}
+
+		if (player.getPledgeType() == 0) {
+			for (Skill skill : _subPledgeSkills.values()) {
+				player.removeSkill(skill, false); // Skill is not saved to player DB
+			}
+		} else {
+			SubPledge subunit = getSubPledge(player.getPledgeType());
+			if (subunit == null) {
+				return;
+			}
+			for (Skill skill : subunit.getSkills()) {
+				player.removeSkill(skill, false); // Skill is not saved to player DB
+			}
+		}
+	}
+	
+	public void updateSubPledgeInDB(int pledgeType) {
+		try (var con = ConnectionFactory.getInstance().getConnection();
+			var ps = con.prepareStatement("UPDATE clan_subpledges SET leader_id=?, name=? WHERE clan_id=? AND sub_pledge_id=?")) {
+			ps.setInt(1, getSubPledge(pledgeType).getLeaderId());
+			ps.setString(2, getSubPledge(pledgeType).getName());
+			ps.setInt(3, getId());
+			ps.setInt(4, pledgeType);
+			ps.execute();
+			if (general().debug()) {
+				_log.fine("Subpledge updated in db: " + getId());
+			}
+		} catch (Exception e) {
+			_log.log(Level.SEVERE, "Error updating subpledge: " + e.getMessage(), e);
+		}
+	}
+	
+	public int getLeaderSubPledge(int leaderId) {
+		int id = 0;
+		for (SubPledge sp : _subPledges.values()) {
+			if (sp.getLeaderId() == 0) {
+				continue;
+			}
+			if (sp.getLeaderId() == leaderId) {
+				id = sp.getId();
+			}
+		}
+		return id;
+	}
+	
+	/**
+	 * @return the online clan member count.
+	 */
+	public int getOnlineMembersCount() {
+		int count = 0;
+		for (L2ClanMember temp : _members.values()) {
+			if ((temp == null) || !temp.isOnline()) {
+				continue;
+			}
+			count++;
+		}
+		return count;
+	}
+	
+	/**
+	 * @return the hideout Id for this clan if owns a hideout, zero otherwise.
+	 */
+	public int getHideoutId() {
+		return _hideoutId;
+	}
+	
+	/**
+	 * @param hideoutId the hideout Id to set.
+	 */
+	public void setHideoutId(int hideoutId) {
+		_hideoutId = hideoutId;
+	}
+	
+	/**
+	 * @param id the Id of the player to be verified.
+	 * @return {code true} if the player belongs to the clan.
+	 */
+	public boolean isMember(int id) {
+		return (id != 0 && _members.containsKey(id));
+	}
+	
+	/**
+	 * Increase Blood Alliance count by config predefined count and updates the database.
+	 */
+	public void increaseBloodAllianceCount() {
+		_bloodAllianceCount += SiegeManager.getInstance().getBloodAllianceReward();
+		updateBloodAllianceCountInDB();
+	}
+	
+	/**
+	 * Store current Blood Alliances count in database.
+	 */
+	public void updateBloodAllianceCountInDB() {
+		try (var con = ConnectionFactory.getInstance().getConnection();
+			var ps = con.prepareStatement("UPDATE clan_data SET blood_alliance_count=? WHERE clan_id=?")) {
+			ps.setInt(1, getBloodAllianceCount());
+			ps.setInt(2, getId());
+			ps.execute();
+		} catch (Exception e) {
+			_log.log(Level.WARNING, "Exception on updateBloodAllianceCountInDB(): " + e.getMessage(), e);
+		}
+	}
+	
+	/**
+	 * @return the Blood Alliance count for this clan
+	 */
+	public int getBloodAllianceCount() {
+		return _bloodAllianceCount;
+	}
+	
+	/**
+	 * Reset the Blood Alliance count to zero and updates the database.
+	 */
+	public void resetBloodAllianceCount() {
+		_bloodAllianceCount = 0;
+		updateBloodAllianceCountInDB();
+	}
+	
+	/**
+	 * Increase Blood Oath count by config predefined count and updates the database.
+	 */
+	public void increaseBloodOathCount() {
+		_bloodOathCount += fortress().getBloodOathCount();
+		updateBloodOathCountInDB();
+	}
+	
+	/**
+	 * Store current Blood Alliances count in database.
+	 */
+	public void updateBloodOathCountInDB() {
+		try (var con = ConnectionFactory.getInstance().getConnection();
+			var ps = con.prepareStatement("UPDATE clan_data SET blood_oath_count=? WHERE clan_id=?")) {
+			ps.setInt(1, getBloodOathCount());
+			ps.setInt(2, getId());
+			ps.execute();
+		} catch (Exception e) {
+			_log.log(Level.WARNING, "Exception on updateBloodAllianceCountInDB(): " + e.getMessage(), e);
+		}
+	}
+	
+	/**
+	 * @return the Blood Oath count for this clan
+	 */
+	public int getBloodOathCount() {
+		return _bloodOathCount;
+	}
+	
+	/**
+	 * Reset the Blood Oath count to zero and updates the database.
+	 */
+	public void resetBloodOathCount() {
+		_bloodOathCount = 0;
+		updateBloodOathCountInDB();
 	}
 	
 	/**
@@ -804,122 +976,36 @@ public class L2Clan implements Identifiable, INamable {
 	}
 	
 	/**
-	 * Removes a clan member from this clan.
-	 * @param playerId the clan member object ID to be removed
-	 * @param clanJoinExpiryTime the time penalty for the player to join a new clan
-	 * @param clanCreateExpiryTime the time penalty for the player to create a new clan
+	 * @return Returns the clanCrestId.
 	 */
-	private void removeMemberInDatabase(int playerId, long clanJoinExpiryTime, long clanCreateExpiryTime) {
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps1 = con.prepareStatement("UPDATE characters SET clanid=0, title=?, clan_join_expiry_time=?, clan_create_expiry_time=?, clan_privs=0, wantspeace=0, subpledge=0, lvl_joined_academy=0, apprentice=0, sponsor=0 WHERE charId=?");
-			var ps2 = con.prepareStatement("UPDATE characters SET apprentice=0 WHERE apprentice=?");
-			var ps3 = con.prepareStatement("UPDATE characters SET sponsor=0 WHERE sponsor=?")) {
-			// Remove clan member.
-			ps1.setString(1, "");
-			ps1.setLong(2, clanJoinExpiryTime);
-			ps1.setLong(3, clanCreateExpiryTime);
-			ps1.setInt(4, playerId);
-			ps1.execute();
-			// Remove apprentice.
-			ps2.setInt(1, playerId);
-			ps2.execute();
-			// Remove sponsor.
-			ps3.setInt(1, playerId);
-			ps3.execute();
-		} catch (Exception e) {
-			_log.log(Level.SEVERE, "Error removing clan member: " + e.getMessage(), e);
-		}
+	public int getCrestId() {
+		return _crestId;
 	}
 	
-	private void restore() {
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement(SELECT_CLAN_DATA)) {
-			ps.setInt(1, getId());
-			try (var clanData = ps.executeQuery()) {
-				if (clanData.next()) {
-					setName(clanData.getString("clan_name"));
-					setLevel(clanData.getInt("clan_level"));
-					setCastleId(clanData.getInt("hasCastle"));
-					_bloodAllianceCount = clanData.getInt("blood_alliance_count");
-					_bloodOathCount = clanData.getInt("blood_oath_count");
-					setAllyId(clanData.getInt("ally_id"));
-					setAllyName(clanData.getString("ally_name"));
-					setAllyPenaltyExpiryTime(clanData.getLong("ally_penalty_expiry_time"), clanData.getInt("ally_penalty_type"));
-					if (getAllyPenaltyExpiryTime() < System.currentTimeMillis()) {
-						setAllyPenaltyExpiryTime(0, 0);
-					}
-					setCharPenaltyExpiryTime(clanData.getLong("char_penalty_expiry_time"));
-					
-					if ((getCharPenaltyExpiryTime() + DAYS.toMillis(character().getDaysBeforeJoinAClan())) < System.currentTimeMillis()) {
-						setCharPenaltyExpiryTime(0);
-					}
-					setDissolvingExpiryTime(clanData.getLong("dissolving_expiry_time"));
-					
-					setCrestId(clanData.getInt("crest_id"));
-					setCrestLargeId(clanData.getInt("crest_large_id"));
-					setAllyCrestId(clanData.getInt("ally_crest_id"));
-					
-					setReputationScore(clanData.getInt("reputation_score"), false);
-					setAuctionBidAt(clanData.getInt("auction_bid_at"), false);
-					setNewLeaderId(clanData.getInt("new_leader_id"), false);
-					
-					final int leaderId = (clanData.getInt("leader_id"));
-					
-					ps.clearParameters();
-					
-					try (var select = con.prepareStatement("SELECT char_name,level,classid,charId,title,power_grade,subpledge,apprentice,sponsor,sex,race FROM characters WHERE clanid=?")) {
-						select.setInt(1, getId());
-						try (var clanMember = select.executeQuery()) {
-							while (clanMember.next()) {
-								final var member = new L2ClanMember(this, clanMember);
-								if (member.getObjectId() == leaderId) {
-									setLeader(member);
-								} else {
-									addClanMember(member);
-								}
-							}
-						}
-					}
-				}
-			}
-			
-			if (general().debug() && (getName() != null)) {
-				_log.info("Restored clan data for \"" + getName() + "\" from database.");
-			}
-			
-			restoreSubPledges();
-			restoreRankPrivs();
-			restoreSkills();
-			restoreNotice();
-		} catch (Exception ex) {
-			_log.log(Level.SEVERE, "Error restoring clan data for clan " + getId() + "!", ex);
-		}
+	/**
+	 * @param crestId the Id of the clan crest to be set.
+	 */
+	public void setCrestId(int crestId) {
+		_crestId = crestId;
 	}
 	
-	private void restoreNotice() {
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("SELECT enabled,notice FROM clan_notices WHERE clan_id=?")) {
-			ps.setInt(1, getId());
-			try (var noticeData = ps.executeQuery()) {
-				while (noticeData.next()) {
-					_noticeEnabled = noticeData.getBoolean("enabled");
-					_notice = noticeData.getString("notice");
-				}
-			}
-		} catch (Exception e) {
-			_log.log(Level.SEVERE, "Error restoring clan notice: " + e.getMessage(), e);
-		}
+	public boolean isNoticeEnabled() {
+		return _noticeEnabled;
+	}
+	
+	public void setNoticeEnabled(boolean enabled) {
+		storeNotice(_notice, enabled);
 	}
 	
 	private void storeNotice(String notice, boolean enabled) {
 		if (notice == null) {
 			notice = "";
 		}
-		
+
 		if (notice.length() > MAX_NOTICE_LENGTH) {
 			notice = notice.substring(0, MAX_NOTICE_LENGTH - 1);
 		}
-		
+
 		try (var con = ConnectionFactory.getInstance().getConnection();
 			var ps = con.prepareStatement("INSERT INTO clan_notices (clan_id,notice,enabled) values (?,?,?) ON DUPLICATE KEY UPDATE notice=?,enabled=?")) {
 			ps.setInt(1, getId());
@@ -939,70 +1025,13 @@ public class L2Clan implements Identifiable, INamable {
 		} catch (Exception e) {
 			_log.log(Level.WARNING, "Error could not store clan notice: " + e.getMessage(), e);
 		}
-		
+
 		_notice = notice;
 		_noticeEnabled = enabled;
 	}
 	
-	public void setNoticeEnabled(boolean enabled) {
-		storeNotice(_notice, enabled);
-	}
-	
 	public void setNotice(String notice) {
 		storeNotice(notice, _noticeEnabled);
-	}
-	
-	public boolean isNoticeEnabled() {
-		return _noticeEnabled;
-	}
-	
-	public String getNotice() {
-		if (_notice == null) {
-			return "";
-		}
-		return _notice;
-	}
-	
-	private void restoreSkills() {
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("SELECT skill_id,skill_level,sub_pledge_id FROM clan_skills WHERE clan_id=?")) {
-			// Retrieve all skills of this L2PcInstance from the database
-			ps.setInt(1, getId());
-			try (var rs = ps.executeQuery()) {
-				// Go though the recordset of this SQL query
-				while (rs.next()) {
-					int id = rs.getInt("skill_id");
-					int level = rs.getInt("skill_level");
-					// Create a L2Skill object for each record
-					Skill skill = SkillData.getInstance().getSkill(id, level);
-					// Add the L2Skill object to the L2Clan _skills
-					int subType = rs.getInt("sub_pledge_id");
-					
-					if (subType == -2) {
-						_skills.put(skill.getId(), skill);
-					} else if (subType == 0) {
-						_subPledgeSkills.put(skill.getId(), skill);
-					} else {
-						SubPledge subunit = _subPledges.get(subType);
-						if (subunit != null) {
-							subunit.addNewSkill(skill);
-						} else {
-							_log.info("Missing subpledge " + subType + " for clan " + this + ", skill skipped.");
-						}
-					}
-				}
-			}
-		} catch (Exception e) {
-			_log.log(Level.SEVERE, "Error restoring clan skills: " + e.getMessage(), e);
-		}
-	}
-	
-	public final Skill[] getAllSkills() {
-		return _skills.values().toArray(new Skill[0]);
-	}
-	
-	public Map<Integer, Skill> getSkills() {
-		return _skills;
 	}
 	
 	/**
@@ -1012,17 +1041,13 @@ public class L2Clan implements Identifiable, INamable {
 	 */
 	public Skill addSkill(Skill newSkill) {
 		Skill oldSkill = null;
-		
+
 		if (newSkill != null) {
 			// Replace oldSkill by newSkill or Add the newSkill
 			oldSkill = _skills.put(newSkill.getId(), newSkill);
 		}
-		
+
 		return oldSkill;
-	}
-	
-	public Skill addNewSkill(Skill newSkill) {
-		return addNewSkill(newSkill, -2);
 	}
 	
 	/**
@@ -1034,7 +1059,7 @@ public class L2Clan implements Identifiable, INamable {
 	public Skill addNewSkill(Skill newSkill, int subType) {
 		Skill oldSkill = null;
 		if (newSkill != null) {
-			
+
 			if (subType == -2) {
 				oldSkill = _skills.put(newSkill.getId(), newSkill);
 			} else if (subType == 0) {
@@ -1048,7 +1073,7 @@ public class L2Clan implements Identifiable, INamable {
 					return oldSkill;
 				}
 			}
-			
+
 			try (var con = ConnectionFactory.getInstance().getConnection()) {
 				if (oldSkill != null) {
 					try (var ps = con.prepareStatement("UPDATE clan_skills SET skill_level=? WHERE skill_id=? AND clan_id=?")) {
@@ -1070,10 +1095,10 @@ public class L2Clan implements Identifiable, INamable {
 			} catch (Exception e) {
 				_log.log(Level.WARNING, "Error could not store clan skills: " + e.getMessage(), e);
 			}
-			
+
 			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.CLAN_SKILL_S1_ADDED);
 			sm.addSkillName(newSkill.getId());
-			
+
 			for (L2ClanMember temp : _members.values()) {
 				if ((temp != null) && (temp.getPlayerInstance() != null) && temp.isOnline()) {
 					if (subType == -2) {
@@ -1094,8 +1119,153 @@ public class L2Clan implements Identifiable, INamable {
 				}
 			}
 		}
-		
+
 		return oldSkill;
+	}
+	
+	public SubPledge createSubPledge(L2PcInstance player, int pledgeType, int leaderId, String subPledgeName) {
+		SubPledge subPledge = null;
+		pledgeType = getAvailablePledgeTypes(pledgeType);
+		if (pledgeType == 0) {
+			if (pledgeType == SUBUNIT_ACADEMY) {
+				player.sendPacket(SystemMessageId.CLAN_HAS_ALREADY_ESTABLISHED_A_CLAN_ACADEMY);
+			} else {
+				player.sendMessage("You can't create any more sub-units of this type");
+			}
+			return null;
+		}
+		if (_leader.getObjectId() == leaderId) {
+			player.sendMessage("Leader is not correct");
+			return null;
+		}
+
+		// Royal Guard 5000 points per each
+		// Order of Knights 10000 points per each
+		if ((pledgeType != -1) && (((getReputationScore() < clan().getCreateRoyalGuardCost()) && (pledgeType < SUBUNIT_KNIGHT1)) || //
+			((getReputationScore() < clan().getCreateKnightUnitCost()) && (pledgeType > SUBUNIT_ROYAL2)))) {
+			player.sendPacket(SystemMessageId.THE_CLAN_REPUTATION_SCORE_IS_TOO_LOW);
+			return null;
+		}
+
+		try (var con = ConnectionFactory.getInstance().getConnection();
+			var ps = con.prepareStatement("INSERT INTO clan_subpledges (clan_id,sub_pledge_id,name,leader_id) values (?,?,?,?)")) {
+			ps.setInt(1, getId());
+			ps.setInt(2, pledgeType);
+			ps.setString(3, subPledgeName);
+			ps.setInt(4, pledgeType != -1 ? leaderId : 0);
+			ps.execute();
+
+			subPledge = new SubPledge(pledgeType, subPledgeName, leaderId);
+			_subPledges.put(pledgeType, subPledge);
+
+			if (pledgeType != -1) {
+				// Royal Guard 5000 points per each
+				// Order of Knights 10000 points per each
+				if (pledgeType < SUBUNIT_KNIGHT1) {
+					setReputationScore(getReputationScore() - clan().getCreateRoyalGuardCost(), true);
+				} else {
+					setReputationScore(getReputationScore() - clan().getCreateKnightUnitCost(), true);
+					// TODO: clan lvl9 or more can reinforce knights cheaper if first knight unit already created, use clan().getReinforceKnightUnitCost()
+				}
+			}
+
+			if (general().debug()) {
+				_log.fine("New sub_clan saved in db: " + getId() + "; " + pledgeType);
+			}
+		} catch (Exception e) {
+			_log.log(Level.SEVERE, "Error saving sub clan data: " + e.getMessage(), e);
+		}
+
+		broadcastToOnlineMembers(new PledgeShowInfoUpdate(_leader.getClan()));
+		broadcastToOnlineMembers(new PledgeReceiveSubPledgeCreated(subPledge, _leader.getClan()));
+		return subPledge;
+	}
+	
+	public L2ClanMember[] getMembers() {
+		return _members.values().toArray(new L2ClanMember[0]);
+	}
+	
+	public void broadcastClanStatus() {
+		for (L2PcInstance member : getOnlineMembers(0)) {
+			member.sendPacket(PledgeShowMemberListDeleteAll.STATIC_PACKET);
+			member.sendPacket(new PledgeShowMemberListAll(this, member));
+		}
+	}
+	
+	public String getNotice() {
+		if (_notice == null) {
+			return "";
+		}
+		return _notice;
+	}
+	
+	public int getRank() {
+		return _rank;
+	}
+	
+	public final Skill[] getAllSkills() {
+		return _skills.values().toArray(new Skill[0]);
+	}
+	
+	public Map<Integer, Skill> getSkills() {
+		return _skills;
+	}
+	
+	public int getSubPledgeMembersCount(int subpl) {
+		int result = 0;
+		for (L2ClanMember temp : _members.values()) {
+			if (temp.getPledgeType() == subpl) {
+				result++;
+			}
+		}
+		return result;
+	}
+	
+	public Skill addNewSkill(Skill newSkill) {
+		return addNewSkill(newSkill, -2);
+	}
+	
+	/**
+	 * @param pledgeType the Id of the pledge type.
+	 * @return the maximum number of members allowed for a given {@code pledgeType}.
+	 */
+	public int getMaxNrOfMembers(int pledgeType) {
+		int limit = 0;
+
+		switch (pledgeType) {
+			case 0:
+				limit = switch (getLevel()) {
+					case 3 -> 30;
+					case 2 -> 20;
+					case 1 -> 15;
+					case 0 -> 10;
+					default -> 40;
+				};
+				break;
+			case -1:
+				limit = 20;
+				break;
+			case 100:
+			case 200:
+				if (getLevel() == 11) {
+					limit = 30;
+				} else {
+					limit = 20;
+				}
+				break;
+			case 1001:
+			case 1002:
+			case 2001:
+			case 2002:
+				limit = switch (getLevel()) {
+					case 9, 10, 11 -> 25;
+					default -> 10;
+				};
+				break;
+			default:
+				break;
+		}
+		return limit;
 	}
 	
 	public void addSkillEffects() {
@@ -1110,109 +1280,6 @@ public class L2Clan implements Identifiable, INamable {
 				} catch (NullPointerException e) {
 					_log.log(Level.WARNING, e.getMessage(), e);
 				}
-			}
-		}
-	}
-	
-	public void addSkillEffects(L2PcInstance player) {
-		if (player == null) {
-			return;
-		}
-		
-		for (Skill skill : _skills.values()) {
-			if (skill.getMinPledgeClass() <= player.getPledgeClass()) {
-				player.addSkill(skill, false); // Skill is not saved to player DB
-			}
-		}
-		
-		if (player.getPledgeType() == 0) {
-			for (Skill skill : _subPledgeSkills.values()) {
-				player.addSkill(skill, false); // Skill is not saved to player DB
-			}
-		} else {
-			SubPledge subunit = getSubPledge(player.getPledgeType());
-			if (subunit == null) {
-				return;
-			}
-			for (Skill skill : subunit.getSkills()) {
-				player.addSkill(skill, false); // Skill is not saved to player DB
-			}
-		}
-		
-		if (_reputationScore < 0) {
-			skillsStatus(player, true);
-		}
-	}
-	
-	public void removeSkillEffects(L2PcInstance player) {
-		if (player == null) {
-			return;
-		}
-		
-		for (Skill skill : _skills.values()) {
-			player.removeSkill(skill, false); // Skill is not saved to player DB
-		}
-		
-		if (player.getPledgeType() == 0) {
-			for (Skill skill : _subPledgeSkills.values()) {
-				player.removeSkill(skill, false); // Skill is not saved to player DB
-			}
-		} else {
-			SubPledge subunit = getSubPledge(player.getPledgeType());
-			if (subunit == null) {
-				return;
-			}
-			for (Skill skill : subunit.getSkills()) {
-				player.removeSkill(skill, false); // Skill is not saved to player DB
-			}
-		}
-	}
-	
-	public void skillsStatus(L2PcInstance player, boolean disable) {
-		if (player == null) {
-			return;
-		}
-		
-		for (Skill skill : _skills.values()) {
-			if (disable) {
-				player.disableSkill(skill, -1);
-			} else {
-				player.enableSkill(skill);
-			}
-		}
-		
-		if (player.getPledgeType() == 0) {
-			for (Skill skill : _subPledgeSkills.values()) {
-				if (disable) {
-					player.disableSkill(skill, -1);
-				} else {
-					player.enableSkill(skill);
-				}
-			}
-		} else {
-			final SubPledge subunit = getSubPledge(player.getPledgeType());
-			if (subunit != null) {
-				for (Skill skill : subunit.getSkills()) {
-					if (disable) {
-						player.disableSkill(skill, -1);
-					} else {
-						player.enableSkill(skill);
-					}
-				}
-			}
-		}
-	}
-	
-	public void broadcastToOnlineAllyMembers(L2GameServerPacket packet) {
-		for (L2Clan clan : ClanTable.getInstance().getClanAllies(getAllyId())) {
-			clan.broadcastToOnlineMembers(packet);
-		}
-	}
-	
-	public void broadcastToOnlineMembers(L2GameServerPacket packet) {
-		for (L2ClanMember member : _members.values()) {
-			if ((member != null) && member.isOnline()) {
-				member.getPlayerInstance().sendPacket(packet);
 			}
 		}
 	}
@@ -1236,14 +1303,6 @@ public class L2Clan implements Identifiable, INamable {
 	@Override
 	public String toString() {
 		return getName() + "[" + getId() + "]";
-	}
-	
-	public ItemContainer getWarehouse() {
-		return _warehouse;
-	}
-	
-	public boolean isAtWarWith(int id) {
-		return _atWarWith.contains(id);
 	}
 	
 	public boolean isAtWarWith(L2Clan clan) {
@@ -1298,121 +1357,6 @@ public class L2Clan implements Identifiable, INamable {
 		return _atWarAttackers;
 	}
 	
-	public void broadcastClanStatus() {
-		for (L2PcInstance member : getOnlineMembers(0)) {
-			member.sendPacket(PledgeShowMemberListDeleteAll.STATIC_PACKET);
-			member.sendPacket(new PledgeShowMemberListAll(this, member));
-		}
-	}
-	
-	public static class SubPledge {
-		private final int _id;
-		private String _subPledgeName;
-		private int _leaderId;
-		private final Map<Integer, Skill> _subPledgeSkills = new HashMap<>();
-		
-		public SubPledge(int id, String name, int leaderId) {
-			_id = id;
-			_subPledgeName = name;
-			_leaderId = leaderId;
-		}
-		
-		public int getId() {
-			return _id;
-		}
-		
-		public String getName() {
-			return _subPledgeName;
-		}
-		
-		public void setName(String name) {
-			_subPledgeName = name;
-		}
-		
-		public int getLeaderId() {
-			return _leaderId;
-		}
-		
-		public void setLeaderId(int leaderId) {
-			_leaderId = leaderId;
-		}
-		
-		public Skill addNewSkill(Skill skill) {
-			return _subPledgeSkills.put(skill.getId(), skill);
-		}
-		
-		public Collection<Skill> getSkills() {
-			return _subPledgeSkills.values();
-		}
-		
-		public Skill getSkill(int id) {
-			return _subPledgeSkills.get(id);
-		}
-	}
-	
-	public static class RankPrivs {
-		private final int _rankId;
-		private final int _party;// TODO find out what this stuff means and implement it
-		private final EnumIntBitmask<ClanPrivilege> _rankPrivs;
-		
-		public RankPrivs(int rank, int party, int privs) {
-			_rankId = rank;
-			_party = party;
-			_rankPrivs = new EnumIntBitmask<>(ClanPrivilege.class, privs);
-		}
-		
-		public RankPrivs(int rank, int party, EnumIntBitmask<ClanPrivilege> rankPrivs) {
-			_rankId = rank;
-			_party = party;
-			_rankPrivs = rankPrivs;
-		}
-		
-		public int getRank() {
-			return _rankId;
-		}
-		
-		public int getParty() {
-			return _party;
-		}
-		
-		public EnumIntBitmask<ClanPrivilege> getPrivs() {
-			return _rankPrivs;
-		}
-		
-		public void setPrivs(int privs) {
-			_rankPrivs.setBitmask(privs);
-		}
-	}
-	
-	private void restoreSubPledges() {
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("SELECT sub_pledge_id,name,leader_id FROM clan_subpledges WHERE clan_id=?")) {
-			// Retrieve all subpledges of this clan from the database
-			ps.setInt(1, getId());
-			try (var rs = ps.executeQuery()) {
-				while (rs.next()) {
-					int id = rs.getInt("sub_pledge_id");
-					String name = rs.getString("name");
-					int leaderId = rs.getInt("leader_id");
-					// Create a SubPledge object for each record
-					SubPledge pledge = new SubPledge(id, name, leaderId);
-					_subPledges.put(id, pledge);
-				}
-			}
-		} catch (Exception e) {
-			_log.log(Level.WARNING, "Could not restore clan sub-units: " + e.getMessage(), e);
-		}
-	}
-	
-	/**
-	 * used to retrieve subPledge by type
-	 * @param pledgeType
-	 * @return
-	 */
-	public final SubPledge getSubPledge(int pledgeType) {
-		return _subPledges.get(pledgeType);
-	}
-	
 	/**
 	 * Used to retrieve subPledge by type
 	 * @param pledgeName
@@ -1435,62 +1379,12 @@ public class L2Clan implements Identifiable, INamable {
 		return _subPledges.values().toArray(new SubPledge[0]);
 	}
 	
-	public SubPledge createSubPledge(L2PcInstance player, int pledgeType, int leaderId, String subPledgeName) {
-		SubPledge subPledge = null;
-		pledgeType = getAvailablePledgeTypes(pledgeType);
-		if (pledgeType == 0) {
-			if (pledgeType == SUBUNIT_ACADEMY) {
-				player.sendPacket(SystemMessageId.CLAN_HAS_ALREADY_ESTABLISHED_A_CLAN_ACADEMY);
-			} else {
-				player.sendMessage("You can't create any more sub-units of this type");
-			}
-			return null;
-		}
-		if (_leader.getObjectId() == leaderId) {
-			player.sendMessage("Leader is not correct");
-			return null;
-		}
-		
-		// Royal Guard 5000 points per each
-		// Order of Knights 10000 points per each
-		if ((pledgeType != -1) && (((getReputationScore() < clan().getCreateRoyalGuardCost()) && (pledgeType < SUBUNIT_KNIGHT1)) || //
-			((getReputationScore() < clan().getCreateKnightUnitCost()) && (pledgeType > SUBUNIT_ROYAL2)))) {
-			player.sendPacket(SystemMessageId.THE_CLAN_REPUTATION_SCORE_IS_TOO_LOW);
-			return null;
-		}
-		
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("INSERT INTO clan_subpledges (clan_id,sub_pledge_id,name,leader_id) values (?,?,?,?)")) {
-			ps.setInt(1, getId());
-			ps.setInt(2, pledgeType);
-			ps.setString(3, subPledgeName);
-			ps.setInt(4, pledgeType != -1 ? leaderId : 0);
-			ps.execute();
-			
-			subPledge = new SubPledge(pledgeType, subPledgeName, leaderId);
-			_subPledges.put(pledgeType, subPledge);
-			
-			if (pledgeType != -1) {
-				// Royal Guard 5000 points per each
-				// Order of Knights 10000 points per each
-				if (pledgeType < SUBUNIT_KNIGHT1) {
-					setReputationScore(getReputationScore() - clan().getCreateRoyalGuardCost(), true);
-				} else {
-					setReputationScore(getReputationScore() - clan().getCreateKnightUnitCost(), true);
-					// TODO: clan lvl9 or more can reinforce knights cheaper if first knight unit already created, use clan().getReinforceKnightUnitCost()
-				}
-			}
-			
-			if (general().debug()) {
-				_log.fine("New sub_clan saved in db: " + getId() + "; " + pledgeType);
-			}
-		} catch (Exception e) {
-			_log.log(Level.SEVERE, "Error saving sub clan data: " + e.getMessage(), e);
-		}
-		
-		broadcastToOnlineMembers(new PledgeShowInfoUpdate(_leader.getClan()));
-		broadcastToOnlineMembers(new PledgeReceiveSubPledgeCreated(subPledge, _leader.getClan()));
-		return subPledge;
+	/**
+	 * Gets the clan level.
+	 * @return the clan level
+	 */
+	public int getLevel() {
+		return _level;
 	}
 	
 	public int getAvailablePledgeTypes(int pledgeType) {
@@ -1504,32 +1398,6 @@ public class L2Clan implements Identifiable, INamable {
 			}
 		}
 		return pledgeType;
-	}
-	
-	public void updateSubPledgeInDB(int pledgeType) {
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("UPDATE clan_subpledges SET leader_id=?, name=? WHERE clan_id=? AND sub_pledge_id=?")) {
-			ps.setInt(1, getSubPledge(pledgeType).getLeaderId());
-			ps.setString(2, getSubPledge(pledgeType).getName());
-			ps.setInt(3, getId());
-			ps.setInt(4, pledgeType);
-			ps.execute();
-			if (general().debug()) {
-				_log.fine("Subpledge updated in db: " + getId());
-			}
-		} catch (Exception e) {
-			_log.log(Level.SEVERE, "Error updating subpledge: " + e.getMessage(), e);
-		}
-	}
-	
-	private void restoreRankPrivs() {
-		DAOFactory.getInstance().getClanDAO().getPrivileges(getId()).forEach((rank, privileges) -> _privs.get(rank).setPrivs(privileges));
-	}
-	
-	public void initializePrivs() {
-		for (int i = 1; i < 10; i++) {
-			_privs.put(i, new RankPrivs(i, 0, new EnumIntBitmask<>(ClanPrivilege.class, false)));
-		}
 	}
 	
 	public EnumIntBitmask<ClanPrivilege> getRankPrivs(int rank) {
@@ -1561,148 +1429,12 @@ public class L2Clan implements Identifiable, INamable {
 		}
 	}
 	
-	public final RankPrivs[] getAllRankPrivs() {
-		return _privs.values().toArray(new RankPrivs[0]);
-	}
-	
-	public int getLeaderSubPledge(int leaderId) {
-		int id = 0;
-		for (SubPledge sp : _subPledges.values()) {
-			if (sp.getLeaderId() == 0) {
-				continue;
-			}
-			if (sp.getLeaderId() == leaderId) {
-				id = sp.getId();
-			}
-		}
-		return id;
-	}
-	
-	public synchronized void addReputationScore(int value, boolean save) {
-		setReputationScore(getReputationScore() + value, save);
-	}
-	
-	public synchronized void takeReputationScore(int value, boolean save) {
-		setReputationScore(getReputationScore() - value, save);
-	}
-	
-	private void setReputationScore(int value, boolean save) {
-		if ((_reputationScore >= 0) && (value < 0)) {
-			broadcastToOnlineMembers(SystemMessage.getSystemMessage(SystemMessageId.REPUTATION_POINTS_0_OR_LOWER_CLAN_SKILLS_DEACTIVATED));
-			for (L2ClanMember member : _members.values()) {
-				if (member.isOnline() && (member.getPlayerInstance() != null)) {
-					skillsStatus(member.getPlayerInstance(), true);
-				}
-			}
-		} else if ((_reputationScore < 0) && (value >= 0)) {
-			broadcastToOnlineMembers(SystemMessage.getSystemMessage(SystemMessageId.CLAN_SKILLS_WILL_BE_ACTIVATED_SINCE_REPUTATION_IS_0_OR_HIGHER));
-			for (L2ClanMember member : _members.values()) {
-				if (member.isOnline() && (member.getPlayerInstance() != null)) {
-					skillsStatus(member.getPlayerInstance(), false);
-				}
-			}
-		}
-		
-		_reputationScore = value;
-		if (_reputationScore > 100000000) {
-			_reputationScore = 100000000;
-		}
-		if (_reputationScore < -100000000) {
-			_reputationScore = -100000000;
-		}
-		broadcastToOnlineMembers(new PledgeShowInfoUpdate(this));
-		if (save) {
-			updateClanScoreInDB();
-		}
-	}
-	
-	public int getReputationScore() {
-		return _reputationScore;
-	}
-	
-	public void setRank(int rank) {
-		_rank = rank;
-	}
-	
-	public int getRank() {
-		return _rank;
-	}
-	
-	public int getAuctionBidAt() {
-		return _auctionBidAt;
-	}
-	
-	public void setAuctionBidAt(int id, boolean storeInDb) {
-		_auctionBidAt = id;
-		
-		if (storeInDb) {
-			try (var con = ConnectionFactory.getInstance().getConnection();
-				var ps = con.prepareStatement("UPDATE clan_data SET auction_bid_at=? WHERE clan_id=?")) {
-				ps.setInt(1, id);
-				ps.setInt(2, getId());
-				ps.execute();
-			} catch (Exception e) {
-				_log.log(Level.WARNING, "Could not store auction for clan: " + e.getMessage(), e);
-			}
-		}
-	}
-	
 	/**
-	 * @param activeChar the clan inviting player.
-	 * @param target the invited player.
-	 * @param pledgeType the pledge type to join.
-	 * @return {core true} if activeChar and target meet various conditions to join a clan.
+	 * Sets the clan level.
+	 * @param level the level to set
 	 */
-	public boolean checkClanJoinCondition(L2PcInstance activeChar, L2PcInstance target, int pledgeType) {
-		if (activeChar == null) {
-			return false;
-		}
-		if (!activeChar.hasClanPrivilege(ClanPrivilege.CL_JOIN_CLAN)) {
-			activeChar.sendPacket(SystemMessageId.YOU_ARE_NOT_AUTHORIZED_TO_DO_THAT);
-			return false;
-		}
-		if (target == null) {
-			activeChar.sendPacket(SystemMessageId.YOU_HAVE_INVITED_THE_WRONG_TARGET);
-			return false;
-		}
-		if (activeChar.getObjectId() == target.getObjectId()) {
-			activeChar.sendPacket(SystemMessageId.CANNOT_INVITE_YOURSELF);
-			return false;
-		}
-		if (getCharPenaltyExpiryTime() > System.currentTimeMillis()) {
-			activeChar.sendPacket(SystemMessageId.YOU_MUST_WAIT_BEFORE_ACCEPTING_A_NEW_MEMBER);
-			return false;
-		}
-		if (target.getClanId() != 0) {
-			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.S1_WORKING_WITH_ANOTHER_CLAN);
-			sm.addString(target.getName());
-			activeChar.sendPacket(sm);
-			return false;
-		}
-		if (target.getClanJoinExpiryTime() > System.currentTimeMillis()) {
-			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.C1_MUST_WAIT_BEFORE_JOINING_ANOTHER_CLAN);
-			sm.addString(target.getName());
-			activeChar.sendPacket(sm);
-			return false;
-		}
-		if (((target.getLevel() > 40) || (target.getClassId().level() >= 2)) && (pledgeType == -1)) {
-			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.S1_DOESNOT_MEET_REQUIREMENTS_TO_JOIN_ACADEMY);
-			sm.addString(target.getName());
-			activeChar.sendPacket(sm);
-			activeChar.sendPacket(SystemMessageId.ACADEMY_REQUIREMENTS);
-			return false;
-		}
-		if (getSubPledgeMembersCount(pledgeType) >= getMaxNrOfMembers(pledgeType)) {
-			if (pledgeType == 0) {
-				SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.S1_CLAN_IS_FULL);
-				sm.addString(getName());
-				activeChar.sendPacket(sm);
-			} else {
-				activeChar.sendPacket(SystemMessageId.SUBCLAN_IS_FULL);
-			}
-			return false;
-		}
-		return true;
+	public void setLevel(int level) {
+		_level = level;
 	}
 	
 	/**
@@ -1772,53 +1504,40 @@ public class L2Clan implements Identifiable, INamable {
 			activeChar.sendPacket(SystemMessageId.MAY_NOT_ALLY_CLAN_BATTLE);
 			return false;
 		}
-		
+
 		if (ClanTable.getInstance().getClanAllies(activeChar.getAllyId()).size() >= character().getMaxNumOfClansInAlly()) {
 			activeChar.sendPacket(SystemMessageId.YOU_HAVE_EXCEEDED_THE_LIMIT);
 			return false;
 		}
-		
+
 		return true;
 	}
 	
-	public long getAllyPenaltyExpiryTime() {
-		return _allyPenaltyExpiryTime;
+	public boolean isAtWarWith(int id) {
+		return _atWarWith.contains(id);
 	}
 	
-	public int getAllyPenaltyType() {
-		return _allyPenaltyType;
+	public final RankPrivs[] getAllRankPrivs() {
+		return _privs.values().toArray(new RankPrivs[0]);
 	}
 	
-	public void setAllyPenaltyExpiryTime(long expiryTime, int penaltyType) {
-		_allyPenaltyExpiryTime = expiryTime;
-		_allyPenaltyType = penaltyType;
+	public synchronized void addReputationScore(int value, boolean save) {
+		setReputationScore(getReputationScore() + value, save);
 	}
 	
-	public long getCharPenaltyExpiryTime() {
-		return _charPenaltyExpiryTime;
-	}
-	
-	public void setCharPenaltyExpiryTime(long time) {
-		_charPenaltyExpiryTime = time;
-	}
-	
-	public long getDissolvingExpiryTime() {
-		return _dissolvingExpiryTime;
-	}
-	
-	public void setDissolvingExpiryTime(long time) {
-		_dissolvingExpiryTime = time;
+	public synchronized void takeReputationScore(int value, boolean save) {
+		setReputationScore(getReputationScore() - value, save);
 	}
 	
 	public void createAlly(L2PcInstance player, String allyName) {
 		if (null == player) {
 			return;
 		}
-		
+
 		if (general().debug()) {
 			_log.fine(player.getObjectId() + "(" + player.getName() + ") requested ally creation from ");
 		}
-		
+
 		if (!player.isClanLeader()) {
 			player.sendPacket(SystemMessageId.ONLY_CLAN_LEADER_CREATE_ALLIANCE);
 			return;
@@ -1853,17 +1572,83 @@ public class L2Clan implements Identifiable, INamable {
 			player.sendPacket(SystemMessageId.ALLIANCE_ALREADY_EXISTS);
 			return;
 		}
-		
+
 		setAllyId(getId());
 		setAllyName(allyName.trim());
 		setAllyPenaltyExpiryTime(0, 0);
 		updateClanInDB();
-		
+
 		player.sendPacket(new UserInfo(player));
 		player.sendPacket(new ExBrExtraUserInfo(player));
-		
+
 		// TODO: Need correct message id
 		player.sendMessage("Alliance " + allyName + " has been created.");
+	}
+	
+	public void setRank(int rank) {
+		_rank = rank;
+	}
+	
+	public int getAuctionBidAt() {
+		return _auctionBidAt;
+	}
+	
+	/**
+	 * @param activeChar the clan inviting player.
+	 * @param target the invited player.
+	 * @param pledgeType the pledge type to join.
+	 * @return {core true} if activeChar and target meet various conditions to join a clan.
+	 */
+	public boolean checkClanJoinCondition(L2PcInstance activeChar, L2PcInstance target, int pledgeType) {
+		if (activeChar == null) {
+			return false;
+		}
+		if (!activeChar.hasClanPrivilege(ClanPrivilege.CL_JOIN_CLAN)) {
+			activeChar.sendPacket(SystemMessageId.YOU_ARE_NOT_AUTHORIZED_TO_DO_THAT);
+			return false;
+		}
+		if (target == null) {
+			activeChar.sendPacket(SystemMessageId.YOU_HAVE_INVITED_THE_WRONG_TARGET);
+			return false;
+		}
+		if (activeChar.getObjectId() == target.getObjectId()) {
+			activeChar.sendPacket(SystemMessageId.CANNOT_INVITE_YOURSELF);
+			return false;
+		}
+		if (getCharPenaltyExpiryTime() > System.currentTimeMillis()) {
+			activeChar.sendPacket(SystemMessageId.YOU_MUST_WAIT_BEFORE_ACCEPTING_A_NEW_MEMBER);
+			return false;
+		}
+		if (target.getClanId() != 0) {
+			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.S1_WORKING_WITH_ANOTHER_CLAN);
+			sm.addString(target.getName());
+			activeChar.sendPacket(sm);
+			return false;
+		}
+		if (target.getClanJoinExpiryTime() > System.currentTimeMillis()) {
+			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.C1_MUST_WAIT_BEFORE_JOINING_ANOTHER_CLAN);
+			sm.addString(target.getName());
+			activeChar.sendPacket(sm);
+			return false;
+		}
+		if (((target.getLevel() > 40) || (target.getClassId().level() >= 2)) && (pledgeType == -1)) {
+			SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.S1_DOESNOT_MEET_REQUIREMENTS_TO_JOIN_ACADEMY);
+			sm.addString(target.getName());
+			activeChar.sendPacket(sm);
+			activeChar.sendPacket(SystemMessageId.ACADEMY_REQUIREMENTS);
+			return false;
+		}
+		if (getSubPledgeMembersCount(pledgeType) >= getMaxNrOfMembers(pledgeType)) {
+			if (pledgeType == 0) {
+				SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.S1_CLAN_IS_FULL);
+				sm.addString(getName());
+				activeChar.sendPacket(sm);
+			} else {
+				activeChar.sendPacket(SystemMessageId.SUBCLAN_IS_FULL);
+			}
+			return false;
+		}
+		return true;
 	}
 	
 	public void dissolveAlly(L2PcInstance player) {
@@ -1879,9 +1664,9 @@ public class L2Clan implements Identifiable, INamable {
 			player.sendPacket(SystemMessageId.CANNOT_DISSOLVE_ALLY_WHILE_IN_SIEGE);
 			return;
 		}
-		
+
 		broadcastToOnlineAllyMembers(SystemMessage.getSystemMessage(SystemMessageId.ALLIANCE_DISOLVED));
-		
+
 		long currentTime = System.currentTimeMillis();
 		for (L2Clan clan : ClanTable.getInstance().getClanAllies(getAllyId())) {
 			if (clan.getId() != getId()) {
@@ -1891,13 +1676,87 @@ public class L2Clan implements Identifiable, INamable {
 				clan.updateClanInDB();
 			}
 		}
-		
+
 		setAllyId(0);
 		setAllyName(null);
 		changeAllyCrest(0, false);
-		
+
 		setAllyPenaltyExpiryTime(currentTime + DAYS.toMillis(character().getDaysBeforeCreateNewAllyWhenDissolved()), PENALTY_TYPE_DISSOLVE_ALLY);
 		updateClanInDB();
+	}
+	
+	public void broadcastToOnlineAllyMembers(L2GameServerPacket packet) {
+		for (L2Clan clan : ClanTable.getInstance().getClanAllies(getAllyId())) {
+			clan.broadcastToOnlineMembers(packet);
+		}
+	}
+	
+	/**
+	 * Change the ally crest. If crest id is 0, crest is removed. New crest id is saved to database.
+	 * @param crestId if 0, crest is removed, else new crest id is set and saved to database
+	 * @param onlyThisClan
+	 */
+	public void changeAllyCrest(int crestId, boolean onlyThisClan) {
+		String sqlStatement = "UPDATE clan_data SET ally_crest_id = ? WHERE clan_id = ?";
+		int allyId = getId();
+		if (!onlyThisClan) {
+			if (getAllyCrestId() != 0) {
+				CrestTable.getInstance().removeCrest(getAllyCrestId());
+			}
+			sqlStatement = "UPDATE clan_data SET ally_crest_id = ? WHERE ally_id = ?";
+			allyId = getAllyId();
+		}
+
+		try (var con = ConnectionFactory.getInstance().getConnection();
+			var ps = con.prepareStatement(sqlStatement)) {
+			ps.setInt(1, crestId);
+			ps.setInt(2, allyId);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			_log.log(Level.WARNING, "Could not update ally crest for ally/clan id " + allyId + " : " + e.getMessage(), e);
+		}
+
+		if (onlyThisClan) {
+			setAllyCrestId(crestId);
+			for (L2PcInstance member : getOnlineMembers(0)) {
+				member.broadcastUserInfo();
+			}
+		} else {
+			for (L2Clan clan : ClanTable.getInstance().getClanAllies(getAllyId())) {
+				clan.setAllyCrestId(crestId);
+				for (L2PcInstance member : clan.getOnlineMembers(0)) {
+					member.broadcastUserInfo();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * @return the alliance crest Id.
+	 */
+	public int getAllyCrestId() {
+		return _allyCrestId;
+	}
+	
+	/**
+	 * @param allyCrestId the alliance crest Id to be set.
+	 */
+	public void setAllyCrestId(int allyCrestId) {
+		_allyCrestId = allyCrestId;
+	}
+	
+	/**
+	 * @param exclude the object Id to exclude from list.
+	 * @return all online members excluding the one with object id {code exclude}.
+	 */
+	public List<L2PcInstance> getOnlineMembers(int exclude) {
+		final List<L2PcInstance> onlineMembers = new ArrayList<>();
+		for (L2ClanMember temp : _members.values()) {
+			if ((temp != null) && temp.isOnline() && (temp.getObjectId() != exclude)) {
+				onlineMembers.add(temp.getPlayerInstance());
+			}
+		}
+		return onlineMembers;
 	}
 	
 	public boolean levelUpClan(L2PcInstance player) {
@@ -1909,9 +1768,9 @@ public class L2Clan implements Identifiable, INamable {
 			player.sendPacket(SystemMessageId.CANNOT_RISE_LEVEL_WHILE_DISSOLUTION_IN_PROGRESS);
 			return false;
 		}
-		
+
 		boolean increaseClanLevel = false;
-		
+
 		switch (getLevel()) {
 			case 0: {
 				// Upgrade to 1
@@ -2001,7 +1860,7 @@ public class L2Clan implements Identifiable, INamable {
 					increaseClanLevel = true;
 				}
 				break;
-			
+
 			case 6:
 				// Upgrade to 7
 				if ((getReputationScore() >= clan().getClanLevel7Cost()) && (getMembersCount() >= clan().getClanLevel7Requirement())) {
@@ -2076,24 +1935,28 @@ public class L2Clan implements Identifiable, INamable {
 			default:
 				return false;
 		}
-		
+
 		if (!increaseClanLevel) {
 			player.sendPacket(SystemMessageId.FAILED_TO_INCREASE_CLAN_LEVEL);
 			return false;
 		}
-		
+
 		// the player should know that he has less sp now :p
 		StatusUpdate su = new StatusUpdate(player);
 		su.addAttribute(StatusUpdate.SP, player.getSp());
 		player.sendPacket(su);
-		
+
 		player.sendPacket(new ItemList(player, false));
-		
+
 		changeLevel(getLevel() + 1);
-		
+
 		// Notify to scripts
 		EventDispatcher.getInstance().notifyEventAsync(new OnPlayerClanLvlUp(this));
 		return true;
+	}
+	
+	public int getMembersCount() {
+		return _members.size();
 	}
 	
 	public void changeLevel(int level) {
@@ -2105,11 +1968,11 @@ public class L2Clan implements Identifiable, INamable {
 		} catch (Exception e) {
 			_log.log(Level.WARNING, "could not increase clan level:" + e.getMessage(), e);
 		}
-		
+
 		setLevel(level);
-		
+
 		ForumsBBSManager.getInstance().onClanLevel(this);
-		
+
 		if (getLeader().isOnline()) {
 			L2PcInstance leader = getLeader().getPlayerInstance();
 			if (level > 4) {
@@ -2119,10 +1982,51 @@ public class L2Clan implements Identifiable, INamable {
 				SiegeManager.getInstance().removeSiegeSkills(leader);
 			}
 		}
-		
+
 		// notify all the members about it
 		broadcastToOnlineMembers(SystemMessage.getSystemMessage(SystemMessageId.CLAN_LEVEL_INCREASED));
 		broadcastToOnlineMembers(new PledgeShowInfoUpdate(this));
+	}
+	
+	public L2ClanMember getLeader() {
+		return _leader;
+	}
+	
+	public void setLeader(L2ClanMember leader) {
+		_leader = leader;
+		_members.put(leader.getObjectId(), leader);
+	}
+	
+	/**
+	 * Change the large crest. If crest id is 0, crest is removed. New crest id is saved to database.
+	 * @param crestId if 0, crest is removed, else new crest id is set and saved to database
+	 */
+	public void changeLargeCrest(int crestId) {
+		if (getCrestLargeId() != 0) {
+			CrestTable.getInstance().removeCrest(getCrestLargeId());
+		}
+
+		setCrestLargeId(crestId);
+
+		try (var con = ConnectionFactory.getInstance().getConnection();
+			var ps = con.prepareStatement("UPDATE clan_data SET crest_large_id = ? WHERE clan_id = ?")) {
+			ps.setInt(1, crestId);
+			ps.setInt(2, getId());
+			ps.executeUpdate();
+		} catch (Exception e) {
+			_log.log(Level.WARNING, "Could not update large crest for clan " + getName() + " [" + getId() + "] : " + e.getMessage(), e);
+		}
+
+		for (L2PcInstance member : getOnlineMembers(0)) {
+			member.broadcastUserInfo();
+		}
+	}
+	
+	/**
+	 * @return Returns the clan CrestLargeId
+	 */
+	public int getCrestLargeId() {
+		return _crestLargeId;
 	}
 	
 	/**
@@ -2151,68 +2055,10 @@ public class L2Clan implements Identifiable, INamable {
 	}
 	
 	/**
-	 * Change the ally crest. If crest id is 0, crest is removed. New crest id is saved to database.
-	 * @param crestId if 0, crest is removed, else new crest id is set and saved to database
-	 * @param onlyThisClan
+	 * @param crestLargeId The id of pledge LargeCrest.
 	 */
-	public void changeAllyCrest(int crestId, boolean onlyThisClan) {
-		String sqlStatement = "UPDATE clan_data SET ally_crest_id = ? WHERE clan_id = ?";
-		int allyId = getId();
-		if (!onlyThisClan) {
-			if (getAllyCrestId() != 0) {
-				CrestTable.getInstance().removeCrest(getAllyCrestId());
-			}
-			sqlStatement = "UPDATE clan_data SET ally_crest_id = ? WHERE ally_id = ?";
-			allyId = getAllyId();
-		}
-		
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement(sqlStatement)) {
-			ps.setInt(1, crestId);
-			ps.setInt(2, allyId);
-			ps.executeUpdate();
-		} catch (Exception e) {
-			_log.log(Level.WARNING, "Could not update ally crest for ally/clan id " + allyId + " : " + e.getMessage(), e);
-		}
-		
-		if (onlyThisClan) {
-			setAllyCrestId(crestId);
-			for (L2PcInstance member : getOnlineMembers(0)) {
-				member.broadcastUserInfo();
-			}
-		} else {
-			for (L2Clan clan : ClanTable.getInstance().getClanAllies(getAllyId())) {
-				clan.setAllyCrestId(crestId);
-				for (L2PcInstance member : clan.getOnlineMembers(0)) {
-					member.broadcastUserInfo();
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Change the large crest. If crest id is 0, crest is removed. New crest id is saved to database.
-	 * @param crestId if 0, crest is removed, else new crest id is set and saved to database
-	 */
-	public void changeLargeCrest(int crestId) {
-		if (getCrestLargeId() != 0) {
-			CrestTable.getInstance().removeCrest(getCrestLargeId());
-		}
-		
-		setCrestLargeId(crestId);
-		
-		try (var con = ConnectionFactory.getInstance().getConnection();
-			var ps = con.prepareStatement("UPDATE clan_data SET crest_large_id = ? WHERE clan_id = ?")) {
-			ps.setInt(1, crestId);
-			ps.setInt(2, getId());
-			ps.executeUpdate();
-		} catch (Exception e) {
-			_log.log(Level.WARNING, "Could not update large crest for clan " + getName() + " [" + getId() + "] : " + e.getMessage(), e);
-		}
-		
-		for (L2PcInstance member : getOnlineMembers(0)) {
-			member.broadcastUserInfo();
-		}
+	public void setCrestLargeId(int crestLargeId) {
+		_crestLargeId = crestLargeId;
 	}
 	
 	/**
@@ -2255,7 +2101,7 @@ public class L2Clan implements Identifiable, INamable {
 		if (subType == -1) {
 			return false;
 		}
-		
+
 		int id = skill.getId();
 		Skill current;
 		if (subType == 0) {
@@ -2284,19 +2130,75 @@ public class L2Clan implements Identifiable, INamable {
 		return list;
 	}
 	
-	public void setNewLeaderId(int objectId, boolean storeInDb) {
-		_newLeaderId = objectId;
-		if (storeInDb) {
-			updateClanInDB();
-		}
-	}
-	
-	public int getNewLeaderId() {
-		return _newLeaderId;
-	}
-	
 	public L2PcInstance getNewLeader() {
 		return L2World.getInstance().getPlayer(_newLeaderId);
+	}
+	
+	public void setNewLeader(L2ClanMember member) {
+		final L2PcInstance newLeader = member.getPlayerInstance();
+		final L2ClanMember exMember = getLeader();
+		final L2PcInstance exLeader = exMember.getPlayerInstance();
+
+		// Notify to scripts
+		EventDispatcher.getInstance().notifyEventAsync(new OnPlayerClanLeaderChange(exMember, member, this));
+
+		if (exLeader != null) {
+			if (exLeader.isFlying()) {
+				exLeader.dismount();
+			}
+
+			if (getLevel() >= SiegeManager.getInstance().getSiegeClanMinLevel()) {
+				SiegeManager.getInstance().removeSiegeSkills(exLeader);
+			}
+			exLeader.getClanPrivileges().clear();
+			exLeader.broadcastUserInfo();
+
+		} else {
+			try (var con = ConnectionFactory.getInstance().getConnection();
+				var ps = con.prepareStatement("UPDATE characters SET clan_privs = ? WHERE charId = ?")) {
+				ps.setInt(1, 0);
+				ps.setInt(2, getLeaderId());
+				ps.execute();
+			} catch (Exception e) {
+				_log.log(Level.WARNING, "Couldn't update clan privs for old clan leader", e);
+			}
+		}
+
+		setLeader(member);
+		if (getNewLeaderId() != 0) {
+			setNewLeaderId(0, true);
+		}
+		updateClanInDB();
+
+		if (exLeader != null) {
+			exLeader.setPledgeClass(L2ClanMember.calculatePledgeClass(exLeader));
+			exLeader.broadcastUserInfo();
+			exLeader.checkItemRestriction();
+		}
+
+		if (newLeader != null) {
+			newLeader.setPledgeClass(L2ClanMember.calculatePledgeClass(newLeader));
+			newLeader.getClanPrivileges().setAll();
+
+			if (getLevel() >= SiegeManager.getInstance().getSiegeClanMinLevel()) {
+				SiegeManager.getInstance().addSiegeSkills(newLeader);
+			}
+			newLeader.broadcastUserInfo();
+		} else {
+			try (var con = ConnectionFactory.getInstance().getConnection();
+				var ps = con.prepareStatement("UPDATE characters SET clan_privs = ? WHERE charId = ?")) {
+				ps.setInt(1, EnumIntBitmask.getAllBitmask(ClanPrivilege.class));
+				ps.setInt(2, getLeaderId());
+				ps.execute();
+			} catch (Exception e) {
+				_log.log(Level.WARNING, "Couldn't update clan privs for new clan leader", e);
+			}
+		}
+
+		broadcastClanStatus();
+		broadcastToOnlineMembers(SystemMessage.getSystemMessage(SystemMessageId.CLAN_LEADER_PRIVILEGES_HAVE_BEEN_TRANSFERRED_TO_C1).addString(member.getName()));
+
+		_log.log(Level.INFO, "Leader of Clan: " + getName() + " changed to: " + member.getName() + " ex leader: " + exMember.getName());
 	}
 	
 	public String getNewLeaderName() {
@@ -2325,5 +2227,84 @@ public class L2Clan implements Identifiable, INamable {
 	
 	public void clearSiegeDeaths() {
 		_siegeDeaths.set(0);
+	}
+	
+	public static class SubPledge {
+		private final int _id;
+		private final Map<Integer, Skill> _subPledgeSkills = new HashMap<>();
+		private String _subPledgeName;
+		private int _leaderId;
+
+		public SubPledge(int id, String name, int leaderId) {
+			_id = id;
+			_subPledgeName = name;
+			_leaderId = leaderId;
+		}
+
+		public int getId() {
+			return _id;
+		}
+
+		public String getName() {
+			return _subPledgeName;
+		}
+
+		public void setName(String name) {
+			_subPledgeName = name;
+		}
+
+		public int getLeaderId() {
+			return _leaderId;
+		}
+
+		public void setLeaderId(int leaderId) {
+			_leaderId = leaderId;
+		}
+
+		public Skill addNewSkill(Skill skill) {
+			return _subPledgeSkills.put(skill.getId(), skill);
+		}
+
+		public Collection<Skill> getSkills() {
+			return _subPledgeSkills.values();
+		}
+
+		public Skill getSkill(int id) {
+			return _subPledgeSkills.get(id);
+		}
+	}
+	
+	public static class RankPrivs {
+		private final int _rankId;
+		private final int _party;// TODO find out what this stuff means and implement it
+		private final EnumIntBitmask<ClanPrivilege> _rankPrivs;
+
+		public RankPrivs(int rank, int party, int privs) {
+			_rankId = rank;
+			_party = party;
+			_rankPrivs = new EnumIntBitmask<>(ClanPrivilege.class, privs);
+		}
+
+		public RankPrivs(int rank, int party, EnumIntBitmask<ClanPrivilege> rankPrivs) {
+			_rankId = rank;
+			_party = party;
+			_rankPrivs = rankPrivs;
+		}
+
+		public int getRank() {
+			return _rankId;
+		}
+
+		public int getParty() {
+			return _party;
+		}
+
+		public EnumIntBitmask<ClanPrivilege> getPrivs() {
+			return _rankPrivs;
+		}
+
+		public void setPrivs(int privs) {
+			_rankPrivs.setBitmask(privs);
+		}
 	}
 }

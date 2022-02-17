@@ -18,16 +18,16 @@
  */
 package com.l2jserver.gameserver.network.clientpackets;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import com.l2jserver.gameserver.enums.MacroType;
 import com.l2jserver.gameserver.model.Macro;
 import com.l2jserver.gameserver.model.MacroCmd;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
 
 public final class RequestMakeMacro extends L2GameClientPacket {
 	private static final String _C__CD_REQUESTMAKEMACRO = "[C] CD RequestMakeMacro";
@@ -87,7 +87,7 @@ public final class RequestMakeMacro extends L2GameClientPacket {
 			player.sendPacket(SystemMessageId.ENTER_THE_MACRO_NAME);
 			return;
 		}
-		if (_macro.getDescr().length() > 32) {
+    if (_macro.getDescription().length() > 32) {
 			// Macro descriptions may contain up to 32 characters.
 			player.sendPacket(SystemMessageId.MACRO_DESCRIPTION_MAX_32_CHARS);
 			return;

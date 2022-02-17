@@ -1,56 +1,29 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.instancemanager;
 
-import static com.l2jserver.gameserver.config.Configuration.general;
-import static com.l2jserver.gameserver.config.Configuration.server;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import com.l2jserver.commons.database.ConnectionFactory;
+import com.l2jserver.gameserver.model.CursedWeapon;
+import com.l2jserver.gameserver.model.actor.L2Attackable;
+import com.l2jserver.gameserver.model.actor.L2Character;
+import com.l2jserver.gameserver.model.actor.instance.*;
+import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
+import com.l2jserver.gameserver.network.SystemMessageId;
+import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import com.l2jserver.gameserver.util.Broadcast;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import com.l2jserver.commons.database.ConnectionFactory;
-import com.l2jserver.gameserver.model.CursedWeapon;
-import com.l2jserver.gameserver.model.actor.L2Attackable;
-import com.l2jserver.gameserver.model.actor.L2Character;
-import com.l2jserver.gameserver.model.actor.instance.L2DefenderInstance;
-import com.l2jserver.gameserver.model.actor.instance.L2FeedableBeastInstance;
-import com.l2jserver.gameserver.model.actor.instance.L2FestivalMonsterInstance;
-import com.l2jserver.gameserver.model.actor.instance.L2FortCommanderInstance;
-import com.l2jserver.gameserver.model.actor.instance.L2GrandBossInstance;
-import com.l2jserver.gameserver.model.actor.instance.L2GuardInstance;
-import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
-import com.l2jserver.gameserver.model.actor.instance.L2RiftInvaderInstance;
-import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
-import com.l2jserver.gameserver.network.SystemMessageId;
-import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
-import com.l2jserver.gameserver.util.Broadcast;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static com.l2jserver.gameserver.config.Configuration.general;
+import static com.l2jserver.gameserver.config.Configuration.server;
 
 /**
  * UnAfraid: TODO: Rewrite with DocumentParser

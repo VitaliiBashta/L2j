@@ -44,7 +44,7 @@ public class SendMacroList extends L2GameServerPacket {
 		if (_macro != null) {
 			writeD(_macro.getId()); // Macro ID
 			writeS(_macro.getName()); // Macro Name
-			writeS(_macro.getDescr()); // Desc
+      writeS(_macro.getDescription()); // Desc
 			writeS(_macro.getAcronym()); // acronym
 			writeC(_macro.getIcon()); // icon
 			
