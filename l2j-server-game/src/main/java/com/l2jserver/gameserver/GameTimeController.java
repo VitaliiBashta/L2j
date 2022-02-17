@@ -1,38 +1,17 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver;
+
+import com.l2jserver.gameserver.instancemanager.DayNightSpawnManager;
+import com.l2jserver.gameserver.model.actor.L2Character;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.l2jserver.gameserver.instancemanager.DayNightSpawnManager;
-import com.l2jserver.gameserver.model.actor.L2Character;
-
-/**
- * Game Time controller class.
- * @author Forsaiken
- */
-public final class GameTimeController extends Thread {
+@Service
+public class GameTimeController extends Thread {
 	private static final Logger LOG = LoggerFactory.getLogger(GameTimeController.class);
 	
 	public static final int TICKS_PER_SECOND = 10; // not able to change this without checking through code
@@ -48,9 +27,11 @@ public final class GameTimeController extends Thread {
 	
 	private final Set<L2Character> _movingObjects = ConcurrentHashMap.newKeySet();
 	private final long _referenceTime;
-	
-	private GameTimeController() {
+  private final ThreadPoolManager threadPoolManager;
+
+  private GameTimeController(ThreadPoolManager threadPoolManager) {
 		super("GameTimeController");
+    this.threadPoolManager = threadPoolManager;
 		super.setDaemon(true);
 		super.setPriority(MAX_PRIORITY);
 		
@@ -64,10 +45,7 @@ public final class GameTimeController extends Thread {
 		super.start();
 	}
 	
-	public static void init() {
-		_instance = new GameTimeController();
-	}
-	
+
 	public int getGameTime() {
 		return (getGameTicks() % TICKS_PER_IG_DAY) / MILLIS_IN_TICK;
 	}
@@ -132,7 +110,7 @@ public final class GameTimeController extends Thread {
 		boolean isNight = isNight();
 		
 		if (isNight) {
-			ThreadPoolManager.getInstance().executeAi(() -> DayNightSpawnManager.getInstance().notifyChangeMode());
+      threadPoolManager.executeAi(() -> DayNightSpawnManager.getInstance().notifyChangeMode());
 		}
 		
 		while (true) {

@@ -93,7 +93,6 @@ public class GameServer {
     ScriptEngineManager.getInstance();
 
     printSection("World");
-    GameTimeController.init();
     InstanceManager.getInstance();
     L2World.getInstance();
     MapRegionManager.getInstance();

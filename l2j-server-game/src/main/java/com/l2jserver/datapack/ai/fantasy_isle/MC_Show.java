@@ -59,10 +59,17 @@ public class MC_Show extends AbstractNpcAI {
     NpcStringId.WE_LOVE_YOU
   };
   private final QuestManager questManager;
+  private final GameTimeController gameTimeController;
+  private final ThreadPoolManager threadPoolManager;
 
-  public MC_Show(QuestManager questManager) {
+  public MC_Show(
+      QuestManager questManager,
+      GameTimeController gameTimeController,
+      ThreadPoolManager threadPoolManager) {
     super(MC_Show.class.getSimpleName(), "ai/fantasy_isle");
     this.questManager = questManager;
+    this.gameTimeController = gameTimeController;
+    this.threadPoolManager = threadPoolManager;
     addSpawnId(
         32433, 32431, 32432, 32442, 32443, 32444, 32445, 32446, 32424, 32425, 32426, 32427, 32428);
     load();
@@ -180,7 +187,7 @@ public class MC_Show extends AbstractNpcAI {
   }
 
   private void scheduleTimer() {
-    int gameTime = GameTimeController.getInstance().getGameTime();
+    int gameTime = gameTimeController.getGameTime();
     int hours = (gameTime / 60) % 24;
     int minutes = gameTime % 60;
     int hourDiff, minDiff;
@@ -205,7 +212,8 @@ public class MC_Show extends AbstractNpcAI {
     }
     // TODO startRepeatingQuestTimer("Start", diff, 14400000, null, null);
     // missing option to provide different initial delay
-    ThreadPoolManager.getInstance()
+    threadPoolManager
+        .getInstance()
         .scheduleGeneralAtFixedRate(new StartMCShow(questManager), diff, 14400000L);
   }
 
