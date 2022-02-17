@@ -4,6 +4,7 @@ import com.l2jserver.gameserver.data.xml.impl.AdminData;
 import com.l2jserver.gameserver.instancemanager.PetitionManager;
 import com.l2jserver.gameserver.network.clientpackets.EnterWorld;
 import com.l2jserver.gameserver.network.clientpackets.Logout;
+import com.l2jserver.gameserver.network.clientpackets.RequestBypassToServer;
 import com.l2jserver.gameserver.network.clientpackets.RequestPetition;
 import com.l2jserver.gameserver.network.clientpackets.RequestPetitionCancel;
 import com.l2jserver.gameserver.taskmanager.AttackStanceTaskManager;
@@ -34,10 +35,14 @@ public class L2GamePacketFactory {
   }
 
   public RequestPetitionCancel requestPetitionCancel() {
-    return new RequestPetitionCancel(petitionManager);
+    return new RequestPetitionCancel(petitionManager, adminData);
   }
 
   public EnterWorld enterWorld() {
-    return new EnterWorld(petitionManager);
+    return new EnterWorld(petitionManager, adminData);
+  }
+
+  public RequestBypassToServer requestBypassToServer() {
+    return new RequestBypassToServer(adminData);
   }
 }

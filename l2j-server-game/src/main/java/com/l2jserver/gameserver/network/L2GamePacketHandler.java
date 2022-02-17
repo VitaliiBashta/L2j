@@ -28,7 +28,7 @@ import static com.l2jserver.gameserver.config.Configuration.general;
 @Service
 public class L2GamePacketHandler implements PacketHandler<L2GameClient>, ClientFactory<L2GameClient>, MMOExecutor<L2GameClient> {
 	
-	private static final Logger _log = Logger.getLogger(L2GamePacketHandler.class.getName());
+	private static final Logger LOG = Logger.getLogger(L2GamePacketHandler.class.getName());
 
 	private final L2GamePacketFactory factory;
 
@@ -43,71 +43,19 @@ public class L2GamePacketHandler implements PacketHandler<L2GameClient>, ClientF
 		}
 		
 		int opcode = buf.get() & 0xFF;
-		int id3;
-		
-		ReceivablePacket<L2GameClient> msg = null;
 		GameClientState state = client.getState();
-		
+		ReceivablePacket<L2GameClient> msg = null;
+		return  createMessage(buf, client, opcode, msg, state);
+	}
+
+	private ReceivablePacket<L2GameClient> createMessage(ByteBuffer buf, L2GameClient client, int opcode, ReceivablePacket<L2GameClient> msg, GameClientState state) {
 		switch (state) {
 			case CONNECTED:
-				switch (opcode) {
-					case 0x0e -> msg = new ProtocolVersion();
-					case 0x2b -> msg = new AuthLogin();
-					default -> printDebug(opcode, buf, state, client);
-				}
-				break;
+				return createConnectedMessage(buf, client, opcode, state);
 			case AUTHED:
-				switch (opcode) {
-					case 0x00 -> msg = factory.logout();
-					case 0x0c -> msg = new CharacterCreate();
-					case 0x0d -> msg = new CharacterDelete();
-					case 0x12 -> msg = new CharacterSelect();
-					case 0x13 -> msg = new NewCharacter();
-					case 0x7b -> msg = new CharacterRestore();
-					case 0xd0 -> {
-						int id2;
-						if (buf.remaining() >= 2) {
-							id2 = buf.getShort() & 0xffff;
-						} else {
-							if (general().packetHandlerDebug()) {
-								_log.warning("Client: " + client + " sent a 0xd0 without the second opcode.");
-							}
-							break;
-						}
-						switch (id2) {
-							case 0x36 -> msg = new RequestGotoLobby();
-							case 0x93 -> msg = new RequestEx2ndPasswordCheck();
-							case 0x94 -> msg = new RequestEx2ndPasswordVerify();
-							case 0x95 -> msg = new RequestEx2ndPasswordReq();
-							default -> printDebugDoubleOpcode(opcode, id2, buf, state, client);
-						}
-					}
-					default -> printDebug(opcode, buf, state, client);
-				}
-				break;
+				return createAuthMessage(buf, client, opcode, state);
 			case JOINING: {
-				switch (opcode) {
-					case 0x11 -> msg = factory.enterWorld();
-					case 0xd0 -> {
-						int id2;
-						if (buf.remaining() >= 2) {
-							id2 = buf.getShort() & 0xffff;
-						} else {
-							if (general().packetHandlerDebug()) {
-								_log.warning("Client: " + client + " sent a 0xd0 without the second opcode.");
-							}
-							break;
-						}
-						
-						if (id2 == 0x01) {
-							msg = new RequestManorList();
-						} else {
-							printDebugDoubleOpcode(opcode, id2, buf, state, client);
-						}
-					}
-					default -> printDebug(opcode, buf, state, client);
-				}
-				break;
+				return createJoinMessage(buf, client, opcode, state);
 			}
 			case IN_GAME:
 				switch (opcode) {
@@ -182,7 +130,7 @@ public class L2GamePacketHandler implements PacketHandler<L2GameClient>, ClientF
 						msg = new RequestLinkHtml();
 						break;
 					case 0x23:
-						msg = new RequestBypassToServer();
+						msg = factory.requestBypassToServer();
 						break;
 					case 0x24:
 						msg = new RequestBBSwrite();
@@ -297,28 +245,18 @@ public class L2GamePacketHandler implements PacketHandler<L2GameClient>, ClientF
 							id_2 = buf.getShort() & 0xffff;
 						} else {
 							if (general().packetHandlerDebug()) {
-								_log.warning("Client: " + client + " sent a 0x4a without the second opcode.");
+								LOG.warning("Client: " + client + " sent a 0x4a without the second opcode.");
 							}
-							break;
+							return null;
 						}
 						switch (id_2) {
-							case 0x00:
-								// SuperCmdCharacterInfo
-								break;
-							case 0x01:
-								// SuperCmdSummonCmd
-								break;
-							case 0x02:
-								// SuperCmdServerStatus
-								break;
-							case 0x03:
-								// SendL2ParamSetting
-								break;
+							case 0x00:								// SuperCmdCharacterInfo
+							case 0x01:								// SuperCmdSummonCmd
+							case 0x02:								// SuperCmdServerStatus
+							case 0x03:								// SendL2ParamSetting
 							default:
-								printDebugDoubleOpcode(opcode, id_2, buf, state, client);
-								break;
+								return printDebugDoubleOpcode(opcode, id_2, buf, state, client);
 						}
-						break;
 					case 0x4d:
 						msg = new RequestPledgeMemberList();
 						break;
@@ -661,486 +599,539 @@ public class L2GamePacketHandler implements PacketHandler<L2GameClient>, ClientF
 							id2 = buf.getShort() & 0xffff;
 						} else {
 							if (general().packetHandlerDebug()) {
-								_log.warning("Client: " + client + " sent a 0xd0 without the second opcode.");
+								LOG.warning("Client: " + client + " sent a 0xd0 without the second opcode.");
 							}
-							break;
+							return msg;
 						}
-						
-						switch (id2) {
-							case 0x01:
-								msg = new RequestManorList();
-								break;
-							case 0x02:
-								msg = new RequestProcureCropList();
-								break;
-							case 0x03:
-								msg = new RequestSetSeed();
-								break;
-							case 0x04:
-								msg = new RequestSetCrop();
-								break;
-							case 0x05:
-								msg = new RequestWriteHeroWords();
-								break;
-							case 0x5F:
-								// Server Packets:
-								// ExMpccRoomInfo FE:9B
-								// ExListMpccWaiting FE:9C
-								// ExDismissMpccRoom FE:9D
-								// ExManageMpccRoomMember FE:9E
-								// ExMpccRoomMember FE:9F
-								// TODO: RequestJoinMpccRoom chdd
-								break;
-							case 0x5D:
-								// TODO: RequestListMpccWaiting chddd
-								break;
-							case 0x5E:
-								// TODO: RequestManageMpccRoom chdddddS
-								break;
-							case 0x06:
-								msg = new RequestExAskJoinMPCC();
-								break;
-							case 0x07:
-								msg = new RequestExAcceptJoinMPCC();
-								break;
-							case 0x08:
-								msg = new RequestExOustFromMPCC();
-								break;
-							case 0x09:
-								msg = new RequestOustFromPartyRoom();
-								break;
-							case 0x0a:
-								msg = new RequestDismissPartyRoom();
-								break;
-							case 0x0b:
-								msg = new RequestWithdrawPartyRoom();
-								break;
-							case 0x0c:
-								msg = new RequestChangePartyLeader();
-								break;
-							case 0x0d:
-								msg = new RequestAutoSoulShot();
-								break;
-							case 0x0e:
-								msg = new RequestExEnchantSkillInfo();
-								break;
-							case 0x0f:
-								msg = new RequestExEnchantSkill();
-								break;
-							case 0x10:
-								msg = new RequestExPledgeCrestLarge();
-								break;
-							case 0x11:
-								msg = new RequestExSetPledgeCrestLarge();
-								break;
-							case 0x12:
-								msg = new RequestPledgeSetAcademyMaster();
-								break;
-							case 0x13:
-								msg = new RequestPledgePowerGradeList();
-								break;
-							case 0x14:
-								msg = new RequestPledgeMemberPowerInfo();
-								break;
-							case 0x15:
-								msg = new RequestPledgeSetMemberPowerGrade();
-								break;
-							case 0x16:
-								msg = new RequestPledgeMemberInfo();
-								break;
-							case 0x17:
-								msg = new RequestPledgeWarList();
-								break;
-							case 0x18:
-								msg = new RequestExFishRanking();
-								break;
-							case 0x19:
-								msg = new RequestPCCafeCouponUse();
-								break;
-							case 0x1b:
-								msg = new RequestDuelStart();
-								break;
-							case 0x1c:
-								msg = new RequestDuelAnswerStart();
-								break;
-							case 0x1d:
-								// RequestExSetTutorial
-								break;
-							case 0x1e:
-								msg = new RequestExRqItemLink();
-								break;
-							case 0x1f:
-								// CanNotMoveAnymoreAirShip
-								break;
-							case 0x20:
-								msg = new MoveToLocationInAirShip();
-								break;
-							case 0x21:
-								msg = new RequestKeyMapping();
-								break;
-							case 0x22:
-								msg = new RequestSaveKeyMapping();
-								break;
-							case 0x23:
-								msg = new RequestExRemoveItemAttribute();
-								break;
-							case 0x24:
-								msg = new RequestSaveInventoryOrder();
-								break;
-							case 0x25:
-								msg = new RequestExitPartyMatchingWaitingRoom();
-								break;
-							case 0x26:
-								msg = new RequestConfirmTargetItem();
-								break;
-							case 0x27:
-								msg = new RequestConfirmRefinerItem();
-								break;
-							case 0x28:
-								msg = new RequestConfirmGemStone();
-								break;
-							case 0x29:
-								msg = new RequestOlympiadObserverEnd();
-								break;
-							case 0x2a:
-								msg = new RequestCursedWeaponList();
-								break;
-							case 0x2b:
-								msg = new RequestCursedWeaponLocation();
-								break;
-							case 0x2c:
-								msg = new RequestPledgeReorganizeMember();
-								break;
-							case 0x2d:
-								msg = new RequestExMPCCShowPartyMembersInfo();
-								break;
-							case 0x2e:
-								msg = new RequestOlympiadMatchList();
-								break;
-							case 0x2f:
-								msg = new RequestAskJoinPartyRoom();
-								break;
-							case 0x30:
-								msg = new AnswerJoinPartyRoom();
-								break;
-							case 0x31:
-								msg = new RequestListPartyMatchingWaitingRoom();
-								break;
-							case 0x32:
-								msg = new RequestExEnchantSkillSafe();
-								break;
-							case 0x33:
-								msg = new RequestExEnchantSkillUntrain();
-								break;
-							case 0x34:
-								msg = new RequestExEnchantSkillRouteChange();
-								break;
-							case 0x35:
-								msg = new RequestExEnchantItemAttribute();
-								break;
-							case 0x36:
-								msg = new ExGetOnAirShip();
-								break;
-							case 0x38:
-								msg = new MoveToLocationAirShip();
-								break;
-							case 0x39:
-								msg = new RequestBidItemAuction();
-								break;
-							case 0x3a:
-								msg = new RequestInfoItemAuction();
-								break;
-							case 0x3b:
-								msg = new RequestExChangeName();
-								break;
-							case 0x3c:
-								msg = new RequestAllCastleInfo();
-								break;
-							case 0x3d:
-								msg = new RequestAllFortressInfo();
-								break;
-							case 0x3e:
-								msg = new RequestAllAgitInfo();
-								break;
-							case 0x3f:
-								msg = new RequestFortressSiegeInfo();
-								break;
-							case 0x40:
-								msg = new RequestGetBossRecord();
-								break;
-							case 0x41:
-								msg = new RequestRefine();
-								break;
-							case 0x42:
-								msg = new RequestConfirmCancelItem();
-								break;
-							case 0x43:
-								msg = new RequestRefineCancel();
-								break;
-							case 0x44:
-								msg = new RequestExMagicSkillUseGround();
-								break;
-							case 0x45:
-								msg = new RequestDuelSurrender();
-								break;
-							case 0x46:
-								msg = new RequestExEnchantSkillInfoDetail();
-								break;
-							case 0x48:
-								msg = new RequestFortressMapInfo();
-								break;
-							case 0x49:
-								// RequestPVPMatchRecord
-								break;
-							case 0x4a:
-								msg = new SetPrivateStoreWholeMsg();
-								break;
-							case 0x4b:
-								msg = new RequestDispel();
-								break;
-							case 0x4c:
-								msg = new RequestExTryToPutEnchantTargetItem();
-								break;
-							case 0x4d:
-								msg = new RequestExTryToPutEnchantSupportItem();
-								break;
-							case 0x4e:
-								msg = new RequestExCancelEnchantItem();
-								break;
-							case 0x4f:
-								msg = new RequestChangeNicknameColor();
-								break;
-							case 0x50:
-								msg = new RequestResetNickname();
-								break;
-							case 0x51:
-								if (buf.remaining() >= 4) {
-									id3 = buf.getInt();
-								} else {
-									_log.warning("Client: " + client + " sent a 0xd0:0x51 without the third opcode.");
-									break;
-								}
-								switch (id3) {
-									case 0x00:
-										msg = new RequestBookMarkSlotInfo();
-										break;
-									case 0x01:
-										msg = new RequestSaveBookMarkSlot();
-										break;
-									case 0x02:
-										msg = new RequestModifyBookMarkSlot();
-										break;
-									case 0x03:
-										msg = new RequestDeleteBookMarkSlot();
-										break;
-									case 0x04:
-										msg = new RequestTeleportBookMark();
-										break;
-									case 0x05:
-										// RequestChangeBookMarkSlot
-										break;
-									default:
-										printDebugDoubleOpcode(opcode, id3, buf, state, client);
-										break;
-								}
-								break;
-							case 0x52:
-								msg = new RequestWithDrawPremiumItem();
-								break;
-							case 0x53:
-								// RequestJump
-								break;
-							case 0x54:
-								// RequestStartShowCrataeCubeRank
-								break;
-							case 0x55:
-								// RequestStopShowCrataeCubeRank
-								break;
-							case 0x56:
-								// NotifyStartMiniGame
-								break;
-							case 0x57:
-								msg = new RequestJoinDominionWar();
-								break;
-							case 0x58:
-								msg = new RequestDominionInfo();
-								break;
-							case 0x59:
-								// RequestExCleftEnter
-								break;
-							case 0x5a:
-								msg = new RequestExCubeGameChangeTeam();
-								break;
-							case 0x5b:
-								msg = new EndScenePlayer();
-								break;
-							case 0x5c:
-								msg = new RequestExCubeGameReadyAnswer();
-								break;
-							case 0x63:
-								msg = new RequestSeedPhase();
-								break;
-							case 0x65:
-								msg = new RequestPostItemList();
-								break;
-							case 0x66:
-								msg = new RequestSendPost();
-								break;
-							case 0x67:
-								msg = new RequestReceivedPostList();
-								break;
-							case 0x68:
-								msg = new RequestDeleteReceivedPost();
-								break;
-							case 0x69:
-								msg = new RequestReceivedPost();
-								break;
-							case 0x6a:
-								msg = new RequestPostAttachment();
-								break;
-							case 0x6b:
-								msg = new RequestRejectPostAttachment();
-								break;
-							case 0x6c:
-								msg = new RequestSentPostList();
-								break;
-							case 0x6d:
-								msg = new RequestDeleteSentPost();
-								break;
-							case 0x6e:
-								msg = new RequestSentPost();
-								break;
-							case 0x6f:
-								msg = new RequestCancelPostAttachment();
-								break;
-							case 0x70:
-								// RequestShowNewUserPetition
-								break;
-							case 0x71:
-								// RequestShowStepThree
-								break;
-							case 0x72:
-								// RequestShowStepTwo
-								break;
-							case 0x73:
-								// ExRaidReserveResult
-								break;
-							case 0x75:
-								msg = new RequestRefundItem();
-								break;
-							case 0x76:
-								msg = new RequestBuySellUIClose();
-								break;
-							case 0x77:
-								// RequestEventMatchObserverEnd
-								break;
-							case 0x78:
-								msg = new RequestPartyLootModification();
-								break;
-							case 0x79:
-								msg = new AnswerPartyLootModification();
-								break;
-							case 0x7a:
-								msg = new AnswerCoupleAction();
-								break;
-							case 0x7b:
-								msg = new BrEventRankerList();
-								break;
-							case 0x7c:
-								// AskMembership
-								break;
-							case 0x7d:
-								// RequestAddExpandQuestAlarm
-								break;
-							case 0x7e:
-								msg = new RequestVoteNew();
-								break;
-							case 0x84:
-								msg = new RequestExAddContactToContactList();
-								break;
-							case 0x85:
-								msg = new RequestExDeleteContactFromContactList();
-								break;
-							case 0x86:
-								msg = new RequestExShowContactList();
-								break;
-							case 0x87:
-								msg = new RequestExFriendListExtended();
-								break;
-							case 0x88:
-								msg = new RequestExOlympiadMatchListRefresh();
-								break;
-							case 0x89:
-								// RequestBRGamePoint
-								break;
-							case 0x8A:
-								// RequestBRProductList
-								break;
-							case 0x8B:
-								// RequestBRProductInfo
-								break;
-							case 0x8C:
-								// RequestBRBuyProduct
-								break;
-							case 0x8D:
-								// RequestBRRecentProductList
-								break;
-							case 0x8E:
-								// BrMinigameLoadScores
-								break;
-							case 0x8F:
-								// BrMinigameInsertScore
-								break;
-							case 0x90:
-								// BrLectureMark
-								break;
-							case 0x91:
-								// RequestGoodsInventoryInfo
-								break;
-							case 0x92:
-								// RequestUseGoodsInventoryItem
-								break;
-							default:
-								printDebugDoubleOpcode(opcode, id2, buf, state, client);
-								break;
-						}
-						break;
+
+						return  getMessageById2(buf, client, opcode, msg, state, id2);
 					default:
 						printDebug(opcode, buf, state, client);
+						return msg;
+				}
+				return msg;
+		}
+		return msg;
+	}
+
+	private ReceivablePacket<L2GameClient> createJoinMessage(ByteBuffer buf, L2GameClient client, int opcode, GameClientState state) {
+		switch (opcode) {
+			case 0x11:
+				return factory.enterWorld();
+			case 0xd0:
+				int id2;
+				if (buf.remaining() >= 2) {
+					id2 = buf.getShort() & 0xffff;
+				} else {
+					if (general().packetHandlerDebug()) {
+						LOG.warning("Client: " + client + " sent a 0xd0 without the second opcode.");
+					}
+					return null;
+				}
+				if (id2 == 0x01) {
+					return new RequestManorList();
+				} else {
+					return printDebugDoubleOpcode(opcode, id2, buf, state, client);
+				}
+			default:
+				return printDebug(opcode, buf, state, client);
+		}
+	}
+
+	private ReceivablePacket<L2GameClient> createAuthMessage(ByteBuffer buf, L2GameClient client, int opcode, GameClientState state) {
+		return switch (opcode) {
+			case 0x00 -> factory.logout();
+			case 0x0c -> new CharacterCreate();
+			case 0x0d -> new CharacterDelete();
+			case 0x12 -> new CharacterSelect();
+			case 0x13 -> new NewCharacter();
+			case 0x7b -> new CharacterRestore();
+			case 0xd0 -> newExtendMessage(buf, client, opcode, state);
+			default -> printDebug(opcode, buf, state, client);
+		};
+	}
+
+	private ReceivablePacket<L2GameClient> newExtendMessage(ByteBuffer buf, L2GameClient client, int opcode, GameClientState state) {
+		int id2;
+		if (buf.remaining() >= 2) {
+			id2 = buf.getShort() & 0xffff;
+		} else {
+			if (general().packetHandlerDebug()) {
+				LOG.warning("Client: " + client + " sent a 0xd0 without the second opcode.");
+			}
+			return null;
+		}
+		return switch (id2) {
+			case 0x36 -> new RequestGotoLobby();
+			case 0x93 -> new RequestEx2ndPasswordCheck();
+			case 0x94 -> new RequestEx2ndPasswordVerify();
+			case 0x95 -> new RequestEx2ndPasswordReq();
+			default -> printDebugDoubleOpcode(opcode, id2, buf, state, client);
+		};
+	}
+
+	private ReceivablePacket<L2GameClient> printDebugDoubleOpcode(int opcode, int id2, ByteBuffer buf, GameClientState state, L2GameClient client) {
+		client.onUnknownPacket();
+		if (!general().packetHandlerDebug()) {
+			return null;
+		}
+
+		int size = buf.remaining();
+		LOG.warning("Unknown Packet: 0x" + Integer.toHexString(opcode) + ":0x" + Integer.toHexString(id2) + " on State: " + state.name() + " Client: " + client);
+		byte[] array = new byte[size];
+		buf.get(array);
+		LOG.warning(Util.printData(array, size));
+		return null;
+	}
+
+	private ReceivablePacket<L2GameClient> createConnectedMessage(ByteBuffer buf, L2GameClient client, int opcode, GameClientState state) {
+		return switch (opcode) {
+			case 0x0e -> new ProtocolVersion();
+			case 0x2b -> new AuthLogin();
+			default -> printDebug(opcode, buf, state, client);
+		};
+	}
+
+	private ReceivablePacket<L2GameClient> printDebug(int opcode, ByteBuffer buf, GameClientState state, L2GameClient client) {
+		client.onUnknownPacket();
+		if (!general().packetHandlerDebug()) {
+			return null;
+		}
+
+		int size = buf.remaining();
+		LOG.warning("Unknown Packet: 0x" + Integer.toHexString(opcode) + " on State: " + state.name() + " Client: " + client);
+		byte[] array = new byte[size];
+		buf.get(array);
+		LOG.warning(Util.printData(array, size));
+		return null;
+	}
+	
+	private ReceivablePacket<L2GameClient> getMessageById2(ByteBuffer buf, L2GameClient client, int opcode, ReceivablePacket<L2GameClient> msg, GameClientState state, int id2) {
+		int id3;
+		switch (id2) {
+			case 0x01:
+				return  new RequestManorList();
+			case 0x02:
+				return  new RequestProcureCropList();
+			case 0x03:
+				return   new RequestSetSeed();
+			case 0x04:
+				return  new RequestSetCrop();
+			case 0x05:
+				return  new RequestWriteHeroWords();
+			case 0x5F:
+				// Server Packets:
+				// ExMpccRoomInfo FE:9B
+				// ExListMpccWaiting FE:9C
+				// ExDismissMpccRoom FE:9D
+				// ExManageMpccRoomMember FE:9E
+				// ExMpccRoomMember FE:9F
+				// TODO: RequestJoinMpccRoom chdd
+				return null;
+			case 0x5D:
+				// TODO: RequestListMpccWaiting chddd
+				return null;
+			case 0x5E:
+				// TODO: RequestManageMpccRoom chdddddS
+				return null;
+			case 0x06:
+				return  new RequestExAskJoinMPCC();
+			case 0x07:
+				return  new RequestExAcceptJoinMPCC();
+			case 0x08:
+				return  new RequestExOustFromMPCC();
+			case 0x09:
+				return  new RequestOustFromPartyRoom();
+			case 0x0a:
+				return  new RequestDismissPartyRoom();
+			case 0x0b:
+				return  new RequestWithdrawPartyRoom();
+			case 0x0c:
+				return  new RequestChangePartyLeader();
+			case 0x0d:
+				return  new RequestAutoSoulShot();
+			case 0x0e:
+				return  new RequestExEnchantSkillInfo();
+			case 0x0f:
+				msg = new RequestExEnchantSkill();
+				break;
+			case 0x10:
+				msg = new RequestExPledgeCrestLarge();
+				break;
+			case 0x11:
+				msg = new RequestExSetPledgeCrestLarge();
+				break;
+			case 0x12:
+				msg = new RequestPledgeSetAcademyMaster();
+				break;
+			case 0x13:
+				msg = new RequestPledgePowerGradeList();
+				break;
+			case 0x14:
+				msg = new RequestPledgeMemberPowerInfo();
+				break;
+			case 0x15:
+				msg = new RequestPledgeSetMemberPowerGrade();
+				break;
+			case 0x16:
+				msg = new RequestPledgeMemberInfo();
+				break;
+			case 0x17:
+				msg = new RequestPledgeWarList();
+				break;
+			case 0x18:
+				msg = new RequestExFishRanking();
+				break;
+			case 0x19:
+				msg = new RequestPCCafeCouponUse();
+				break;
+			case 0x1b:
+				msg = new RequestDuelStart();
+				break;
+			case 0x1c:
+				msg = new RequestDuelAnswerStart();
+				break;
+			case 0x1d:
+				// RequestExSetTutorial
+				break;
+			case 0x1e:
+				msg = new RequestExRqItemLink();
+				break;
+			case 0x1f:
+				// CanNotMoveAnymoreAirShip
+				break;
+			case 0x20:
+				msg = new MoveToLocationInAirShip();
+				break;
+			case 0x21:
+				msg = new RequestKeyMapping();
+				break;
+			case 0x22:
+				msg = new RequestSaveKeyMapping();
+				break;
+			case 0x23:
+				msg = new RequestExRemoveItemAttribute();
+				break;
+			case 0x24:
+				msg = new RequestSaveInventoryOrder();
+				break;
+			case 0x25:
+				msg = new RequestExitPartyMatchingWaitingRoom();
+				break;
+			case 0x26:
+				msg = new RequestConfirmTargetItem();
+				break;
+			case 0x27:
+				msg = new RequestConfirmRefinerItem();
+				break;
+			case 0x28:
+				msg = new RequestConfirmGemStone();
+				break;
+			case 0x29:
+				msg = new RequestOlympiadObserverEnd();
+				break;
+			case 0x2a:
+				msg = new RequestCursedWeaponList();
+				break;
+			case 0x2b:
+				msg = new RequestCursedWeaponLocation();
+				break;
+			case 0x2c:
+				msg = new RequestPledgeReorganizeMember();
+				break;
+			case 0x2d:
+				msg = new RequestExMPCCShowPartyMembersInfo();
+				break;
+			case 0x2e:
+				msg = new RequestOlympiadMatchList();
+				break;
+			case 0x2f:
+				msg = new RequestAskJoinPartyRoom();
+				break;
+			case 0x30:
+				msg = new AnswerJoinPartyRoom();
+				break;
+			case 0x31:
+				msg = new RequestListPartyMatchingWaitingRoom();
+				break;
+			case 0x32:
+				msg = new RequestExEnchantSkillSafe();
+				break;
+			case 0x33:
+				msg = new RequestExEnchantSkillUntrain();
+				break;
+			case 0x34:
+				msg = new RequestExEnchantSkillRouteChange();
+				break;
+			case 0x35:
+				msg = new RequestExEnchantItemAttribute();
+				break;
+			case 0x36:
+				msg = new ExGetOnAirShip();
+				break;
+			case 0x38:
+				msg = new MoveToLocationAirShip();
+				break;
+			case 0x39:
+				msg = new RequestBidItemAuction();
+				break;
+			case 0x3a:
+				msg = new RequestInfoItemAuction();
+				break;
+			case 0x3b:
+				msg = new RequestExChangeName();
+				break;
+			case 0x3c:
+				msg = new RequestAllCastleInfo();
+				break;
+			case 0x3d:
+				msg = new RequestAllFortressInfo();
+				break;
+			case 0x3e:
+				msg = new RequestAllAgitInfo();
+				break;
+			case 0x3f:
+				msg = new RequestFortressSiegeInfo();
+				break;
+			case 0x40:
+				msg = new RequestGetBossRecord();
+				break;
+			case 0x41:
+				msg = new RequestRefine();
+				break;
+			case 0x42:
+				msg = new RequestConfirmCancelItem();
+				break;
+			case 0x43:
+				msg = new RequestRefineCancel();
+				break;
+			case 0x44:
+				msg = new RequestExMagicSkillUseGround();
+				break;
+			case 0x45:
+				msg = new RequestDuelSurrender();
+				break;
+			case 0x46:
+				msg = new RequestExEnchantSkillInfoDetail();
+				break;
+			case 0x48:
+				msg = new RequestFortressMapInfo();
+				break;
+			case 0x49:
+				// RequestPVPMatchRecord
+				break;
+			case 0x4a:
+				msg = new SetPrivateStoreWholeMsg();
+				break;
+			case 0x4b:
+				msg = new RequestDispel();
+				break;
+			case 0x4c:
+				msg = new RequestExTryToPutEnchantTargetItem();
+				break;
+			case 0x4d:
+				msg = new RequestExTryToPutEnchantSupportItem();
+				break;
+			case 0x4e:
+				msg = new RequestExCancelEnchantItem();
+				break;
+			case 0x4f:
+				msg = new RequestChangeNicknameColor();
+				break;
+			case 0x50:
+				msg = new RequestResetNickname();
+				break;
+			case 0x51:
+				if (buf.remaining() >= 4) {
+					id3 = buf.getInt();
+				} else {
+					LOG.warning("Client: " + client + " sent a 0xd0:0x51 without the third opcode.");
+					break;
+				}
+				switch (id3) {
+					case 0x00:
+						msg = new RequestBookMarkSlotInfo();
+						break;
+					case 0x01:
+						msg = new RequestSaveBookMarkSlot();
+						break;
+					case 0x02:
+						msg = new RequestModifyBookMarkSlot();
+						break;
+					case 0x03:
+						msg = new RequestDeleteBookMarkSlot();
+						break;
+					case 0x04:
+						msg = new RequestTeleportBookMark();
+						break;
+					case 0x05:
+						// RequestChangeBookMarkSlot
+						break;
+					default:
+						printDebugDoubleOpcode(opcode, id3, buf, state, client);
 						break;
 				}
+				break;
+			case 0x52:
+				msg = new RequestWithDrawPremiumItem();
+				break;
+			case 0x53:
+				// RequestJump
+				break;
+			case 0x54:
+				// RequestStartShowCrataeCubeRank
+				break;
+			case 0x55:
+				// RequestStopShowCrataeCubeRank
+				break;
+			case 0x56:
+				// NotifyStartMiniGame
+				break;
+			case 0x57:
+				msg = new RequestJoinDominionWar();
+				break;
+			case 0x58:
+				msg = new RequestDominionInfo();
+				break;
+			case 0x59:
+				// RequestExCleftEnter
+				break;
+			case 0x5a:
+				msg = new RequestExCubeGameChangeTeam();
+				break;
+			case 0x5b:
+				msg = new EndScenePlayer();
+				break;
+			case 0x5c:
+				msg = new RequestExCubeGameReadyAnswer();
+				break;
+			case 0x63:
+				msg = new RequestSeedPhase();
+				break;
+			case 0x65:
+				msg = new RequestPostItemList();
+				break;
+			case 0x66:
+				msg = new RequestSendPost();
+				break;
+			case 0x67:
+				msg = new RequestReceivedPostList();
+				break;
+			case 0x68:
+				msg = new RequestDeleteReceivedPost();
+				break;
+			case 0x69:
+				msg = new RequestReceivedPost();
+				break;
+			case 0x6a:
+				msg = new RequestPostAttachment();
+				break;
+			case 0x6b:
+				msg = new RequestRejectPostAttachment();
+				break;
+			case 0x6c:
+				msg = new RequestSentPostList();
+				break;
+			case 0x6d:
+				msg = new RequestDeleteSentPost();
+				break;
+			case 0x6e:
+				msg = new RequestSentPost();
+				break;
+			case 0x6f:
+				msg = new RequestCancelPostAttachment();
+				break;
+			case 0x70:
+				// RequestShowNewUserPetition
+				break;
+			case 0x71:
+				// RequestShowStepThree
+				break;
+			case 0x72:				// RequestShowStepTwo
+				return null;
+			case 0x73:				// ExRaidReserveResult
+				return null;
+			case 0x75:
+				return  new RequestRefundItem();
+			case 0x76:
+				msg = new RequestBuySellUIClose();
+				break;
+			case 0x77:
+				// RequestEventMatchObserverEnd
+				break;
+			case 0x78:
+				msg = new RequestPartyLootModification();
+				break;
+			case 0x79:
+				msg = new AnswerPartyLootModification();
+				break;
+			case 0x7a:
+				msg = new AnswerCoupleAction();
+				break;
+			case 0x7b:
+				msg = new BrEventRankerList();
+				break;
+			case 0x7c:
+				// AskMembership
+				break;
+			case 0x7d:
+				// RequestAddExpandQuestAlarm
+				break;
+			case 0x7e:
+				msg = new RequestVoteNew();
+				break;
+			case 0x84:
+				msg = new RequestExAddContactToContactList();
+				break;
+			case 0x85:
+				msg = new RequestExDeleteContactFromContactList();
+				break;
+			case 0x86:
+				msg = new RequestExShowContactList();
+				break;
+			case 0x87:
+				msg = new RequestExFriendListExtended();
+				break;
+			case 0x88:
+				msg = new RequestExOlympiadMatchListRefresh();
+				break;
+			case 0x89:
+				// RequestBRGamePoint
+				break;
+			case 0x8A:
+				// RequestBRProductList
+				break;
+			case 0x8B:
+				// RequestBRProductInfo
+				break;
+			case 0x8C:
+				// RequestBRBuyProduct
+				break;
+			case 0x8D:
+				// RequestBRRecentProductList
+				break;
+			case 0x8E:
+				// BrMinigameLoadScores
+				break;
+			case 0x8F:
+				// BrMinigameInsertScore
+				break;
+			case 0x90:
+				// BrLectureMark
+				break;
+			case 0x91:
+				// RequestGoodsInventoryInfo
+				return null;
+			case 0x92:
+				// RequestUseGoodsInventoryItem
+				return null;
+			default:
+				printDebugDoubleOpcode(opcode, id2, buf, state, client);
 				break;
 		}
 		return msg;
 	}
 	
-	private void printDebug(int opcode, ByteBuffer buf, GameClientState state, L2GameClient client) {
-		client.onUnknownPacket();
-		if (!general().packetHandlerDebug()) {
-			return;
-		}
-		
-		int size = buf.remaining();
-		_log.warning("Unknown Packet: 0x" + Integer.toHexString(opcode) + " on State: " + state.name() + " Client: " + client);
-		byte[] array = new byte[size];
-		buf.get(array);
-		_log.warning(Util.printData(array, size));
-	}
-	
-	private void printDebugDoubleOpcode(int opcode, int id2, ByteBuffer buf, GameClientState state, L2GameClient client) {
-		client.onUnknownPacket();
-		if (!general().packetHandlerDebug()) {
-			return;
-		}
-		
-		int size = buf.remaining();
-		_log.warning("Unknown Packet: 0x" + Integer.toHexString(opcode) + ":0x" + Integer.toHexString(id2) + " on State: " + state.name() + " Client: " + client);
-		byte[] array = new byte[size];
-		buf.get(array);
-		_log.warning(Util.printData(array, size));
-	}
-	
-	// impl
 	@Override
 	public L2GameClient create(MMOConnection<L2GameClient> con) {
 		return new L2GameClient(con);

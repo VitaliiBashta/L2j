@@ -15,9 +15,11 @@ public final class RequestPetitionCancel extends L2GameClientPacket {
   // private int _unknown;
 
   private final PetitionManager petitionManager;
+  private final AdminData adminData;
 
-  public RequestPetitionCancel(PetitionManager petitionManager) {
+  public RequestPetitionCancel(PetitionManager petitionManager, AdminData adminData) {
     this.petitionManager = petitionManager;
+    this.adminData = adminData;
   }
 
 	@Override
@@ -51,7 +53,9 @@ public final class RequestPetitionCancel extends L2GameClientPacket {
 					
 					// Notify all GMs that the player's pending petition has been cancelled.
 					String msgContent = activeChar.getName() + " has canceled a pending petition.";
-					AdminData.getInstance().broadcastToGMs(new CreatureSay(activeChar.getObjectId(), Say2.HERO_VOICE, "Petition System", msgContent));
+          adminData.broadcastToGMs(
+              new CreatureSay(
+                  activeChar.getObjectId(), Say2.HERO_VOICE, "Petition System", msgContent));
 				} else {
 					activeChar.sendPacket(SystemMessageId.FAILED_CANCEL_PETITION_TRY_LATER);
 				}
