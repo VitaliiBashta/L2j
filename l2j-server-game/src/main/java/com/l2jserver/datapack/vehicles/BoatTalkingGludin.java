@@ -31,9 +31,8 @@ public class BoatTalkingGludin implements Runnable {
     new VehiclePathPoint(-95686, 149718, -3610, 150, 800)
   };
 
-  private static final VehiclePathPoint[] GLUDIN_DOCK = {
-    new VehiclePathPoint(-95686, 150514, -3610, 150, 800)
-  };
+  private static final VehiclePathPoint GLUDIN_DOCK =
+    new VehiclePathPoint(-95686, 150514, -3610, 150, 800)  ;
 
   // Time: 780s
   private static final VehiclePathPoint[] GLUDIN_TO_TALKING = {
@@ -153,40 +152,40 @@ public class BoatTalkingGludin implements Runnable {
   private boolean actionOnCycle(int cycle) {
     switch (cycle) {
       case 0 -> {
-        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK[0], LEAVE_TALKING5);
+        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK, LEAVE_TALKING5);
 
         threadPoolManager.scheduleGeneral(this, 240000);
       }
       case 1 -> {
         boatManager.broadcastPackets(
-                TALKING_DOCK[0], GLUDIN_DOCK[0], LEAVE_TALKING1, LEAVE_TALKING1_2);
+                TALKING_DOCK[0], GLUDIN_DOCK, LEAVE_TALKING1, LEAVE_TALKING1_2);
         threadPoolManager.scheduleGeneral(this, 40000);
       }
       case 2 -> {
-        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK[0], LEAVE_TALKING0);
+        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK, LEAVE_TALKING0);
         threadPoolManager.scheduleGeneral(this, 20000);
       }
       case 3 -> {
         boatManager.dockShip(BoatManager.TALKING_ISLAND, false);
-        boatManager.broadcastPackets(TALKING_DOCK[0], GLUDIN_DOCK[0], LEAVING_TALKING);
+        boatManager.broadcastPackets(TALKING_DOCK[0], GLUDIN_DOCK, LEAVING_TALKING);
         boat.broadcastPacket(Sound.ITEMSOUND_SHIP_ARRIVAL_DEPARTURE.withObject(boat));
         boat.payForRide(1074, 1, -96777, 258970, -3623);
         boat.executePath(TALKING_TO_GLUDIN);
         threadPoolManager.scheduleGeneral(this, 300000);
       }
       case 4 -> {
-        boatManager.broadcastPacket(GLUDIN_DOCK[0], TALKING_DOCK[0], ARRIVAL_GLUDIN10);
+        boatManager.broadcastPacket(GLUDIN_DOCK, TALKING_DOCK[0], ARRIVAL_GLUDIN10);
         threadPoolManager.scheduleGeneral(this, 300000);
       }
       case 5 -> {
-        boatManager.broadcastPacket(GLUDIN_DOCK[0], TALKING_DOCK[0], ARRIVAL_GLUDIN5);
+        boatManager.broadcastPacket(GLUDIN_DOCK, TALKING_DOCK[0], ARRIVAL_GLUDIN5);
         threadPoolManager.scheduleGeneral(this, 240000);
       }
-      case 6 -> boatManager.broadcastPacket(GLUDIN_DOCK[0], TALKING_DOCK[0], ARRIVAL_GLUDIN1);
+      case 6 -> boatManager.broadcastPacket(GLUDIN_DOCK, TALKING_DOCK[0], ARRIVAL_GLUDIN1);
       case 7 -> {
         if (boatManager.dockBusy(BoatManager.GLUDIN_HARBOR)) {
           if (shoutCount == 0) {
-            boatManager.broadcastPacket(GLUDIN_DOCK[0], TALKING_DOCK[0], BUSY_GLUDIN);
+            boatManager.broadcastPacket(GLUDIN_DOCK, TALKING_DOCK[0], BUSY_GLUDIN);
           }
 
           shoutCount++;
@@ -197,49 +196,49 @@ public class BoatTalkingGludin implements Runnable {
           threadPoolManager.scheduleGeneral(this, 5000);
           return true;
         }
-        boat.executePath(GLUDIN_DOCK);
+        boat.executePath(new VehiclePathPoint[]{GLUDIN_DOCK});
       }
       case 8 -> {
         boatManager.dockShip(BoatManager.GLUDIN_HARBOR, true);
         boatManager.broadcastPackets(
-                GLUDIN_DOCK[0], TALKING_DOCK[0], ARRIVED_AT_GLUDIN, ARRIVED_AT_GLUDIN_2);
+                GLUDIN_DOCK, TALKING_DOCK[0], ARRIVED_AT_GLUDIN, ARRIVED_AT_GLUDIN_2);
         boat.broadcastPacket(Sound.ITEMSOUND_SHIP_ARRIVAL_DEPARTURE.withObject(boat));
         threadPoolManager.scheduleGeneral(this, 300000);
       }
       case 9 -> {
-        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK[0], LEAVE_GLUDIN5);
+        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK, LEAVE_GLUDIN5);
         threadPoolManager.scheduleGeneral(this, 240000);
       }
       case 10 -> {
         boatManager.broadcastPackets(
-                TALKING_DOCK[0], GLUDIN_DOCK[0], LEAVE_GLUDIN1, LEAVE_TALKING1_2);
+                TALKING_DOCK[0], GLUDIN_DOCK, LEAVE_GLUDIN1, LEAVE_TALKING1_2);
         threadPoolManager.scheduleGeneral(this, 40000);
       }
       case 11 -> {
-        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK[0], LEAVE_GLUDIN0);
+        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK, LEAVE_GLUDIN0);
         threadPoolManager.scheduleGeneral(this, 20000);
       }
       case 12 -> {
         boatManager.dockShip(BoatManager.GLUDIN_HARBOR, false);
-        boatManager.broadcastPackets(TALKING_DOCK[0], GLUDIN_DOCK[0], LEAVING_GLUDIN);
+        boatManager.broadcastPackets(TALKING_DOCK[0], GLUDIN_DOCK, LEAVING_GLUDIN);
         boat.broadcastPacket(Sound.ITEMSOUND_SHIP_ARRIVAL_DEPARTURE.withObject(boat));
         boat.payForRide(1075, 1, -90015, 150422, -3610);
         boat.executePath(GLUDIN_TO_TALKING);
         threadPoolManager.scheduleGeneral(this, 150000);
       }
       case 13 -> {
-        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK[0], ARRIVAL_TALKING10);
+        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK, ARRIVAL_TALKING10);
         threadPoolManager.scheduleGeneral(this, 300000);
       }
       case 14 -> {
-        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK[0], ARRIVAL_TALKING5);
+        boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK, ARRIVAL_TALKING5);
         threadPoolManager.scheduleGeneral(this, 240000);
       }
-      case 15 -> boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK[0], ARRIVAL_TALKING1);
+      case 15 -> boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK, ARRIVAL_TALKING1);
       case 16 -> {
         if (boatManager.dockBusy(BoatManager.TALKING_ISLAND)) {
           if (shoutCount == 0) {
-            boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK[0], BUSY_TALKING);
+            boatManager.broadcastPacket(TALKING_DOCK[0], GLUDIN_DOCK, BUSY_TALKING);
           }
 
           shoutCount++;
@@ -255,7 +254,7 @@ public class BoatTalkingGludin implements Runnable {
       case 17 -> {
         boatManager.dockShip(BoatManager.TALKING_ISLAND, true);
         boatManager.broadcastPackets(
-                TALKING_DOCK[0], GLUDIN_DOCK[0], ARRIVED_AT_TALKING, ARRIVED_AT_TALKING_2);
+                TALKING_DOCK[0], GLUDIN_DOCK, ARRIVED_AT_TALKING, ARRIVED_AT_TALKING_2);
         boat.broadcastPacket(Sound.ITEMSOUND_SHIP_ARRIVAL_DEPARTURE.withObject(boat));
         threadPoolManager.scheduleGeneral(this, 300000);
       }
