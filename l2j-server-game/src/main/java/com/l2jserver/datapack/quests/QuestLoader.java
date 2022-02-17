@@ -7,7 +7,6 @@ import com.l2jserver.datapack.quests.Q00003_WillTheSealBeBroken.Q00003_WillTheSe
 import com.l2jserver.datapack.quests.Q00004_LongLiveThePaagrioLord.Q00004_LongLiveThePaagrioLord;
 import com.l2jserver.datapack.quests.Q00005_MinersFavor.Q00005_MinersFavor;
 import com.l2jserver.datapack.quests.Q00006_StepIntoTheFuture.Q00006_StepIntoTheFuture;
-import com.l2jserver.datapack.quests.Q00007_ATripBegins.Q00007_ATripBegins;
 import com.l2jserver.datapack.quests.Q00008_AnAdventureBegins.Q00008_AnAdventureBegins;
 import com.l2jserver.datapack.quests.Q00009_IntoTheCityOfHumans.Q00009_IntoTheCityOfHumans;
 import com.l2jserver.datapack.quests.Q00010_IntoTheWorld.Q00010_IntoTheWorld;
@@ -15,7 +14,6 @@ import com.l2jserver.datapack.quests.Q00011_SecretMeetingWithKetraOrcs.Q00011_Se
 import com.l2jserver.datapack.quests.Q00012_SecretMeetingWithVarkaSilenos.Q00012_SecretMeetingWithVarkaSilenos;
 import com.l2jserver.datapack.quests.Q00013_ParcelDelivery.Q00013_ParcelDelivery;
 import com.l2jserver.datapack.quests.Q00014_WhereaboutsOfTheArchaeologist.Q00014_WhereaboutsOfTheArchaeologist;
-import com.l2jserver.datapack.quests.Q00015_SweetWhispers.Q00015_SweetWhispers;
 import com.l2jserver.datapack.quests.Q00016_TheComingDarkness.Q00016_TheComingDarkness;
 import com.l2jserver.datapack.quests.Q00017_LightAndDarkness.Q00017_LightAndDarkness;
 import com.l2jserver.datapack.quests.Q00018_MeetingWithTheGoldenRam.Q00018_MeetingWithTheGoldenRam;
@@ -23,7 +21,6 @@ import com.l2jserver.datapack.quests.Q00019_GoToThePastureland.Q00019_GoToThePas
 import com.l2jserver.datapack.quests.Q00020_BringUpWithLove.Q00020_BringUpWithLove;
 import com.l2jserver.datapack.quests.Q00021_HiddenTruth.Q00021_HiddenTruth;
 import com.l2jserver.datapack.quests.Q00022_TragedyInVonHellmannForest.Q00022_TragedyInVonHellmannForest;
-import com.l2jserver.datapack.quests.Q00023_LidiasHeart.Q00023_LidiasHeart;
 import com.l2jserver.datapack.quests.Q00024_InhabitantsOfTheForestOfTheDead.Q00024_InhabitantsOfTheForestOfTheDead;
 import com.l2jserver.datapack.quests.Q00025_HidingBehindTheTruth.Q00025_HidingBehindTheTruth;
 import com.l2jserver.datapack.quests.Q00026_TiredOfWaiting.Q00026_TiredOfWaiting;
@@ -75,7 +72,6 @@ import com.l2jserver.datapack.quests.Q00078_SagaOfTheDoomcryer.Q00078_SagaOfTheD
 import com.l2jserver.datapack.quests.Q00079_SagaOfTheAdventurer.Q00079_SagaOfTheAdventurer;
 import com.l2jserver.datapack.quests.Q00080_SagaOfTheWindRider.Q00080_SagaOfTheWindRider;
 import com.l2jserver.datapack.quests.Q00081_SagaOfTheGhostHunter.Q00081_SagaOfTheGhostHunter;
-import com.l2jserver.datapack.quests.Q00082_SagaOfTheSagittarius.Q00082_SagaOfTheSagittarius;
 import com.l2jserver.datapack.quests.Q00083_SagaOfTheMoonlightSentinel.Q00083_SagaOfTheMoonlightSentinel;
 import com.l2jserver.datapack.quests.Q00084_SagaOfTheGhostSentinel.Q00084_SagaOfTheGhostSentinel;
 import com.l2jserver.datapack.quests.Q00085_SagaOfTheCardinal.Q00085_SagaOfTheCardinal;
@@ -448,7 +444,6 @@ import com.l2jserver.datapack.quests.Q00695_DefendTheHallOfSuffering.Q00695_Defe
 import com.l2jserver.datapack.quests.Q00699_GuardianOfTheSkies.Q00699_GuardianOfTheSkies;
 import com.l2jserver.datapack.quests.Q00700_CursedLife.Q00700_CursedLife;
 import com.l2jserver.datapack.quests.Q00701_ProofOfExistence.Q00701_ProofOfExistence;
-import com.l2jserver.datapack.quests.Q00702_ATrapForRevenge.Q00702_ATrapForRevenge;
 import com.l2jserver.datapack.quests.Q00708_PathToBecomingALordGludio.Q00708_PathToBecomingALordGludio;
 import com.l2jserver.datapack.quests.Q00901_HowLavasaurusesAreMade.Q00901_HowLavasaurusesAreMade;
 import com.l2jserver.datapack.quests.Q00902_ReclaimOurEra.Q00902_ReclaimOurEra;
@@ -462,9 +457,7 @@ import com.l2jserver.datapack.quests.Q10267_JourneyToGracia.Q10267_JourneyToGrac
 import com.l2jserver.datapack.quests.Q10268_ToTheSeedOfInfinity.Q10268_ToTheSeedOfInfinity;
 import com.l2jserver.datapack.quests.Q10269_ToTheSeedOfDestruction.Q10269_ToTheSeedOfDestruction;
 import com.l2jserver.datapack.quests.Q10270_BirthOfTheSeed.Q10270_BirthOfTheSeed;
-import com.l2jserver.datapack.quests.Q10271_TheEnvelopingDarkness.Q10271_TheEnvelopingDarkness;
 import com.l2jserver.datapack.quests.Q10272_LightFragment.Q10272_LightFragment;
-import com.l2jserver.datapack.quests.Q10273_GoodDayToFly.Q10273_GoodDayToFly;
 import com.l2jserver.datapack.quests.Q10274_CollectingInTheAir.Q10274_CollectingInTheAir;
 import com.l2jserver.datapack.quests.Q10275_ContainingTheAttributePower.Q10275_ContainingTheAttributePower;
 import com.l2jserver.datapack.quests.Q10276_MutatedKaneusGludio.Q10276_MutatedKaneusGludio;
@@ -476,7 +469,6 @@ import com.l2jserver.datapack.quests.Q10282_ToTheSeedOfAnnihilation.Q10282_ToThe
 import com.l2jserver.datapack.quests.Q10283_RequestOfIceMerchant.Q10283_RequestOfIceMerchant;
 import com.l2jserver.datapack.quests.Q10284_AcquisitionOfDivineSword.Q10284_AcquisitionOfDivineSword;
 import com.l2jserver.datapack.quests.Q10285_MeetingSirra.Q10285_MeetingSirra;
-import com.l2jserver.datapack.quests.Q10286_ReunionWithSirra.Q10286_ReunionWithSirra;
 import com.l2jserver.datapack.quests.Q10287_StoryOfThoseLeft.Q10287_StoryOfThoseLeft;
 import com.l2jserver.datapack.quests.Q10288_SecretMission.Q10288_SecretMission;
 import com.l2jserver.datapack.quests.Q10289_FadeToBlack.Q10289_FadeToBlack;
@@ -488,7 +480,6 @@ import com.l2jserver.datapack.quests.Q10295_SevenSignsSolinasTomb.Q10295_SevenSi
 import com.l2jserver.datapack.quests.Q10296_SevenSignsOneWhoSeeksThePowerOfTheSeal.Q10296_SevenSignsOneWhoSeeksThePowerOfTheSeal;
 import com.l2jserver.datapack.quests.Q10501_ZakenEmbroideredSoulCloak.Q10501_ZakenEmbroideredSoulCloak;
 import com.l2jserver.datapack.quests.Q10502_FreyaEmbroideredSoulCloak.Q10502_FreyaEmbroideredSoulCloak;
-import com.l2jserver.datapack.quests.Q10503_FrintezzaEmbroideredSoulCloak.Q10503_FrintezzaEmbroideredSoulCloak;
 import com.l2jserver.datapack.quests.Q10504_JewelOfAntharas.Q10504_JewelOfAntharas;
 import com.l2jserver.datapack.quests.Q10505_JewelOfValakas.Q10505_JewelOfValakas;
 import org.slf4j.Logger;
@@ -504,7 +495,6 @@ public class QuestLoader {
     Q00004_LongLiveThePaagrioLord.class,
     Q00005_MinersFavor.class,
     Q00006_StepIntoTheFuture.class,
-    Q00007_ATripBegins.class,
     Q00008_AnAdventureBegins.class,
     Q00009_IntoTheCityOfHumans.class,
     Q00010_IntoTheWorld.class,
@@ -512,7 +502,6 @@ public class QuestLoader {
     Q00012_SecretMeetingWithVarkaSilenos.class,
     Q00013_ParcelDelivery.class,
     Q00014_WhereaboutsOfTheArchaeologist.class,
-    Q00015_SweetWhispers.class,
     Q00016_TheComingDarkness.class,
     Q00017_LightAndDarkness.class,
     Q00018_MeetingWithTheGoldenRam.class,
@@ -520,7 +509,6 @@ public class QuestLoader {
     Q00020_BringUpWithLove.class,
     Q00021_HiddenTruth.class,
     Q00022_TragedyInVonHellmannForest.class,
-    Q00023_LidiasHeart.class,
     Q00024_InhabitantsOfTheForestOfTheDead.class,
     Q00025_HidingBehindTheTruth.class,
     Q00026_TiredOfWaiting.class,
@@ -572,7 +560,6 @@ public class QuestLoader {
     Q00079_SagaOfTheAdventurer.class,
     Q00080_SagaOfTheWindRider.class,
     Q00081_SagaOfTheGhostHunter.class,
-    Q00082_SagaOfTheSagittarius.class,
     Q00083_SagaOfTheMoonlightSentinel.class,
     Q00084_SagaOfTheGhostSentinel.class,
     Q00085_SagaOfTheCardinal.class,
@@ -954,9 +941,7 @@ public class QuestLoader {
     Q00699_GuardianOfTheSkies.class,
     Q00700_CursedLife.class,
     Q00701_ProofOfExistence.class,
-    Q00702_ATrapForRevenge.class,
     Q00708_PathToBecomingALordGludio.class,
-    Q00728_TerritoryWar.class,
     Q00901_HowLavasaurusesAreMade.class,
     Q00902_ReclaimOurEra.class,
     Q00903_TheCallOfAntharas.class,
@@ -969,9 +954,7 @@ public class QuestLoader {
     Q10268_ToTheSeedOfInfinity.class,
     Q10269_ToTheSeedOfDestruction.class,
     Q10270_BirthOfTheSeed.class,
-    Q10271_TheEnvelopingDarkness.class,
     Q10272_LightFragment.class,
-    Q10273_GoodDayToFly.class,
     Q10274_CollectingInTheAir.class,
     Q10275_ContainingTheAttributePower.class,
     Q10276_MutatedKaneusGludio.class,
@@ -983,7 +966,6 @@ public class QuestLoader {
     Q10283_RequestOfIceMerchant.class,
     Q10284_AcquisitionOfDivineSword.class,
     Q10285_MeetingSirra.class,
-    Q10286_ReunionWithSirra.class,
     Q10287_StoryOfThoseLeft.class,
     Q10288_SecretMission.class,
     Q10289_FadeToBlack.class,
@@ -995,7 +977,6 @@ public class QuestLoader {
     Q10296_SevenSignsOneWhoSeeksThePowerOfTheSeal.class,
     Q10501_ZakenEmbroideredSoulCloak.class,
     Q10502_FreyaEmbroideredSoulCloak.class,
-    Q10503_FrintezzaEmbroideredSoulCloak.class,
     Q10504_JewelOfAntharas.class,
     Q10505_JewelOfValakas.class
   };

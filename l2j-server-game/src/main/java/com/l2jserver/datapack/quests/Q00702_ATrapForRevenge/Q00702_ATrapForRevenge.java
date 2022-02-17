@@ -8,11 +8,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.quest.State;
+import org.springframework.stereotype.Service;
 
-/**
- * A Trap for Revenge (702)
- * @author malyelfik
- */
+@Service
 public class Q00702_ATrapForRevenge extends Quest {
 	// NPC
 	private static final int PLENOS = 32563;

@@ -12,13 +12,10 @@ import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
+import org.springframework.stereotype.Service;
 
-/**
- * Reunion with Sirra (10286)
- * @author Adry_85
- * @since 2.6.0.0
- */
-public final class Q10286_ReunionWithSirra extends Quest {
+@Service
+public class Q10286_ReunionWithSirra extends Quest {
 	// NPCs
 	private static final int RAFFORTY = 32020;
 	private static final int JINIA = 32760;

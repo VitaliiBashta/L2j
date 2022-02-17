@@ -8,11 +8,9 @@ import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.itemcontainer.Inventory;
 import com.l2jserver.gameserver.model.zone.ZoneId;
 import com.l2jserver.gameserver.network.SystemMessageId;
+import org.springframework.stereotype.Service;
 
-/**
- * Arena Manager AI.
- * @author St3eT
- */
+@Service
 public class ArenaManager extends AbstractNpcAI {
 	// NPCs
 	private static final int[] ARENA_MANAGER = {

@@ -6,12 +6,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.quest.State;
+import org.springframework.stereotype.Service;
 
-/**
- * Sweet Whisper (15)<br>
- * Original jython script by disKret.
- * @author nonom
- */
+@Service
 public class Q00015_SweetWhispers extends Quest {
 	// NPCs
 	private static final int VLADIMIR = 31302;

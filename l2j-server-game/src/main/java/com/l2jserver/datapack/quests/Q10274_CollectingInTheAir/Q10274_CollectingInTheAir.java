@@ -9,9 +9,11 @@ import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.quest.State;
 import com.l2jserver.gameserver.model.skills.Skill;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class Q10274_CollectingInTheAir extends Quest {
   // NPC
   private static final int LEKON = 32557;

@@ -7,11 +7,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.quest.State;
+import org.springframework.stereotype.Service;
 
-/**
- * The Enveloping Darkness (10271)
- * @author Gladicek
- */
+@Service
 public class Q10271_TheEnvelopingDarkness extends Quest {
 	private static final int ORBYU = 32560;
 	private static final int EL = 32556;

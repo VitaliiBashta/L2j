@@ -12,12 +12,10 @@ import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
+import org.springframework.stereotype.Service;
 
-/**
- * Lidia's Heart (23)
- * @author ivantotov
- */
-public final class Q00023_LidiasHeart extends Quest {
+@Service
+public class Q00023_LidiasHeart extends Quest {
 	// NPCs
 	private static final int HIGH_PRIEST_INNOCENTIN = 31328;
 	private static final int TRADER_VIOLET = 31386;

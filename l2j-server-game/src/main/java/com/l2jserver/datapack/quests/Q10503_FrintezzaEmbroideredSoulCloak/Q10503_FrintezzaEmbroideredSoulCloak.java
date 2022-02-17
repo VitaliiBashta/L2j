@@ -8,11 +8,9 @@ import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.quest.State;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Frintezza Embroidered Soul Cloak (10503)
- * @author Zoey76
- */
+@Service
 public class Q10503_FrintezzaEmbroideredSoulCloak extends Quest {
 	// NPC
 	private static final int OLF_ADAMS = 32612;

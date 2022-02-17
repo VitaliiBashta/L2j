@@ -9,12 +9,10 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.zone.type.L2EffectZone;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Queen Shyeed AI
- * @author malyelfik
- */
-public final class QueenShyeed extends AbstractNpcAI {
+@Service
+public class QueenShyeed extends AbstractNpcAI {
 	// NPC
 	private static final int SHYEED = 25671;
 	private static final Location SHYEED_LOC = new Location(79634, -55428, -6104, 0);

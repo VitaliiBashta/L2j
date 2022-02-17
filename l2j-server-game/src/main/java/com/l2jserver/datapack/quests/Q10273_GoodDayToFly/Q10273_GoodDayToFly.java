@@ -8,12 +8,9 @@ import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.quest.State;
+import org.springframework.stereotype.Service;
 
-/**
- * Good Day to Fly (10273)<br>
- * Original Jython script by Kerberos v1.0 on 2009/04/25
- * @author nonom
- */
+@Service
 public class Q10273_GoodDayToFly extends Quest {
 	// NPC
 	private static final int LEKON = 32557;

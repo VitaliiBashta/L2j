@@ -6,12 +6,10 @@ import com.l2jserver.gameserver.enums.CategoryType;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.base.ClassId;
+import org.springframework.stereotype.Service;
 
-/**
- * Elf Human class transfer AI.
- * @author Adry_85
- */
-public final class ElfHumanClericChange2 extends AbstractNpcAI {
+@Service
+public class ElfHumanClericChange2 extends AbstractNpcAI {
 	// NPCs
 	private static int[] NPCS = {
 		30120, // Maximilian

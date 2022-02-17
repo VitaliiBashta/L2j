@@ -3,11 +3,9 @@ package com.l2jserver.datapack.quests.Q00082_SagaOfTheSagittarius;
 
 import com.l2jserver.datapack.quests.AbstractSagaQuest;
 import com.l2jserver.gameserver.model.Location;
+import org.springframework.stereotype.Service;
 
-/**
- * Saga of the Sagittarius (82)
- * @author Emperorc
- */
+@Service
 public class Q00082_SagaOfTheSagittarius extends AbstractSagaQuest {
 	public Q00082_SagaOfTheSagittarius() {
 		super(82, Q00082_SagaOfTheSagittarius.class.getSimpleName(), "Saga of the Sagittarius");

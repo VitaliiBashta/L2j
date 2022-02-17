@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.ai.individual;
 
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_ATTACK;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.model.actor.L2Attackable;
 import com.l2jserver.gameserver.model.actor.L2Character;
@@ -11,12 +9,11 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Blackdagger Wing AI.
- * @author Zoey76
- * @since 2.6.0.0
- */
+import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_ATTACK;
+
+@Service
 public class BlackdaggerWing extends AbstractNpcAI {
 	// NPCs
 	private static final int BLACKDAGGER_WING = 25721;

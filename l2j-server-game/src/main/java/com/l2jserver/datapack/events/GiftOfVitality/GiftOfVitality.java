@@ -7,12 +7,10 @@ import com.l2jserver.gameserver.model.event.LongTimeEvent;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Gift of Vitality event AI.
- * @author Gnacik, Adry_85
- */
-public final class GiftOfVitality extends LongTimeEvent {
+@Service
+public class GiftOfVitality extends LongTimeEvent {
 	// NPC
 	private static final int STEVE_SHYAGEL = 4306;
 	// Skills

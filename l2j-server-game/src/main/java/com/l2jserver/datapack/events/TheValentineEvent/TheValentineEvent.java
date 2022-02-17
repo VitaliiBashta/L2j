@@ -5,12 +5,10 @@ import com.l2jserver.gameserver.enums.audio.Sound;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.event.LongTimeEvent;
+import org.springframework.stereotype.Service;
 
-/**
- * The Valentine Event event AI.
- * @author Gnacik
- */
-public final class TheValentineEvent extends LongTimeEvent {
+@Service
+public class TheValentineEvent extends LongTimeEvent {
 	// NPC
 	private static final int NPC = 4301;
 	// Item
@@ -44,7 +42,4 @@ public final class TheValentineEvent extends LongTimeEvent {
 		return npc.getId() + ".htm";
 	}
 	
-	public static void main(String[] args) {
-		new TheValentineEvent();
-	}
 }

@@ -1,9 +1,6 @@
 
 package com.l2jserver.datapack.ai.individual;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2MonsterInstance;
@@ -11,12 +8,13 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
+import org.springframework.stereotype.Service;
 
-/**
- * Manages Sin Wardens disappearing and chat.
- * @author GKR
- */
-public final class SinWardens extends AbstractNpcAI {
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Service
+public class SinWardens extends AbstractNpcAI {
 	private static final int[] SIN_WARDEN_MINIONS = {
 		22424,
 		22425,

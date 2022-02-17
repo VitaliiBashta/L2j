@@ -6,12 +6,9 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Bleeding Fly AI.
- * @author Zoey76
- * @since 2.6.0.0
- */
+@Service
 public class BleedingFly extends AbstractNpcAI {
 	// NPCs
 	private static final int BLEEDING_FLY = 25720;

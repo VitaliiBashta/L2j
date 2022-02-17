@@ -5,12 +5,10 @@ import com.l2jserver.gameserver.enums.audio.Sound;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.event.LongTimeEvent;
+import org.springframework.stereotype.Service;
 
-/**
- * Heavy Medals event AI.
- * @author Gnacik
- */
-public final class HeavyMedal extends LongTimeEvent {
+@Service
+public class HeavyMedal extends LongTimeEvent {
 	private final static int CAT_ROY = 31228;
 	private final static int CAT_WINNIE = 31229;
 	private final static int GLITTERING_MEDAL = 6393;
@@ -93,7 +91,4 @@ public final class HeavyMedal extends LongTimeEvent {
 		return _lev;
 	}
 	
-	public static void main(String[] args) {
-		new HeavyMedal();
-	}
 }

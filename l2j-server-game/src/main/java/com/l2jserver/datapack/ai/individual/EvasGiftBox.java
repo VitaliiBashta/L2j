@@ -6,12 +6,10 @@ import com.l2jserver.gameserver.model.actor.L2Attackable;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.holders.ItemHolder;
+import org.springframework.stereotype.Service;
 
-/**
- * Eva's Gift Box AI.
- * @author St3eT
- */
-public final class EvasGiftBox extends AbstractNpcAI {
+@Service
+public class EvasGiftBox extends AbstractNpcAI {
 	// NPC
 	private static final int BOX = 32342; // Eva's Gift Box
 	// Skill

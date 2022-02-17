@@ -1,9 +1,6 @@
 
 package com.l2jserver.datapack.vehicles;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.enums.audio.Sound;
 import com.l2jserver.gameserver.instancemanager.BoatManager;
@@ -12,10 +9,12 @@ import com.l2jserver.gameserver.model.actor.instance.L2BoatInstance;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.CreatureSay;
+import org.springframework.stereotype.Service;
 
-/**
- * @author DS
- */
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+@Service
 public class BoatInnadrilTour implements Runnable {
 	private static final Logger _log = Logger.getLogger(BoatInnadrilTour.class.getName());
 	
@@ -56,8 +55,8 @@ public class BoatInnadrilTour implements Runnable {
 	};
 	
 	private static final VehiclePathPoint DOCK = TOUR[TOUR.length - 1];
-	
-	private final L2BoatInstance _boat;
+
+  private final L2BoatInstance boat;
 	private int _cycle = 0;
 	
 	private final CreatureSay ARRIVED_AT_INNADRIL;
@@ -71,10 +70,18 @@ public class BoatInnadrilTour implements Runnable {
 	private final CreatureSay ARRIVAL10;
 	private final CreatureSay ARRIVAL5;
 	private final CreatureSay ARRIVAL1;
-	
-	public BoatInnadrilTour(L2BoatInstance boat) {
-		_boat = boat;
-		
+  private final BoatManager boatManager;
+  private final ThreadPoolManager threadPoolManager;
+
+  public BoatInnadrilTour(BoatManager boatManager, ThreadPoolManager threadPoolManager) {
+    this.boatManager = boatManager;
+
+    boat = boatManager.getNewBoat(4, 111264, 226240, -3610, 32768);
+    this.threadPoolManager = threadPoolManager;
+    if (boat != null) {
+      boat.registerEngine(new BoatInnadrilTour(boatManager, threadPoolManager));
+      boat.runEngine(180000);
+    }
 		ARRIVED_AT_INNADRIL = new CreatureSay(0, Say2.BOAT, 801, SystemMessageId.INNADRIL_BOAT_ANCHOR_10_MINUTES);
 		LEAVE_INNADRIL5 = new CreatureSay(0, Say2.BOAT, 801, SystemMessageId.INNADRIL_BOAT_LEAVE_IN_5_MINUTES);
 		LEAVE_INNADRIL1 = new CreatureSay(0, Say2.BOAT, 801, SystemMessageId.INNADRIL_BOAT_LEAVE_IN_1_MINUTE);
@@ -87,51 +94,61 @@ public class BoatInnadrilTour implements Runnable {
 		ARRIVAL5 = new CreatureSay(0, Say2.BOAT, 801, SystemMessageId.INNADRIL_BOAT_ARRIVE_5_MINUTES);
 		ARRIVAL1 = new CreatureSay(0, Say2.BOAT, 801, SystemMessageId.INNADRIL_BOAT_ARRIVE_1_MINUTE);
 	}
-	
+
+  public static void main(String[] args) {}
+
 	@Override
 	public void run() {
 		try {
 			switch (_cycle) {
 				case 0:
-					BoatManager.getInstance().broadcastPacket(DOCK, DOCK, LEAVE_INNADRIL5);
-					ThreadPoolManager.getInstance().scheduleGeneral(this, 240000);
+          boatManager.broadcastPacket(DOCK, DOCK, LEAVE_INNADRIL5);
+          threadPoolManager.scheduleGeneral(this, 240000);
 					break;
 				case 1:
-					BoatManager.getInstance().broadcastPacket(DOCK, DOCK, LEAVE_INNADRIL1);
-					ThreadPoolManager.getInstance().scheduleGeneral(this, 40000);
+          boatManager.broadcastPacket(DOCK, DOCK, LEAVE_INNADRIL1);
+          threadPoolManager.scheduleGeneral(this, 40000);
 					break;
 				case 2:
-					BoatManager.getInstance().broadcastPacket(DOCK, DOCK, LEAVE_INNADRIL0);
-					ThreadPoolManager.getInstance().scheduleGeneral(this, 20000);
+          boatManager.broadcastPacket(DOCK, DOCK, LEAVE_INNADRIL0);
+          threadPoolManager.scheduleGeneral(this, 20000);
 					break;
 				case 3:
-					BoatManager.getInstance().broadcastPackets(DOCK, DOCK, LEAVING_INNADRIL, Sound.ITEMSOUND_SHIP_ARRIVAL_DEPARTURE.withObject(_boat));
-					_boat.payForRide(0, 1, 107092, 219098, -3952);
-					_boat.executePath(TOUR);
-					ThreadPoolManager.getInstance().scheduleGeneral(this, 650000);
+          boatManager.broadcastPackets(
+              DOCK,
+              DOCK,
+              LEAVING_INNADRIL,
+              Sound.ITEMSOUND_SHIP_ARRIVAL_DEPARTURE.withObject(boat));
+          boat.payForRide(0, 1, 107092, 219098, -3952);
+          boat.executePath(TOUR);
+          threadPoolManager.scheduleGeneral(this, 650000);
 					break;
 				case 4:
-					BoatManager.getInstance().broadcastPacket(DOCK, DOCK, ARRIVAL20);
-					ThreadPoolManager.getInstance().scheduleGeneral(this, 300000);
+          boatManager.broadcastPacket(DOCK, DOCK, ARRIVAL20);
+          threadPoolManager.scheduleGeneral(this, 300000);
 					break;
 				case 5:
-					BoatManager.getInstance().broadcastPacket(DOCK, DOCK, ARRIVAL15);
-					ThreadPoolManager.getInstance().scheduleGeneral(this, 300000);
+          boatManager.broadcastPacket(DOCK, DOCK, ARRIVAL15);
+          threadPoolManager.scheduleGeneral(this, 300000);
 					break;
 				case 6:
-					BoatManager.getInstance().broadcastPacket(DOCK, DOCK, ARRIVAL10);
-					ThreadPoolManager.getInstance().scheduleGeneral(this, 300000);
+          boatManager.broadcastPacket(DOCK, DOCK, ARRIVAL10);
+          threadPoolManager.scheduleGeneral(this, 300000);
 					break;
 				case 7:
-					BoatManager.getInstance().broadcastPacket(DOCK, DOCK, ARRIVAL5);
-					ThreadPoolManager.getInstance().scheduleGeneral(this, 240000);
+          boatManager.broadcastPacket(DOCK, DOCK, ARRIVAL5);
+          threadPoolManager.scheduleGeneral(this, 240000);
 					break;
 				case 8:
-					BoatManager.getInstance().broadcastPacket(DOCK, DOCK, ARRIVAL1);
+          boatManager.broadcastPacket(DOCK, DOCK, ARRIVAL1);
 					break;
 				case 9:
-					BoatManager.getInstance().broadcastPackets(DOCK, DOCK, ARRIVED_AT_INNADRIL, Sound.ITEMSOUND_SHIP_ARRIVAL_DEPARTURE.withObject(_boat));
-					ThreadPoolManager.getInstance().scheduleGeneral(this, 300000);
+          boatManager.broadcastPackets(
+              DOCK,
+              DOCK,
+              ARRIVED_AT_INNADRIL,
+              Sound.ITEMSOUND_SHIP_ARRIVAL_DEPARTURE.withObject(boat));
+          threadPoolManager.scheduleGeneral(this, 300000);
 					break;
 			}
 			_cycle++;
@@ -140,14 +157,6 @@ public class BoatInnadrilTour implements Runnable {
 			}
 		} catch (Exception e) {
 			_log.log(Level.WARNING, e.getMessage());
-		}
-	}
-	
-	public static void main(String[] args) {
-		final L2BoatInstance boat = BoatManager.getInstance().getNewBoat(4, 111264, 226240, -3610, 32768);
-		if (boat != null) {
-			boat.registerEngine(new BoatInnadrilTour(boat));
-			boat.runEngine(180000);
 		}
 	}
 }

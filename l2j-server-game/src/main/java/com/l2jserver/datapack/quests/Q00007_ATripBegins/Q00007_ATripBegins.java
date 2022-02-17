@@ -7,11 +7,9 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.quest.State;
+import org.springframework.stereotype.Service;
 
-/**
- * A Trip Begins (7)
- * @author malyelfik
- */
+@Service
 public class Q00007_ATripBegins extends Quest {
 	// NPCs
 	private static final int MIRABEL = 30146;

@@ -6,6 +6,7 @@ import com.l2jserver.gameserver.model.actor.instance.L2EventMonsterInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.Event;
 import com.l2jserver.gameserver.util.Broadcast;
+import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +14,8 @@ import java.util.concurrent.ScheduledFuture;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
 
-public final class Elpies extends Event {
+@Service
+public class Elpies extends Event {
   // NPC
   private static final int ELPY = 900100;
   // Amount of Elpies to spawn when the event starts
@@ -51,26 +53,6 @@ public final class Elpies extends Event {
     super(Elpies.class.getSimpleName(), "custom/events");
     addSpawnId(ELPY);
     addKillId(ELPY);
-  }
-
-  private static void dropItem(L2Npc mob, L2PcInstance player, int[][] droplist) {
-    final int chance = getRandom(100);
-
-    for (int[] drop : droplist) {
-      if (chance >= drop[1]) {
-        mob.dropItem(player, drop[0], getRandom(drop[2], drop[3]));
-        break;
-      }
-    }
-  }
-
-  public static void main(String[] args) {
-    new Elpies();
-  }
-
-  @Override
-  public boolean eventBypass(L2PcInstance activeChar, String bypass) {
-    return false;
   }
 
   @Override
@@ -145,6 +127,17 @@ public final class Elpies extends Event {
     return true;
   }
 
+  private static void dropItem(L2Npc mob, L2PcInstance player, int[][] droplist) {
+    final int chance = getRandom(100);
+
+    for (int[] drop : droplist) {
+      if (chance >= drop[1]) {
+        mob.dropItem(player, drop[0], getRandom(drop[2], drop[3]));
+        break;
+      }
+    }
+  }
+
   @Override
   public String onKill(L2Npc npc, L2PcInstance killer, boolean isSummon) {
     if (EVENT_ACTIVE) {
@@ -160,6 +153,11 @@ public final class Elpies extends Event {
     }
 
     return super.onKill(npc, killer, isSummon);
+  }
+
+  @Override
+  public boolean eventBypass(L2PcInstance activeChar, String bypass) {
+    return false;
   }
 
   @Override

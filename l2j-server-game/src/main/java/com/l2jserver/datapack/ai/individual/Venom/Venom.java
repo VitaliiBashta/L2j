@@ -1,9 +1,6 @@
 
 package com.l2jserver.datapack.ai.individual.Venom;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.ai.CtrlIntention;
 import com.l2jserver.gameserver.instancemanager.CastleManager;
@@ -20,12 +17,13 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.model.zone.ZoneId;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-/**
- * Venom AI on Rune Castle.
- * @author nonom, MELERIX
- */
-public final class Venom extends AbstractNpcAI {
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class Venom extends AbstractNpcAI {
 	private static final int CASTLE = 8; // Rune
 	
 	private static final int VENOM = 29054;

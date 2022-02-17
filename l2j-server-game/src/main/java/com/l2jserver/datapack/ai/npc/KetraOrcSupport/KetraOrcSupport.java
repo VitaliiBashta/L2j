@@ -1,22 +1,19 @@
 
 package com.l2jserver.datapack.ai.npc.KetraOrcSupport;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
 import com.l2jserver.gameserver.datatables.SkillData;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Ketra Orc Support AI.<br>
- * Original Jython script by Emperorc and Kerberos_20.
- * @authors Nyaran
- */
-public final class KetraOrcSupport extends AbstractNpcAI {
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+public class KetraOrcSupport extends AbstractNpcAI {
 	private static class BuffsData {
 		private final int _skill;
 		private final int _cost;

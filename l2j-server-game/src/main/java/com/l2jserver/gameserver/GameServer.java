@@ -189,7 +189,6 @@ public class GameServer {
     TransformData.getInstance();
     BotReportTable.getInstance();
     QuestManager.getInstance();
-    BoatManager.getInstance();
     AirShipManager.getInstance();
     GraciaSeedsManager.getInstance();
 
@@ -199,9 +198,6 @@ public class GameServer {
     printSection("Quests");
     ScriptEngineManager.getInstance().executeScript(QuestLoader.class);
     ScriptEngineManager.getInstance().executeScript(TerritoryWarSuperClass.class);
-
-    printSection("Scripts");
-    ScriptEngineManager.getInstance().runMainOnscripts();
 
     DayNightSpawnManager.getInstance().trim().notifyChangeMode();
     DimensionalRiftManager.getInstance();
