@@ -1,8 +1,6 @@
 
 package com.l2jserver.datapack.quests.Q00255_Tutorial;
 
-import static com.l2jserver.gameserver.config.Configuration.character;
-
 import com.l2jserver.gameserver.enums.Race;
 import com.l2jserver.gameserver.enums.audio.Sound;
 import com.l2jserver.gameserver.enums.audio.Voice;
@@ -20,11 +18,8 @@ import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.quest.State;
 
-/**
- * Tutorial (255)
- * @author Zealar
- * @since 2.6.0.0
- */
+import static com.l2jserver.gameserver.config.Configuration.character;
+
 public class Q00255_Tutorial extends Quest {
 	// Npc
 	private static final int ROIEN = 30008;
@@ -1635,8 +1630,8 @@ public class Q00255_Tutorial extends Quest {
 			
 			int territoryWarId = qs.getDominionSiegeID(talker);
 			int territoryWarState = qs.getNRMemoStateEx(talker, 728, 1);
-			
-			if ((territoryWarId > 0) && (qs.getDominionWarState(territoryWarId) == 5)) {
+
+			if ((territoryWarId > 0) && (getDominionWarState(territoryWarId) == 5)) {
 				if (!qs.haveNRMemo(talker, 728)) {
 					qs.setNRMemo(talker, 728);
 					qs.setNRMemoState(talker, 728, 0);
@@ -1647,7 +1642,7 @@ public class Q00255_Tutorial extends Quest {
 				}
 				switch (territoryWarId) {
 					case 81:
-						if (qs.getDominionWarState(TW_GLUDIO) == 5) {
+						if (getDominionWarState(TW_GLUDIO) == 5) {
 							if (!qs.haveNRMemo(talker, Q717_FOR_THE_SAKE_OF_THE_TERRITORY_GLUDIO)) {
 								qs.setNRMemo(talker, Q717_FOR_THE_SAKE_OF_THE_TERRITORY_GLUDIO);
 								qs.setNRMemoState(talker, Q717_FOR_THE_SAKE_OF_THE_TERRITORY_GLUDIO, 0);
@@ -1661,7 +1656,7 @@ public class Q00255_Tutorial extends Quest {
 						}
 						break;
 					case 82:
-						if (qs.getDominionWarState(TW_DION) == 5) {
+						if (getDominionWarState(TW_DION) == 5) {
 							if (!qs.haveNRMemo(talker, Q718_FOR_THE_SAKE_OF_THE_TERRITORY_DION)) {
 								qs.setNRMemo(talker, Q718_FOR_THE_SAKE_OF_THE_TERRITORY_DION);
 								qs.setNRMemoState(talker, Q718_FOR_THE_SAKE_OF_THE_TERRITORY_DION, 0);
@@ -1675,7 +1670,7 @@ public class Q00255_Tutorial extends Quest {
 						}
 						break;
 					case 83:
-						if (qs.getDominionWarState(TW_GIRAN) == 5) {
+						if (getDominionWarState(TW_GIRAN) == 5) {
 							if (!qs.haveNRMemo(talker, Q719_FOR_THE_SAKE_OF_THE_TERRITORY_GIRAN)) {
 								qs.setNRMemo(talker, Q719_FOR_THE_SAKE_OF_THE_TERRITORY_GIRAN);
 								qs.setNRMemoState(talker, Q719_FOR_THE_SAKE_OF_THE_TERRITORY_GIRAN, 0);
@@ -1689,7 +1684,7 @@ public class Q00255_Tutorial extends Quest {
 						}
 						break;
 					case 84:
-						if (qs.getDominionWarState(TW_OREN) == 5) {
+						if (getDominionWarState(TW_OREN) == 5) {
 							if (!qs.haveNRMemo(talker, Q720_FOR_THE_SAKE_OF_THE_TERRITORY_OREN)) {
 								qs.setNRMemo(talker, Q720_FOR_THE_SAKE_OF_THE_TERRITORY_OREN);
 								qs.setNRMemoState(talker, Q720_FOR_THE_SAKE_OF_THE_TERRITORY_OREN, 0);
@@ -1703,7 +1698,7 @@ public class Q00255_Tutorial extends Quest {
 						}
 						break;
 					case 85:
-						if (qs.getDominionWarState(TW_ADEN) == 5) {
+						if (getDominionWarState(TW_ADEN) == 5) {
 							if (!qs.haveNRMemo(talker, Q721_FOR_THE_SAKE_OF_THE_TERRITORY_ADEN)) {
 								qs.setNRMemo(talker, Q721_FOR_THE_SAKE_OF_THE_TERRITORY_ADEN);
 								qs.setNRMemoState(talker, Q721_FOR_THE_SAKE_OF_THE_TERRITORY_ADEN, 0);
@@ -1717,7 +1712,7 @@ public class Q00255_Tutorial extends Quest {
 						}
 						break;
 					case 86:
-						if (qs.getDominionWarState(TW_HEINE) == 5) {
+						if (getDominionWarState(TW_HEINE) == 5) {
 							if (!qs.haveNRMemo(talker, Q722_FOR_THE_SAKE_OF_THE_TERRITORY_INNADRIL)) {
 								qs.setNRMemo(talker, Q722_FOR_THE_SAKE_OF_THE_TERRITORY_INNADRIL);
 								qs.setNRMemoState(talker, Q722_FOR_THE_SAKE_OF_THE_TERRITORY_INNADRIL, 0);
@@ -1731,7 +1726,7 @@ public class Q00255_Tutorial extends Quest {
 						}
 						break;
 					case 87:
-						if (qs.getDominionWarState(TW_GODDARD) == 5) {
+						if (getDominionWarState(TW_GODDARD) == 5) {
 							if (!qs.haveNRMemo(talker, Q723_FOR_THE_SAKE_OF_THE_TERRITORY_GODDARD)) {
 								qs.setNRMemo(talker, Q723_FOR_THE_SAKE_OF_THE_TERRITORY_GODDARD);
 								qs.setNRMemoState(talker, Q723_FOR_THE_SAKE_OF_THE_TERRITORY_GODDARD, 0);
@@ -1745,7 +1740,7 @@ public class Q00255_Tutorial extends Quest {
 						}
 						break;
 					case 88:
-						if (qs.getDominionWarState(TW_RUNE) == 5) {
+						if (getDominionWarState(TW_RUNE) == 5) {
 							if (!qs.haveNRMemo(talker, Q724_FOR_THE_SAKE_OF_THE_TERRITORY_RUNE)) {
 								qs.setNRMemo(talker, Q724_FOR_THE_SAKE_OF_THE_TERRITORY_RUNE);
 								qs.setNRMemoState(talker, Q724_FOR_THE_SAKE_OF_THE_TERRITORY_RUNE, 0);
@@ -1759,7 +1754,7 @@ public class Q00255_Tutorial extends Quest {
 						}
 						break;
 					case 89:
-						if (qs.getDominionWarState(TW_SCHUTTGART) == 5) {
+						if (getDominionWarState(TW_SCHUTTGART) == 5) {
 							if (!qs.haveNRMemo(talker, Q725_FOR_THE_SAKE_OF_THE_TERRITORY_SCHUTTGART)) {
 								qs.setNRMemo(talker, Q725_FOR_THE_SAKE_OF_THE_TERRITORY_SCHUTTGART);
 								qs.setNRMemoState(talker, Q725_FOR_THE_SAKE_OF_THE_TERRITORY_SCHUTTGART, 0);

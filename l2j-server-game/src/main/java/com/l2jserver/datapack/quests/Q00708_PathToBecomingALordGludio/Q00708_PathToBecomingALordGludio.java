@@ -1,20 +1,6 @@
 
 package com.l2jserver.datapack.quests.Q00708_PathToBecomingALordGludio;
 
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_ATTACK;
-import static com.l2jserver.gameserver.enums.audio.Sound.ITEMSOUND_QUEST_FINISH;
-import static com.l2jserver.gameserver.enums.audio.Sound.ITEMSOUND_QUEST_MIDDLE;
-import static com.l2jserver.gameserver.network.NpcStringId.DOES_MY_MISSION_TO_BLOCK_THE_SUPPLIES_END_HERE;
-import static com.l2jserver.gameserver.network.NpcStringId.GO_FIND_SAIUS;
-import static com.l2jserver.gameserver.network.NpcStringId.HAVE_YOU_COMPLETED_YOUR_PREPARATIONS_TO_BECOME_A_LORD;
-import static com.l2jserver.gameserver.network.NpcStringId.LISTEN_YOU_VILLAGERS_OUR_LIEGE_WHO_WILL_SOON_BECOME_A_LORD_HAS_DEFEATED_THE_HEADLESS_KNIGHT_YOU_CAN_NOW_REST_EASY;
-import static com.l2jserver.gameserver.network.NpcStringId.S1_DO_YOU_DARE_DEFY_MY_SUBORDINATES;
-import static com.l2jserver.gameserver.network.NpcStringId.S1_HAS_BECOME_LORD_OF_THE_TOWN_OF_GLUDIO_LONG_MAY_HE_REIGN;
-import static com.l2jserver.gameserver.network.NpcStringId.S1_NOW_DEPART;
-import static com.l2jserver.gameserver.network.clientpackets.Say2.NPC_ALL;
-import static com.l2jserver.gameserver.network.serverpackets.ExShowScreenMessage.NORMAL_SIZE;
-import static com.l2jserver.gameserver.network.serverpackets.ExShowScreenMessage.TOP_CENTER;
-
 import com.l2jserver.gameserver.instancemanager.FortManager;
 import com.l2jserver.gameserver.instancemanager.TerritoryWarManager;
 import com.l2jserver.gameserver.model.L2World;
@@ -25,6 +11,14 @@ import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.quest.State;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
 import com.l2jserver.gameserver.util.Util;
+
+import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_ATTACK;
+import static com.l2jserver.gameserver.enums.audio.Sound.ITEMSOUND_QUEST_FINISH;
+import static com.l2jserver.gameserver.enums.audio.Sound.ITEMSOUND_QUEST_MIDDLE;
+import static com.l2jserver.gameserver.network.NpcStringId.*;
+import static com.l2jserver.gameserver.network.clientpackets.Say2.NPC_ALL;
+import static com.l2jserver.gameserver.network.serverpackets.ExShowScreenMessage.NORMAL_SIZE;
+import static com.l2jserver.gameserver.network.serverpackets.ExShowScreenMessage.TOP_CENTER;
 
 /**
  * Path To Becoming A Lord - Gludio (708)
@@ -129,7 +123,7 @@ public final class Q00708_PathToBecomingALordGludio extends Quest {
 			}
 			case "35100-23.html": {
 				if (qs.hasMemoState() && qs.isMemoState(49)) {
-					if ((qs.getDominionWarState(GLUDIO_ID) != 5) && npc.isMyLord(player)) {
+					if ((getDominionWarState(GLUDIO_ID) != 5) && npc.isMyLord(player)) {
 						npc.broadcastPacket(new NpcSay(npc, NPC_ALL, S1_HAS_BECOME_LORD_OF_THE_TOWN_OF_GLUDIO_LONG_MAY_HE_REIGN).addStringParameter(player.getName()));
 						TerritoryWarManager.getInstance().declareLord(GLUDIO_ID, player);
 						qs.removeMemo();

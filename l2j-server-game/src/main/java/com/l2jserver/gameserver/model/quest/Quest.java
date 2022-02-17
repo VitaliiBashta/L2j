@@ -9,6 +9,7 @@ import com.l2jserver.gameserver.enums.Race;
 import com.l2jserver.gameserver.enums.TrapAction;
 import com.l2jserver.gameserver.enums.audio.IAudio;
 import com.l2jserver.gameserver.instancemanager.QuestManager;
+import com.l2jserver.gameserver.instancemanager.TerritoryWarManager;
 import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.L2Party;
 import com.l2jserver.gameserver.model.actor.L2Attackable;
@@ -190,15 +191,19 @@ public class Quest extends AbstractScript implements Identifiable {
     }
   }
 
+  public int getDominionWarState(int castleId) {
+    return TerritoryWarManager.getInstance().isTWInProgress() ? 5 : 0;
+  }
+
   /**
    * Delete a variable of player's quest from the database.
    *
-   * @param qs the {@link QuestState} object whose variable to delete
+   * @param qs  the {@link QuestState} object whose variable to delete
    * @param var the name of the variable to delete
    */
   public static void deleteQuestVarInDb(QuestState qs, String var) {
     try (var con = ConnectionFactory.getInstance().getConnection();
-        var ps =
+         var ps =
             con.prepareStatement(
                 "DELETE FROM character_quests WHERE charId=? AND name=? AND var=?")) {
       ps.setInt(1, qs.getPlayer().getObjectId());

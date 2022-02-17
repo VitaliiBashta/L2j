@@ -1,6 +1,7 @@
 
 package com.l2jserver.datapack.quests.Q10291_FireDragonDestroyer;
 
+import com.l2jserver.gameserver.model.L2Party;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.Quest;
@@ -56,7 +57,7 @@ public class Q10291_FireDragonDestroyer extends Quest {
 		Function<L2PcInstance, Boolean> rewardCheck = p -> {
 			if (Util.checkIfInRange(8000, npc, p, false)) {
 				QuestState st = getQuestState(p, false);
-				
+
 				if ((st != null) && st.isCond(1) && st.hasQuestItems(POOR_NECKLACE)) {
 					st.takeItems(POOR_NECKLACE, -1);
 					st.giveItems(VALOR_NECKLACE, 1);
@@ -65,12 +66,13 @@ public class Q10291_FireDragonDestroyer extends Quest {
 			}
 			return true;
 		};
-		
+
 		// Rewards go only to command channel, not to a single party or player.
-		if (player.getParty().isInCommandChannel()) {
-			player.getParty().getCommandChannel().forEachMember(rewardCheck);
+		L2Party party = player.getParty();
+		if (party.isInCommandChannel()) {
+			party.getCommandChannel().forEachMember(rewardCheck);
 		} else {
-			player.getParty().forEachMember(rewardCheck);
+			party.forEachMember(rewardCheck);
 		}
 		return super.onKill(npc, player, isSummon);
 	}
