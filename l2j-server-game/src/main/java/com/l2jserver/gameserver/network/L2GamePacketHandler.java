@@ -26,9 +26,15 @@ import static com.l2jserver.gameserver.config.Configuration.general;
  */
 
 @Service
-public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, ClientFactory<L2GameClient>, MMOExecutor<L2GameClient> {
+public class L2GamePacketHandler implements PacketHandler<L2GameClient>, ClientFactory<L2GameClient>, MMOExecutor<L2GameClient> {
 	
 	private static final Logger _log = Logger.getLogger(L2GamePacketHandler.class.getName());
+
+	private final L2GamePacketFactory factory;
+
+	public L2GamePacketHandler(L2GamePacketFactory factory) {
+		this.factory = factory;
+	}
 
 	@Override
 	public ReceivablePacket<L2GameClient> handlePacket(ByteBuffer buf, L2GameClient client) {
@@ -52,7 +58,7 @@ public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, C
 				break;
 			case AUTHED:
 				switch (opcode) {
-					case 0x00 -> msg = new Logout();
+					case 0x00 -> msg = factory.logout();
 					case 0x0c -> msg = new CharacterCreate();
 					case 0x0d -> msg = new CharacterDelete();
 					case 0x12 -> msg = new CharacterSelect();
@@ -64,7 +70,7 @@ public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, C
 							id2 = buf.getShort() & 0xffff;
 						} else {
 							if (general().packetHandlerDebug()) {
-								_log.warning("Client: " + client.toString() + " sent a 0xd0 without the second opcode.");
+								_log.warning("Client: " + client + " sent a 0xd0 without the second opcode.");
 							}
 							break;
 						}
@@ -81,14 +87,14 @@ public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, C
 				break;
 			case JOINING: {
 				switch (opcode) {
-					case 0x11 -> msg = new EnterWorld();
+					case 0x11 -> msg = factory.enterWorld();
 					case 0xd0 -> {
 						int id2;
 						if (buf.remaining() >= 2) {
 							id2 = buf.getShort() & 0xffff;
 						} else {
 							if (general().packetHandlerDebug()) {
-								_log.warning("Client: " + client.toString() + " sent a 0xd0 without the second opcode.");
+								_log.warning("Client: " + client + " sent a 0xd0 without the second opcode.");
 							}
 							break;
 						}
@@ -106,7 +112,7 @@ public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, C
 			case IN_GAME:
 				switch (opcode) {
 					case 0x00:
-						msg = new Logout();
+						msg = factory.logout();
 						break;
 					case 0x01:
 						msg = new Attack();
@@ -291,7 +297,7 @@ public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, C
 							id_2 = buf.getShort() & 0xffff;
 						} else {
 							if (general().packetHandlerDebug()) {
-								_log.warning("Client: " + client.toString() + " sent a 0x4a without the second opcode.");
+								_log.warning("Client: " + client + " sent a 0x4a without the second opcode.");
 							}
 							break;
 						}
@@ -461,10 +467,10 @@ public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, C
 						msg = new RequestTutorialClientEvent();
 						break;
 					case 0x89:
-						msg = new RequestPetition();
+						msg = factory.requestPetition();
 						break;
 					case 0x8a:
-						msg = new RequestPetitionCancel();
+						msg = factory.requestPetitionCancel();
 						break;
 					case 0x8b:
 						msg = new RequestGmList();
@@ -655,7 +661,7 @@ public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, C
 							id2 = buf.getShort() & 0xffff;
 						} else {
 							if (general().packetHandlerDebug()) {
-								_log.warning("Client: " + client.toString() + " sent a 0xd0 without the second opcode.");
+								_log.warning("Client: " + client + " sent a 0xd0 without the second opcode.");
 							}
 							break;
 						}
@@ -911,7 +917,7 @@ public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, C
 								if (buf.remaining() >= 4) {
 									id3 = buf.getInt();
 								} else {
-									_log.warning("Client: " + client.toString() + " sent a 0xd0:0x51 without the third opcode.");
+									_log.warning("Client: " + client + " sent a 0xd0:0x51 without the third opcode.");
 									break;
 								}
 								switch (id3) {
@@ -1115,7 +1121,7 @@ public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, C
 		}
 		
 		int size = buf.remaining();
-		_log.warning("Unknown Packet: 0x" + Integer.toHexString(opcode) + " on State: " + state.name() + " Client: " + client.toString());
+		_log.warning("Unknown Packet: 0x" + Integer.toHexString(opcode) + " on State: " + state.name() + " Client: " + client);
 		byte[] array = new byte[size];
 		buf.get(array);
 		_log.warning(Util.printData(array, size));
@@ -1128,7 +1134,7 @@ public final class L2GamePacketHandler implements PacketHandler<L2GameClient>, C
 		}
 		
 		int size = buf.remaining();
-		_log.warning("Unknown Packet: 0x" + Integer.toHexString(opcode) + ":0x" + Integer.toHexString(id2) + " on State: " + state.name() + " Client: " + client.toString());
+		_log.warning("Unknown Packet: 0x" + Integer.toHexString(opcode) + ":0x" + Integer.toHexString(id2) + " on State: " + state.name() + " Client: " + client);
 		byte[] array = new byte[size];
 		buf.get(array);
 		_log.warning(Util.printData(array, size));

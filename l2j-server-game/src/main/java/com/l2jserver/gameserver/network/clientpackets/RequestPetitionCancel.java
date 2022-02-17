@@ -1,24 +1,4 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.network.clientpackets;
-
-import static com.l2jserver.gameserver.config.Configuration.character;
 
 import com.l2jserver.gameserver.data.xml.impl.AdminData;
 import com.l2jserver.gameserver.instancemanager.PetitionManager;
@@ -27,15 +7,19 @@ import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.CreatureSay;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 
-/**
- * @author -Wooden-
- * @author TempyIncursion
- */
+import static com.l2jserver.gameserver.config.Configuration.character;
+
 public final class RequestPetitionCancel extends L2GameClientPacket {
 	private static final String _C__8A_REQUEST_PETITIONCANCEL = "[C] 8A RequestPetitionCancel";
-	
-	// private int _unknown;
-	
+
+  // private int _unknown;
+
+  private final PetitionManager petitionManager;
+
+  public RequestPetitionCancel(PetitionManager petitionManager) {
+    this.petitionManager = petitionManager;
+  }
+
 	@Override
 	protected void readImpl() {
 		// _unknown = readD(); This is pretty much a trigger packet.
@@ -47,18 +31,20 @@ public final class RequestPetitionCancel extends L2GameClientPacket {
 		if (activeChar == null) {
 			return;
 		}
-		
-		if (PetitionManager.getInstance().isPlayerInConsultation(activeChar)) {
+
+    if (petitionManager.isPlayerInConsultation(activeChar)) {
 			if (activeChar.isGM()) {
-				PetitionManager.getInstance().endActivePetition(activeChar);
+        petitionManager.endActivePetition(activeChar);
 			} else {
 				activeChar.sendPacket(SystemMessageId.PETITION_UNDER_PROCESS);
 			}
 		} else {
-			if (PetitionManager.getInstance().isPlayerPetitionPending(activeChar)) {
-				if (PetitionManager.getInstance().cancelActivePetition(activeChar)) {
-					int numRemaining = character().getMaxPetitionsPerPlayer() - PetitionManager.getInstance().getPlayerTotalPetitionCount(activeChar);
-					
+      if (petitionManager.isPlayerPetitionPending(activeChar)) {
+        if (petitionManager.cancelActivePetition(activeChar)) {
+          int numRemaining =
+              character().getMaxPetitionsPerPlayer()
+                  - petitionManager.getPlayerTotalPetitionCount(activeChar);
+
 					SystemMessage sm = SystemMessage.getSystemMessage(SystemMessageId.PETITION_CANCELED_SUBMIT_S1_MORE_TODAY);
 					sm.addString(String.valueOf(numRemaining));
 					activeChar.sendPacket(sm);

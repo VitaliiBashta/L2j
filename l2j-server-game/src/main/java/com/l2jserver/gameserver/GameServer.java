@@ -182,7 +182,6 @@ public class GameServer {
     UIData.getInstance();
     PartyMatchWaitingList.getInstance();
     PartyMatchRoomList.getInstance();
-    PetitionManager.getInstance();
     CursedWeaponsManager.getInstance();
     TransformData.getInstance();
     BotReportTable.getInstance();

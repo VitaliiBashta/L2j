@@ -48,7 +48,12 @@ public class EnterWorld extends L2GameClientPacket {
 	private static final int COMBAT_FLAG = 9819;
 	
 	private final int[][] tracert = new int[5][4];
-	
+  private final PetitionManager petitionManager;
+
+  public EnterWorld(PetitionManager petitionManager) {
+    this.petitionManager = petitionManager;
+  }
+
 	@Override
 	protected void readImpl() {
 		readB(new byte[32]); // Unknown Byte Array
@@ -341,7 +346,7 @@ public class EnterWorld extends L2GameClientPacket {
 		}
 		
 		if (character().petitioningAllowed()) {
-			PetitionManager.getInstance().checkPetitionMessages(activeChar);
+      petitionManager.checkPetitionMessages(activeChar);
 		}
 		
 		if (activeChar.isAlikeDead()) // dead or fake dead

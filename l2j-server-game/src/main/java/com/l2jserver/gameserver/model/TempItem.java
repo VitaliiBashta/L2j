@@ -1,21 +1,3 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.model;
 
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
@@ -27,36 +9,35 @@ import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
  * is stored, this will be only "list" of items with it's owner
  */
 public final class TempItem {
-	private final int _itemId;
-	private int _quantity;
-	private final int _referencePrice;
-	private final String _itemName;
-	
+  private final int itemId;
+  private final int referencePrice;
+  private final String itemName;
+  private int quantity;
+
 	public TempItem(L2ItemInstance item, int quantity) {
-		super();
-		_itemId = item.getId();
-		_quantity = quantity;
-		_itemName = item.getItem().getName();
-		_referencePrice = item.getReferencePrice();
+    itemId = item.getId();
+    this.quantity = quantity;
+    itemName = item.getItem().getName();
+    referencePrice = item.getReferencePrice();
 	}
 	
 	public int getQuantity() {
-		return _quantity;
+    return quantity;
 	}
 	
 	public void setQuantity(int quantity) {
-		_quantity = quantity;
+    this.quantity = quantity;
 	}
 	
 	public int getReferencePrice() {
-		return _referencePrice;
+    return referencePrice;
 	}
 	
 	public int getItemId() {
-		return _itemId;
+    return itemId;
 	}
 	
 	public String getItemName() {
-		return _itemName;
+    return itemName;
 	}
 }

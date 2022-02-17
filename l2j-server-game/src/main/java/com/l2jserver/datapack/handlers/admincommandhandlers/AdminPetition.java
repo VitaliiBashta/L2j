@@ -19,58 +19,60 @@ public class AdminPetition implements IAdminCommandHandler {
     "admin_force_peti"
   };
 
+  private final PetitionManager petitionManager;
+
+  public AdminPetition(PetitionManager petitionManager) {
+    this.petitionManager = petitionManager;
+  }
+
   @Override
   public boolean useAdminCommand(String command, L2PcInstance activeChar) {
     int petitionId = -1;
 
-    try {
-      petitionId = Integer.parseInt(command.split(" ")[1]);
-    } catch (Exception e) {
-    }
+    petitionId = Integer.parseInt(command.split(" ")[1]);
 
     if (command.equals("admin_view_petitions")) {
-      PetitionManager.getInstance().sendPendingPetitionList(activeChar);
+      petitionManager.sendPendingPetitionList(activeChar);
     } else if (command.startsWith("admin_view_petition")) {
-      PetitionManager.getInstance().viewPetition(activeChar, petitionId);
+      petitionManager.viewPetition(activeChar, petitionId);
     } else if (command.startsWith("admin_accept_petition")) {
-      if (PetitionManager.getInstance().isPlayerInConsultation(activeChar)) {
+      if (petitionManager.isPlayerInConsultation(activeChar)) {
         activeChar.sendPacket(SystemMessageId.ONLY_ONE_ACTIVE_PETITION_AT_TIME);
         return true;
       }
 
-      if (PetitionManager.getInstance().isPetitionInProcess(petitionId)) {
+      if (petitionManager.isPetitionInProcess(petitionId)) {
         activeChar.sendPacket(SystemMessageId.PETITION_UNDER_PROCESS);
         return true;
       }
 
-      if (!PetitionManager.getInstance().acceptPetition(activeChar, petitionId)) {
+      if (!petitionManager.acceptPetition(activeChar, petitionId)) {
         activeChar.sendPacket(SystemMessageId.NOT_UNDER_PETITION_CONSULTATION);
       }
     } else if (command.startsWith("admin_reject_petition")) {
-      if (!PetitionManager.getInstance().rejectPetition(activeChar, petitionId)) {
+      if (!petitionManager.rejectPetition(activeChar, petitionId)) {
         activeChar.sendPacket(SystemMessageId.FAILED_CANCEL_PETITION_TRY_LATER);
       }
-      PetitionManager.getInstance().sendPendingPetitionList(activeChar);
+      petitionManager.sendPendingPetitionList(activeChar);
     } else if (command.equals("admin_reset_petitions")) {
-      if (PetitionManager.getInstance().isPetitionInProcess()) {
+      if (petitionManager.isPetitionInProcess()) {
         activeChar.sendPacket(SystemMessageId.PETITION_UNDER_PROCESS);
         return false;
       }
-      PetitionManager.getInstance().clearPendingPetitions();
-      PetitionManager.getInstance().sendPendingPetitionList(activeChar);
+      petitionManager.clearPendingPetitions();
+      petitionManager.sendPendingPetitionList(activeChar);
     } else if (command.startsWith("admin_force_peti")) {
       try {
         L2Object targetChar = activeChar.getTarget();
-        if ((targetChar == null) || !(targetChar instanceof L2PcInstance)) {
+        if (!(targetChar instanceof L2PcInstance targetPlayer)) {
           activeChar.sendPacket(SystemMessageId.TARGET_IS_INCORRECT);
           return false;
         }
-        L2PcInstance targetPlayer = (L2PcInstance) targetChar;
 
         String val = command.substring(15);
 
-        petitionId = PetitionManager.getInstance().submitPetition(targetPlayer, val, 9);
-        PetitionManager.getInstance().acceptPetition(activeChar, petitionId);
+        petitionId = petitionManager.submitPetition(targetPlayer, val, 9);
+        petitionManager.acceptPetition(activeChar, petitionId);
       } catch (StringIndexOutOfBoundsException e) {
         activeChar.sendMessage("Usage: //force_peti text");
         return false;
