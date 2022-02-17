@@ -9,6 +9,7 @@ import com.l2jserver.gameserver.model.quest.Quest;
 import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +18,8 @@ import java.util.List;
 import static com.l2jserver.gameserver.config.Configuration.character;
 import static com.l2jserver.gameserver.config.Configuration.general;
 
-public final class SubClassSkills extends Quest {
+@Service
+public class SubClassSkills extends Quest {
   // arrays must be sorted
   // @formatter:off
   private static final int[] _allCertSkillIds = {
@@ -55,10 +57,6 @@ public final class SubClassSkills extends Quest {
   private SubClassSkills() {
     super(-1, SubClassSkills.class.getSimpleName(), "custom");
     setOnEnterWorld(true);
-  }
-
-  public static void main(String[] args) {
-    new SubClassSkills();
   }
 
   @Override

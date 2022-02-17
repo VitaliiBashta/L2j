@@ -1,20 +1,18 @@
 
 package com.l2jserver.datapack.events.MasterOfEnchanting;
 
-import java.util.Date;
-
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.event.LongTimeEvent;
 import com.l2jserver.gameserver.model.itemcontainer.Inventory;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
-/**
- * Master of Enchanting event AI.
- * @author Gnacik
- */
-public final class MasterOfEnchanting extends LongTimeEvent {
+import java.util.Date;
+
+@Service
+public class MasterOfEnchanting extends LongTimeEvent {
 	// NPC
 	private static final int MASTER_YOGI = 32599;
 	// Items
@@ -213,7 +211,4 @@ public final class MasterOfEnchanting extends LongTimeEvent {
 		return npc.getId() + ".htm";
 	}
 	
-	public static void main(String[] args) {
-		new MasterOfEnchanting();
-	}
 }

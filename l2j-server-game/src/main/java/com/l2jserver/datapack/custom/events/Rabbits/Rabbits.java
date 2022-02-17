@@ -7,6 +7,7 @@ import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.quest.Event;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.util.Broadcast;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
 
-public final class Rabbits extends Event {
+@Service
+public class Rabbits extends Event {
   // NPCs
   private static final int NPC_MANAGER = 900101;
   private static final int CHEST = 900102;
@@ -87,9 +89,6 @@ public final class Rabbits extends Event {
     npcs.add(npc);
   }
 
-  public static void main(String[] args) {
-    new Rabbits();
-  }
 
   @Override
   public boolean eventStart(L2PcInstance eventMaker) {

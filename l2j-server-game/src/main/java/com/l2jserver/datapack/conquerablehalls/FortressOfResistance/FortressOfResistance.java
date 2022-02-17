@@ -1,10 +1,6 @@
 
 package com.l2jserver.datapack.conquerablehalls.FortressOfResistance;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.l2jserver.gameserver.cache.HtmCache;
 import com.l2jserver.gameserver.data.sql.impl.ClanTable;
 import com.l2jserver.gameserver.model.L2Clan;
@@ -15,12 +11,14 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.entity.clanhall.ClanHallSiegeEngine;
 import com.l2jserver.gameserver.network.serverpackets.NpcHtmlMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Fortress of Resistance clan hall siege Script.
- * @author BiggBoss
- */
-public final class FortressOfResistance extends ClanHallSiegeEngine {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+@Service
+public class FortressOfResistance extends ClanHallSiegeEngine {
 	private final int MESSENGER = 35382;
 	private final int BLOODY_LORD_NURKA = 35375;
 	
@@ -139,7 +137,4 @@ public final class FortressOfResistance extends ClanHallSiegeEngine {
 		buildMessengerMessage();
 	}
 	
-	public static void main(String[] args) {
-		new FortressOfResistance();
-	}
 }

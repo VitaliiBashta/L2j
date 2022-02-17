@@ -1,21 +1,6 @@
 
 package com.l2jserver.datapack.conquerablehalls.RainbowSpringsChateau;
 
-import static com.l2jserver.gameserver.config.Configuration.clanhall;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
-
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.ThreadPoolManager;
 import com.l2jserver.gameserver.cache.HtmCache;
@@ -42,12 +27,25 @@ import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.NpcSay;
 import com.l2jserver.gameserver.util.Broadcast;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Rainbow Springs Chateau clan hall siege script.
- * @author BiggBoss
- */
-public final class RainbowSpringsChateau extends ClanHallSiegeEngine {
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
+
+import static com.l2jserver.gameserver.config.Configuration.clanhall;
+
+@Service
+public class RainbowSpringsChateau extends ClanHallSiegeEngine {
 	protected static class SetFinalAttackers implements Runnable {
 		@Override
 		public void run() {

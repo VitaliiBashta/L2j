@@ -139,6 +139,27 @@ public class Olympiad extends ListenersContainer {
 		}
 	}
 	
+	/**
+	 * @param charId the noble object Id.
+	 * @param data the stats set data to add.
+	 * @return the old stats set if the noble is already present, null otherwise.
+	 */
+	protected static StatsSet addNobleStats(int charId, StatsSet data) {
+		return NOBLES.put(charId, data);
+	}
+	
+	protected static int getNobleCount() {
+		return NOBLES.size();
+	}
+	
+	protected static StatsSet getNobleStats(int playerId) {
+		return NOBLES.get(playerId);
+	}
+	
+	public static Olympiad getInstance() {
+		return SingletonHolder.INSTANCE;
+	}
+	
 	private void load() {
 		NOBLES.clear();
 		boolean loaded = false;
@@ -302,27 +323,6 @@ public class Olympiad extends ListenersContainer {
 				NOBLES_RANK.put(chr.getKey(), 5);
 			}
 		}
-	}
-	
-	/**
-	 * @param charId the noble object Id.
-	 * @param data the stats set data to add.
-	 * @return the old stats set if the noble is already present, null otherwise.
-	 */
-	protected static StatsSet addNobleStats(int charId, StatsSet data) {
-		return NOBLES.put(charId, data);
-	}
-	
-	protected static int getNobleCount() {
-		return NOBLES.size();
-	}
-	
-	protected static StatsSet getNobleStats(int playerId) {
-		return NOBLES.get(playerId);
-	}
-	
-	public static Olympiad getInstance() {
-		return SingletonHolder.INSTANCE;
 	}
 	
 	private void updateCompStatus() {

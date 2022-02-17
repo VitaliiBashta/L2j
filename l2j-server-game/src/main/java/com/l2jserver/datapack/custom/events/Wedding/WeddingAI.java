@@ -18,15 +18,15 @@ import org.springframework.stereotype.Service;
 import static com.l2jserver.gameserver.config.Configuration.customs;
 
 @Service
-public class Wedding extends AbstractNpcAI {
+public class WeddingAI extends AbstractNpcAI {
 	// NPC
 	private static final int MANAGER_ID = 50007;
 	// Item
 	private static final int FORMAL_WEAR = 6408;
   private final CoupleManager coupleManager;
 
-  public Wedding(CoupleManager coupleManager) {
-		super(Wedding.class.getSimpleName(), "custom/events");
+  public WeddingAI(CoupleManager coupleManager) {
+    super(WeddingAI.class.getSimpleName(), "custom/events");
     this.coupleManager = coupleManager;
 		addFirstTalkId(MANAGER_ID);
 		addTalkId(MANAGER_ID);

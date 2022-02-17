@@ -12,10 +12,12 @@ import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.network.serverpackets.CreatureSay;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public final class FreyaCelebration extends LongTimeEvent {
+@Service
+public class FreyaCelebration extends LongTimeEvent {
   // NPC
   private static final int FREYA = 13296;
   // Items
@@ -83,6 +85,11 @@ public final class FreyaCelebration extends LongTimeEvent {
   }
 
   @Override
+  public String onFirstTalk(L2Npc npc, L2PcInstance player) {
+    return "13296.htm";
+  }
+
+  @Override
   public String onSkillSee(
       L2Npc npc, L2PcInstance caster, Skill skill, List<L2Object> targets, boolean isSummon) {
     if ((caster == null) || (npc == null)) {
@@ -115,14 +122,5 @@ public final class FreyaCelebration extends LongTimeEvent {
       }
     }
     return super.onSkillSee(npc, caster, skill, targets, isSummon);
-  }
-
-  @Override
-  public String onFirstTalk(L2Npc npc, L2PcInstance player) {
-    return "13296.htm";
-  }
-
-  public static void main(String[] args) {
-    new FreyaCelebration();
   }
 }

@@ -1,28 +1,25 @@
 package com.l2jserver.gameserver.scripting;
 
 import com.l2jserver.datapack.conquerablehalls.DevastatedCastle.DevastatedCastle;
-import com.l2jserver.datapack.conquerablehalls.FortressOfResistance.FortressOfResistance;
 import com.l2jserver.datapack.conquerablehalls.FortressOfTheDead.FortressOfTheDead;
 import com.l2jserver.datapack.conquerablehalls.RainbowSpringsChateau.RainbowSpringsChateau;
 import com.l2jserver.datapack.conquerablehalls.flagwar.BanditStronghold.BanditStronghold;
 import com.l2jserver.datapack.conquerablehalls.flagwar.WildBeastReserve.WildBeastReserve;
-import com.l2jserver.datapack.custom.Validators.SubClassSkills;
 import com.l2jserver.datapack.custom.events.Elpies.Elpies;
-import com.l2jserver.datapack.custom.events.Rabbits.Rabbits;
 import com.l2jserver.datapack.custom.events.Race.Race;
 import com.l2jserver.datapack.custom.events.TvT.TvTManager.TvTManager;
-import com.l2jserver.datapack.custom.events.Wedding.Wedding;
 import com.l2jserver.datapack.custom.service.buffer.BufferService;
 import com.l2jserver.datapack.custom.service.teleporter.TeleporterService;
 import com.l2jserver.datapack.events.CharacterBirthday.CharacterBirthday;
-import com.l2jserver.datapack.events.FreyaCelebration.FreyaCelebration;
 import com.l2jserver.datapack.events.GiftOfVitality.GiftOfVitality;
 import com.l2jserver.datapack.events.HeavyMedal.HeavyMedal;
 import com.l2jserver.datapack.events.LoveYourGatekeeper.LoveYourGatekeeper;
-import com.l2jserver.datapack.events.MasterOfEnchanting.MasterOfEnchanting;
 import com.l2jserver.datapack.events.TheValentineEvent.TheValentineEvent;
-import com.l2jserver.datapack.features.SkillTransfer.SkillTransfer;
-import com.l2jserver.datapack.vehicles.*;
+import com.l2jserver.datapack.vehicles.BoatGiranTalking;
+import com.l2jserver.datapack.vehicles.BoatGludinRune;
+import com.l2jserver.datapack.vehicles.BoatInnadrilTour;
+import com.l2jserver.datapack.vehicles.BoatRunePrimeval;
+import com.l2jserver.datapack.vehicles.BoatTalkingGludin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,15 +33,11 @@ public final class ScriptEngineManager {
 
   private static final List<Class<?>> scripts =
       List.of(
-          SkillTransfer.class,
-          SubClassSkills.class,
           BufferService.class,
           TeleporterService.class,
           Elpies.class,
-          Rabbits.class,
           Race.class,
           TvTManager.class,
-          Wedding.class,
           BoatTalkingGludin.class,
           BoatGiranTalking.class,
           BoatInnadrilTour.class,
@@ -53,15 +46,12 @@ public final class ScriptEngineManager {
           BanditStronghold.class,
           WildBeastReserve.class,
           DevastatedCastle.class,
-          FortressOfResistance.class,
           FortressOfTheDead.class,
           RainbowSpringsChateau.class,
           CharacterBirthday.class,
           GiftOfVitality.class,
           HeavyMedal.class,
           TheValentineEvent.class,
-          FreyaCelebration.class,
-          MasterOfEnchanting.class,
           LoveYourGatekeeper.class);
 
   private static final String MAIN = "main";
@@ -69,18 +59,6 @@ public final class ScriptEngineManager {
   private static final Object[] MAIN_METHOD_ARGS = new Object[] {new String[0]};
 
   private static final Class<?>[] ARG_MAIN = new Class[] {String[].class};
-
-  private static Method findMethod(Class<?> clazz, String methodName, Class<?>[] args) {
-    try {
-      final var mainMethod = clazz.getMethod(methodName, args);
-      final int modifiers = mainMethod.getModifiers();
-      if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers)) {
-        return mainMethod;
-      }
-    } catch (NoSuchMethodException ignored) {
-    }
-    return null;
-  }
 
   public static ScriptEngineManager getInstance() {
     return SingletonHolder.INSTANCE;
@@ -107,6 +85,18 @@ public final class ScriptEngineManager {
       throw new IllegalStateException("Object cannot be instantiated:" + clazz, e);
     }
     //    mainMethod.invoke(null, MAIN_METHOD_ARGS);
+  }
+
+  private static Method findMethod(Class<?> clazz, String methodName, Class<?>[] args) {
+    try {
+      final var mainMethod = clazz.getMethod(methodName, args);
+      final int modifiers = mainMethod.getModifiers();
+      if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers)) {
+        return mainMethod;
+      }
+    } catch (NoSuchMethodException ignored) {
+    }
+    return null;
   }
 
   public void executeScript(Class<?> clazz) {

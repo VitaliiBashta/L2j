@@ -19,64 +19,15 @@
 package com.l2jserver.gameserver.model.events;
 
 import com.l2jserver.gameserver.model.events.impl.IBaseEvent;
-import com.l2jserver.gameserver.model.events.impl.character.OnCreatureAttack;
-import com.l2jserver.gameserver.model.events.impl.character.OnCreatureAttackAvoid;
-import com.l2jserver.gameserver.model.events.impl.character.OnCreatureAttacked;
-import com.l2jserver.gameserver.model.events.impl.character.OnCreatureDamageDealt;
-import com.l2jserver.gameserver.model.events.impl.character.OnCreatureDamageReceived;
-import com.l2jserver.gameserver.model.events.impl.character.OnCreatureKill;
-import com.l2jserver.gameserver.model.events.impl.character.OnCreatureSkillUse;
-import com.l2jserver.gameserver.model.events.impl.character.OnCreatureTeleported;
-import com.l2jserver.gameserver.model.events.impl.character.OnCreatureZoneEnter;
-import com.l2jserver.gameserver.model.events.impl.character.OnCreatureZoneExit;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcCanBeSeen;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcCreatureSee;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcEventReceived;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcFirstTalk;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcManorBypass;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcMoveFinished;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcMoveNodeArrived;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcMoveRouteFinished;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcSkillFinished;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcSkillSee;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcSpawn;
-import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcTeleport;
+import com.l2jserver.gameserver.model.events.impl.character.*;
+import com.l2jserver.gameserver.model.events.impl.character.npc.*;
 import com.l2jserver.gameserver.model.events.impl.character.npc.attackable.OnAttackableAggroRangeEnter;
 import com.l2jserver.gameserver.model.events.impl.character.npc.attackable.OnAttackableAttack;
 import com.l2jserver.gameserver.model.events.impl.character.npc.attackable.OnAttackableFactionCall;
 import com.l2jserver.gameserver.model.events.impl.character.npc.attackable.OnAttackableHate;
 import com.l2jserver.gameserver.model.events.impl.character.npc.attackable.OnAttackableKill;
 import com.l2jserver.gameserver.model.events.impl.character.playable.OnPlayableExpChanged;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerAugment;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerBypass;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerChat;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerCreate;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerDelete;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerDlgAnswer;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerEquipItem;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerFameChanged;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerHennaAdd;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerHennaRemove;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerKarmaChanged;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerLevelChanged;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerLogin;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerLogout;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerPKChanged;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerProfessionCancel;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerProfessionChange;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerPvPChanged;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerPvPKill;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerRestore;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerSelect;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerSit;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerSkillLearn;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerSummonSpawn;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerSummonTalk;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerTransform;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerTutorialClientEvent;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerTutorialCmd;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerTutorialEvent;
-import com.l2jserver.gameserver.model.events.impl.character.player.OnPlayerTutorialQuestionMark;
+import com.l2jserver.gameserver.model.events.impl.character.player.*;
 import com.l2jserver.gameserver.model.events.impl.character.player.clan.OnPlayerClanCreate;
 import com.l2jserver.gameserver.model.events.impl.character.player.clan.OnPlayerClanDestroy;
 import com.l2jserver.gameserver.model.events.impl.character.player.clan.OnPlayerClanJoin;
@@ -111,9 +62,6 @@ import com.l2jserver.gameserver.model.events.returns.ChatFilterReturn;
 import com.l2jserver.gameserver.model.events.returns.TerminateReturn;
 import com.l2jserver.gameserver.util.Util;
 
-/**
- * @author UnAfraid
- */
 public enum EventType {
 	// Attackable events
 	ON_ATTACKABLE_AGGRO_RANGE_ENTER(OnAttackableAggroRangeEnter.class, void.class),

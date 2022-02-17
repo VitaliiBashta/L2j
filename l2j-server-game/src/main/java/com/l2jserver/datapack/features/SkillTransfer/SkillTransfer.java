@@ -14,10 +14,12 @@ import com.l2jserver.gameserver.model.itemcontainer.PcInventory;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
 
-public final class SkillTransfer extends AbstractNpcAI {
+@Service
+public class SkillTransfer extends AbstractNpcAI {
   private static final String HOLY_POMANDER = "HOLY_POMANDER_";
   private static final ItemHolder[] PORMANDERS = {
     // Cardinal (97)
@@ -33,6 +35,20 @@ public final class SkillTransfer extends AbstractNpcAI {
     setPlayerProfessionChangeId(this::onProfessionChange);
     setPlayerProfessionCancelId(this::onProfessionCancel);
     setOnEnterWorld(general().skillCheckEnable());
+  }
+
+  public void onProfessionChange(OnPlayerProfessionChange event) {
+    final L2PcInstance player = event.getActiveChar();
+    final int index = getTransferClassIndex(player);
+    if (index < 0) {
+      return;
+    }
+
+    final String name = HOLY_POMANDER + player.getClassId().getId();
+    if (!player.getVariables().getBoolean(name, false)) {
+      player.getVariables().set(name, true);
+      giveItems(player, PORMANDERS[index]);
+    }
   }
 
   private static int getTransferClassIndex(L2PcInstance player) {
@@ -53,24 +69,6 @@ public final class SkillTransfer extends AbstractNpcAI {
         {
           return -1;
         }
-    }
-  }
-
-  public static void main(String[] args) {
-    new SkillTransfer();
-  }
-
-  public void onProfessionChange(OnPlayerProfessionChange event) {
-    final L2PcInstance player = event.getActiveChar();
-    final int index = getTransferClassIndex(player);
-    if (index < 0) {
-      return;
-    }
-
-    final String name = HOLY_POMANDER + player.getClassId().getId();
-    if (!player.getVariables().getBoolean(name, false)) {
-      player.getVariables().set(name, true);
-      giveItems(player, PORMANDERS[index]);
     }
   }
 

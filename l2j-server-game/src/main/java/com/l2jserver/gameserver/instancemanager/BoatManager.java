@@ -1,21 +1,3 @@
-/*
- * Copyright © 2004-2021 L2J Server
- *
- * This file is part of L2J Server.
- *
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.instancemanager;
 
 import com.l2jserver.gameserver.model.L2World;
@@ -25,6 +7,7 @@ import com.l2jserver.gameserver.model.actor.instance.L2BoatInstance;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.actor.templates.L2CharTemplate;
 import com.l2jserver.gameserver.network.serverpackets.L2GameServerPacket;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -32,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
 
+@Service
 public class BoatManager {
   public static final int TALKING_ISLAND = 1;
   public static final int GLUDIN_HARBOR = 2;
