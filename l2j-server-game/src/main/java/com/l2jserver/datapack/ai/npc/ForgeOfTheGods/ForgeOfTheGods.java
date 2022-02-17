@@ -6,12 +6,10 @@ import com.l2jserver.gameserver.ai.CtrlIntention;
 import com.l2jserver.gameserver.model.actor.L2Attackable;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import org.springframework.stereotype.Service;
 
-/**
- * Forge of the Gods AI
- * @author nonom, malyelfik
- */
-public final class ForgeOfTheGods extends AbstractNpcAI {
+@Service
+public class ForgeOfTheGods extends AbstractNpcAI {
 	// NPCs
 	private static final int[] FOG_MOBS = {
 		22634, // Scarlet Stakato Worker

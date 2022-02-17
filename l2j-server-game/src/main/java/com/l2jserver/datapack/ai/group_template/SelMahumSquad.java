@@ -13,10 +13,12 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public final class SelMahumSquad extends AbstractNpcAI {
+@Service
+public class SelMahumSquad extends AbstractNpcAI {
   // NPC's
   private static final int CHEF = 18908;
   private static final int FIRE = 18927;
@@ -45,8 +47,11 @@ public final class SelMahumSquad extends AbstractNpcAI {
   private static final int MAHUM_EFFECT_SLEEP = 2;
   private static final int MAHUM_EFFECT_NONE = 3;
 
-  public SelMahumSquad() {
+  private final GameTimeController gameTimeController;
+
+  public SelMahumSquad(GameTimeController gameTimeController) {
     super(SelMahumSquad.class.getSimpleName(), "ai/group_template");
+    this.gameTimeController = gameTimeController;
 
     addAttackId(CHEF);
     addAttackId(SQUAD_LEADERS);
@@ -98,7 +103,7 @@ public final class SelMahumSquad extends AbstractNpcAI {
           startQuestTimer("fire", 30000 + getRandom(5000), npc, null);
           npc.setDisplayEffect(FIRE_EFFECT_NONE);
 
-          if (getRandom(GameTimeController.getInstance().isNight() ? 2 : 4) < 1) {
+          if (getRandom(gameTimeController.isNight() ? 2 : 4) < 1) {
             npc.setDisplayEffect(FIRE_EFFECT_BURN); // fire burns
             npc.broadcastEvent("SCE_CAMPFIRE_START", 600, null);
           } else {

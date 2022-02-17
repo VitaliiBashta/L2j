@@ -1,33 +1,6 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.instancemanager;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.l2jserver.commons.database.ConnectionFactory;
-import com.l2jserver.gameserver.InstanceListManager;
 import com.l2jserver.gameserver.SevenSigns;
 import com.l2jserver.gameserver.model.L2Clan;
 import com.l2jserver.gameserver.model.L2ClanMember;
@@ -35,15 +8,20 @@ import com.l2jserver.gameserver.model.L2Object;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.entity.Castle;
 import com.l2jserver.gameserver.model.items.instance.L2ItemInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-public final class CastleManager implements InstanceListManager {
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Service
+public  class CastleManager {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(CastleManager.class);
-	
-	private final List<Castle> _castles = new ArrayList<>();
-	
-	private final Map<Integer, Long> _castleSiegeDate = new ConcurrentHashMap<>();
-	
 	private static final int[] _castleCirclets = {
 		0,
 		6838,
@@ -56,6 +34,17 @@ public final class CastleManager implements InstanceListManager {
 		8182,
 		8183
 	};
+	private final List<Castle> _castles = new ArrayList<>();
+	private final Map<Integer, Long> _castleSiegeDate = new ConcurrentHashMap<>();
+	private final ConnectionFactory connectionFactory;
+
+	public CastleManager(ConnectionFactory connectionFactory) {
+		this.connectionFactory = connectionFactory;
+	}
+
+	public static CastleManager getInstance() {
+		return SingletonHolder._instance;
+	}
 	
 	public int findNearestCastleIndex(L2Object obj) {
 		return findNearestCastleIndex(obj, Long.MAX_VALUE);
@@ -79,6 +68,21 @@ public final class CastleManager implements InstanceListManager {
 			}
 		}
 		return index;
+	}
+	
+	public int getCastleIndex(L2Object activeObject) {
+		return getCastleIndex(activeObject.getX(), activeObject.getY(), activeObject.getZ());
+	}
+	
+	public int getCastleIndex(int x, int y, int z) {
+		Castle castle;
+		for (int i = 0; i < _castles.size(); i++) {
+			castle = _castles.get(i);
+			if ((castle != null) && castle.checkIfInZone(x, y, z)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	public Castle getCastleById(int castleId) {
@@ -108,6 +112,10 @@ public final class CastleManager implements InstanceListManager {
 		return null;
 	}
 	
+	public Castle getCastle(L2Object activeObject) {
+		return getCastle(activeObject.getX(), activeObject.getY(), activeObject.getZ());
+	}
+	
 	public Castle getCastle(int x, int y, int z) {
 		for (Castle temp : _castles) {
 			if (temp.checkIfInZone(x, y, z)) {
@@ -117,30 +125,11 @@ public final class CastleManager implements InstanceListManager {
 		return null;
 	}
 	
-	public Castle getCastle(L2Object activeObject) {
-		return getCastle(activeObject.getX(), activeObject.getY(), activeObject.getZ());
-	}
-	
 	public int getCastleIndex(int castleId) {
 		Castle castle;
 		for (int i = 0; i < _castles.size(); i++) {
 			castle = _castles.get(i);
 			if ((castle != null) && (castle.getResidenceId() == castleId)) {
-				return i;
-			}
-		}
-		return -1;
-	}
-	
-	public int getCastleIndex(L2Object activeObject) {
-		return getCastleIndex(activeObject.getX(), activeObject.getY(), activeObject.getZ());
-	}
-	
-	public int getCastleIndex(int x, int y, int z) {
-		Castle castle;
-		for (int i = 0; i < _castles.size(); i++) {
-			castle = _castles.get(i);
-			if ((castle != null) && castle.checkIfInZone(x, y, z)) {
 				return i;
 			}
 		}
@@ -218,7 +207,7 @@ public final class CastleManager implements InstanceListManager {
 				}
 			}
 			// else offline-player circlet removal
-			try (var con = ConnectionFactory.getInstance().getConnection();
+			try (var con = connectionFactory.getConnection();
 				var ps = con.prepareStatement("DELETE FROM items WHERE owner_id = ? and item_id = ?")) {
 				ps.setInt(1, member.getObjectId());
 				ps.setInt(2, circletId);
@@ -229,9 +218,9 @@ public final class CastleManager implements InstanceListManager {
 		}
 	}
 	
-	@Override
+	@PostConstruct
 	public void loadInstances() {
-		try (var con = ConnectionFactory.getInstance().getConnection();
+		try (var con = connectionFactory.getConnection();
 			var s = con.createStatement();
 			var rs = s.executeQuery("SELECT id FROM castle ORDER BY id")) {
 			while (rs.next()) {
@@ -242,12 +231,7 @@ public final class CastleManager implements InstanceListManager {
 			LOG.warn("There has been an error loading castles from database!", ex);
 		}
 	}
-	
-	@Override
-	public void updateReferences() {
-	}
-	
-	@Override
+
 	public void activateInstances() {
 		for (final Castle castle : _castles) {
 			castle.activateInstance();
@@ -268,11 +252,7 @@ public final class CastleManager implements InstanceListManager {
 		return count;
 	}
 	
-	public static CastleManager getInstance() {
-		return SingletonHolder._instance;
-	}
-	
 	private static class SingletonHolder {
-		protected static final CastleManager _instance = new CastleManager();
+		protected static final CastleManager _instance = new CastleManager(null);
 	}
 }

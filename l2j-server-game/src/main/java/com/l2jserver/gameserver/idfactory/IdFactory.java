@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.l2jserver.gameserver.config.Configuration.customs;
-import static com.l2jserver.gameserver.config.Configuration.general;
-
 public abstract class IdFactory {
 
   public static final int FIRST_OID = 0x10000000;
@@ -64,28 +61,8 @@ public abstract class IdFactory {
 
   protected IdFactory(ConnectionFactory connectionFactory) {
     this.connectionFactory = connectionFactory;
-    setAllCharacterOffline();
-    if (general().databaseCleanUp()) {
-      if (customs().allowWedding()) {
-        cleanInvalidWeddings();
-      }
-      cleanUpDB();
-    }
-    cleanUpTimeStamps();
-  }
 
-  public static IdFactory getInstance() {
-    return _instance;
-  }
-
-  private void setAllCharacterOffline() {
-    try (var con = connectionFactory.getConnection();
-        var s = con.createStatement()) {
-      s.executeUpdate("UPDATE characters SET online = 0");
-      LOG.info("Updated characters online status.");
-    } catch (Exception ex) {
-      LOG.warn("Could not update characters online status!", ex);
-    }
+    //    cleanUpTimeStamps();
   }
 
   private void cleanUpDB() {
@@ -322,17 +299,8 @@ public abstract class IdFactory {
     }
   }
 
-  private void cleanInvalidWeddings() {
-    try (var con = ConnectionFactory.getInstance().getConnection();
-        var s = con.createStatement()) {
-      s.executeUpdate(
-          "DELETE FROM mods_wedding WHERE player1Id NOT IN (SELECT charId FROM characters)");
-      s.executeUpdate(
-          "DELETE FROM mods_wedding WHERE player2Id NOT IN (SELECT charId FROM characters)");
-      LOG.info("Cleaned up invalid weddings.");
-    } catch (Exception ex) {
-      LOG.warn("Could not clean up invalid weddings!", ex);
-    }
+  public static IdFactory getInstance() {
+    return _instance;
   }
 
   private void cleanUpTimeStamps() {
@@ -346,6 +314,19 @@ public abstract class IdFactory {
       }
       LOG.info("Cleaned {} expired timestamps from database.", cleanCount);
     } catch (Exception e) {
+    }
+  }
+
+  private void cleanInvalidWeddings() {
+    try (var con = connectionFactory.getConnection();
+        var s = con.createStatement()) {
+      s.executeUpdate(
+          "DELETE FROM mods_wedding WHERE player1Id NOT IN (SELECT charId FROM characters)");
+      s.executeUpdate(
+          "DELETE FROM mods_wedding WHERE player2Id NOT IN (SELECT charId FROM characters)");
+      LOG.info("Cleaned up invalid weddings.");
+    } catch (Exception ex) {
+      LOG.warn("Could not clean up invalid weddings!", ex);
     }
   }
 
@@ -379,11 +360,7 @@ public abstract class IdFactory {
 
   public abstract int getNextId();
 
-  /**
-   * return a used Object ID back to the pool
-   *
-   * @param id
-   */
+  /** return a used Object ID back to the pool */
   public abstract void releaseId(int id);
 
   public abstract int size();

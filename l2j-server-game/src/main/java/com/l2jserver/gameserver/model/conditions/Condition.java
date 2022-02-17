@@ -6,7 +6,7 @@ import com.l2jserver.gameserver.model.skills.Skill;
 
 /** The Class Condition. */
 public abstract class Condition implements ConditionListener {
-  private ConditionListener listener;
+  ConditionListener listener;
   private String msg;
   private int msgId;
   private boolean addName = false;

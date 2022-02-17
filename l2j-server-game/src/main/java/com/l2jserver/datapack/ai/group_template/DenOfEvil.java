@@ -12,13 +12,10 @@ import com.l2jserver.gameserver.model.zone.type.L2EffectZone;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
-/**
- * Dummy AI for spawns/respawns only for testing.
- *
- * @author Gnacik
- */
-public final class DenOfEvil extends AbstractNpcAI {
+@Service
+public class DenOfEvil extends AbstractNpcAI {
   // private static final int _buffer_id = 32656;
   protected static final int[] EYE_IDS = {18812, 18813, 18814};
   private static final int SKILL_ID = 6150; // others +2
@@ -71,8 +68,11 @@ public final class DenOfEvil extends AbstractNpcAI {
     new Location(62905, -106109, -2384, 51288)
   };
 
-  public DenOfEvil() {
+  private final ThreadPoolManager threadPoolManager;
+
+  public DenOfEvil(ThreadPoolManager threadPoolManager) {
     super(DenOfEvil.class.getSimpleName(), "ai/group_template");
+    this.threadPoolManager = threadPoolManager;
     addKillId(EYE_IDS);
     addSpawnId(EYE_IDS);
     for (Location loc : EYE_SPAWNS) {
@@ -80,10 +80,30 @@ public final class DenOfEvil extends AbstractNpcAI {
     }
   }
 
-  private int getSkillIdByNpcId(int npcId) {
-    int diff = npcId - EYE_IDS[0];
-    diff *= 2;
-    return SKILL_ID + diff;
+  @Override
+  public String onKill(L2Npc npc, L2PcInstance killer, boolean isSummon) {
+    threadPoolManager.scheduleAi(
+        () -> {
+          addSpawn(EYE_IDS[getRandom(EYE_IDS.length)], npc.getLocation(), false, 0);
+        },
+        15000);
+    L2EffectZone zone = ZoneManager.getInstance().getZone(npc, L2EffectZone.class);
+    if (zone == null) {
+      LOG.warn(
+          "NPC "
+              + npc
+              + " killed outside of L2EffectZone, check your zone coords! X:"
+              + npc.getX()
+              + " Y:"
+              + npc.getY()
+              + " Z:"
+              + npc.getZ());
+      return null;
+    }
+    int skillId = getSkillIdByNpcId(npc.getId());
+    int skillLevel = zone.getSkillLevel(skillId);
+    zone.addSkill(skillId, skillLevel - 1);
+    return super.onKill(npc, killer, isSummon);
   }
 
   @Override
@@ -105,7 +125,8 @@ public final class DenOfEvil extends AbstractNpcAI {
     zone.addSkill(skillId, skillLevel + 1);
     if (skillLevel == 3) // 3+1=4
     {
-      ThreadPoolManager.getInstance().scheduleAi(new KashaDestruction(zone), KASHA_DESTRUCT_DELAY);
+      threadPoolManager.scheduleAi(
+          new KashaDestruction(threadPoolManager, zone), KASHA_DESTRUCT_DELAY);
       zone.broadcastPacket(
           SystemMessage.getSystemMessage(SystemMessageId.KASHA_EYE_PITCHES_TOSSES_EXPLODE));
     } else if (skillLevel == 2) {
@@ -116,38 +137,19 @@ public final class DenOfEvil extends AbstractNpcAI {
     return super.onSpawn(npc);
   }
 
-  @Override
-  public String onKill(L2Npc npc, L2PcInstance killer, boolean isSummon) {
-    ThreadPoolManager.getInstance()
-        .scheduleAi(
-            () -> {
-              addSpawn(EYE_IDS[getRandom(EYE_IDS.length)], npc.getLocation(), false, 0);
-            },
-            15000);
-    L2EffectZone zone = ZoneManager.getInstance().getZone(npc, L2EffectZone.class);
-    if (zone == null) {
-      LOG.warn(
-          "NPC "
-              + npc
-              + " killed outside of L2EffectZone, check your zone coords! X:"
-              + npc.getX()
-              + " Y:"
-              + npc.getY()
-              + " Z:"
-              + npc.getZ());
-      return null;
-    }
-    int skillId = getSkillIdByNpcId(npc.getId());
-    int skillLevel = zone.getSkillLevel(skillId);
-    zone.addSkill(skillId, skillLevel - 1);
-    return super.onKill(npc, killer, isSummon);
+  private int getSkillIdByNpcId(int npcId) {
+    int diff = npcId - EYE_IDS[0];
+    diff *= 2;
+    return SKILL_ID + diff;
   }
 
   private static class KashaDestruction implements Runnable {
     private static final SkillHolder KASHAS_BETRAYAL = new SkillHolder(6149);
+    private final ThreadPoolManager threadPoolManager;
     L2EffectZone _zone;
 
-    public KashaDestruction(L2EffectZone zone) {
+    public KashaDestruction(ThreadPoolManager threadPoolManager, L2EffectZone zone) {
+      this.threadPoolManager = threadPoolManager;
       _zone = zone;
     }
 
@@ -176,12 +178,11 @@ public final class DenOfEvil extends AbstractNpcAI {
               // respawn eye
               L2Npc npc = (L2Npc) character;
               if (Util.contains(EYE_IDS, npc.getId())) {
-                ThreadPoolManager.getInstance()
-                    .scheduleAi(
-                        () -> {
-                          addSpawn(EYE_IDS[getRandom(EYE_IDS.length)], npc.getLocation(), false, 0);
-                        },
-                        15000);
+                threadPoolManager.scheduleAi(
+                    () -> {
+                      addSpawn(EYE_IDS[getRandom(EYE_IDS.length)], npc.getLocation(), false, 0);
+                    },
+                    15000);
               }
             }
           }

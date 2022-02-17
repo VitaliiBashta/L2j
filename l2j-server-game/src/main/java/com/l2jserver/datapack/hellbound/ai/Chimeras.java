@@ -35,9 +35,11 @@ public class Chimeras extends AbstractNpcAI {
   private static final int DIM_LIFE_FORCE = 9680;
   private static final int LIFE_FORCE = 9681;
   private static final int CONTAINED_LIFE_FORCE = 9682;
+  private final ThreadPoolManager threadPoolManager;
 
-  public Chimeras() {
+  public Chimeras(ThreadPoolManager threadPoolManager) {
     super(Chimeras.class.getSimpleName(), "hellbound/AI");
+    this.threadPoolManager = threadPoolManager;
     addSkillSeeId(NPCS);
     addSpawnId(CELTUS);
     addSkillSeeId(CELTUS);
@@ -50,7 +52,7 @@ public class Chimeras extends AbstractNpcAI {
       final Location loc = LOCATIONS[getRandom(LOCATIONS.length)];
       if (!npc.isInsideRadius(loc, 200, false, false)) {
         npc.getSpawn().setLocation(loc);
-        ThreadPoolManager.getInstance().scheduleGeneral(new Teleport(npc, loc), 100);
+        threadPoolManager.scheduleGeneral(new Teleport(npc, loc), 100);
       }
     }
     return super.onSpawn(npc);

@@ -161,7 +161,6 @@ public class GameServer {
     StaticObjectData.getInstance();
     ZoneManager.getInstance();
     DoorData.getInstance();
-    CastleManager.getInstance().loadInstances();
     NpcBufferTable.getInstance();
     EventDroplist.getInstance();
 
@@ -205,8 +204,6 @@ public class GameServer {
     printSection("Siege");
     SiegeManager.getInstance().getSieges();
     CastleManager.getInstance().activateInstances();
-    FortManager.getInstance().loadInstances();
-    FortManager.getInstance().activateInstances();
     FortSiegeManager.getInstance();
     MerchantPriceConfigTable.getInstance().updateReferences();
     TerritoryWarManager.getInstance();

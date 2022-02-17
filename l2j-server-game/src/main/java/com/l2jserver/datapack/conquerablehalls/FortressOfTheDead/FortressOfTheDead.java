@@ -21,10 +21,13 @@ public class FortressOfTheDead extends ClanHallSiegeEngine {
   private static final int ALFRED = 35630;
   private static final int GISELLE = 35631;
 
-  private static Map<Integer, Integer> _damageToLidia = new HashMap<>();
+  private static Map<Integer, Integer> damageToLidia = new HashMap<>();
 
-  public FortressOfTheDead() {
+  private final GameTimeController gameTimeController;
+
+  public FortressOfTheDead(GameTimeController gameTimeController) {
     super(FortressOfTheDead.class.getSimpleName(), "conquerablehalls", FORTRESS_OF_DEAD);
+    this.gameTimeController = gameTimeController;
     addKillId(LIDIA);
     addKillId(ALFRED);
     addKillId(GISELLE);
@@ -47,12 +50,12 @@ public class FortressOfTheDead extends ClanHallSiegeEngine {
 
       if ((clan != null) && checkIsAttacker(clan)) {
         final int id = clan.getId();
-        if ((id > 0) && _damageToLidia.containsKey(id)) {
-          int newDamage = _damageToLidia.get(id);
+        if ((id > 0) && damageToLidia.containsKey(id)) {
+          int newDamage = damageToLidia.get(id);
           newDamage += damage;
-          _damageToLidia.put(id, newDamage);
+          damageToLidia.put(id, newDamage);
         } else {
-          _damageToLidia.put(id, damage);
+          damageToLidia.put(id, damage);
         }
       }
     }
@@ -114,7 +117,7 @@ public class FortressOfTheDead extends ClanHallSiegeEngine {
   @Override
   public void startSiege() {
     // Siege must start at night
-    int hoursLeft = (GameTimeController.getInstance().getGameTime() / 60) % 24;
+    int hoursLeft = (gameTimeController.getGameTime() / 60) % 24;
 
     if ((hoursLeft < 0) || (hoursLeft > 6)) {
       cancelSiegeTask();
@@ -129,7 +132,7 @@ public class FortressOfTheDead extends ClanHallSiegeEngine {
   public L2Clan getWinner() {
     int counter = 0;
     int damagest = 0;
-    for (Entry<Integer, Integer> e : _damageToLidia.entrySet()) {
+    for (Entry<Integer, Integer> e : damageToLidia.entrySet()) {
       final int damage = e.getValue();
       if (damage > counter) {
         counter = damage;
