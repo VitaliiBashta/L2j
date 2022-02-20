@@ -2497,11 +2497,9 @@ public class Quest extends AbstractScript implements Identifiable {
     // TODO: Implement.
   }
 
-  @Override
   public boolean reload() {
     unload();
 
-    // TODO(Zoey76): Implement.
     return false;
   }
 

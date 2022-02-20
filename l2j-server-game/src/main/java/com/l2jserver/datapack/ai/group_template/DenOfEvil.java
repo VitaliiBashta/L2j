@@ -7,17 +7,19 @@ import com.l2jserver.gameserver.model.Location;
 import com.l2jserver.gameserver.model.actor.L2Character;
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+import com.l2jserver.gameserver.model.events.AbstractScript;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.zone.type.L2EffectZone;
 import com.l2jserver.gameserver.network.SystemMessageId;
 import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
-import com.l2jserver.gameserver.util.Util;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class DenOfEvil extends AbstractNpcAI {
   // private static final int _buffer_id = 32656;
-  protected static final int[] EYE_IDS = {18812, 18813, 18814};
+  protected static final List<Integer> EYE_IDS = List.of(18812, 18813, 18814);
   private static final int SKILL_ID = 6150; // others +2
   private static final long KASHA_DESTRUCT_DELAY = 120000;
 
@@ -76,17 +78,14 @@ public class DenOfEvil extends AbstractNpcAI {
     addKillId(EYE_IDS);
     addSpawnId(EYE_IDS);
     for (Location loc : EYE_SPAWNS) {
-      addSpawn(EYE_IDS[getRandom(EYE_IDS.length)], loc, false, 0);
+      addSpawn(getRandom(EYE_IDS), loc, false, 0);
     }
   }
 
   @Override
   public String onKill(L2Npc npc, L2PcInstance killer, boolean isSummon) {
     threadPoolManager.scheduleAi(
-        () -> {
-          addSpawn(EYE_IDS[getRandom(EYE_IDS.length)], npc.getLocation(), false, 0);
-        },
-        15000);
+        () -> addSpawn(getRandom(EYE_IDS), npc.getLocation(), false, 0), 15000);
     L2EffectZone zone = ZoneManager.getInstance().getZone(npc, L2EffectZone.class);
     if (zone == null) {
       LOG.warn(
@@ -138,7 +137,7 @@ public class DenOfEvil extends AbstractNpcAI {
   }
 
   private int getSkillIdByNpcId(int npcId) {
-    int diff = npcId - EYE_IDS[0];
+    int diff = npcId - EYE_IDS.get(0);
     diff *= 2;
     return SKILL_ID + diff;
   }
@@ -146,18 +145,18 @@ public class DenOfEvil extends AbstractNpcAI {
   private static class KashaDestruction implements Runnable {
     private static final SkillHolder KASHAS_BETRAYAL = new SkillHolder(6149);
     private final ThreadPoolManager threadPoolManager;
-    L2EffectZone _zone;
+    L2EffectZone zone;
 
     public KashaDestruction(ThreadPoolManager threadPoolManager, L2EffectZone zone) {
       this.threadPoolManager = threadPoolManager;
-      _zone = zone;
+      this.zone = zone;
     }
 
     @Override
     public void run() {
       for (int i = SKILL_ID; i <= (SKILL_ID + 4); i = i + 2) {
         // test 3 skills if some is lvl 4
-        if (_zone.getSkillLevel(i) > 3) {
+        if (zone.getSkillLevel(i) > 3) {
           destroyZone();
           break;
         }
@@ -165,23 +164,22 @@ public class DenOfEvil extends AbstractNpcAI {
     }
 
     private void destroyZone() {
-      for (L2Character character : _zone.getCharactersInside()) {
+      for (L2Character character : zone.getCharactersInside()) {
         if (character == null) {
           continue;
         }
         if (character.isPlayable()) {
           KASHAS_BETRAYAL.getSkill().applyEffects(character, character);
         } else {
-          if (character.doDie(null)) // mobs die
-          {
+          if (character.doDie(null)) {
             if (character.isNpc()) {
               // respawn eye
               L2Npc npc = (L2Npc) character;
-              if (Util.contains(EYE_IDS, npc.getId())) {
+              if (EYE_IDS.contains(npc.getId())) {
                 threadPoolManager.scheduleAi(
-                    () -> {
-                      addSpawn(EYE_IDS[getRandom(EYE_IDS.length)], npc.getLocation(), false, 0);
-                    },
+                    () ->
+                        new AbstractScript()
+                            .addSpawn(getRandom(EYE_IDS), npc.getLocation(), false, 0),
                     15000);
               }
             }
@@ -189,7 +187,7 @@ public class DenOfEvil extends AbstractNpcAI {
         }
       }
       for (int i = SKILL_ID; i <= (SKILL_ID + 4); i = i + 2) {
-        _zone.removeSkill(i);
+        zone.removeSkill(i);
       }
     }
   }

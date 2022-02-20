@@ -727,28 +727,10 @@ public class QuestState {
 
     /**
      * Add a temporary spawn of the specified npc.
-     *
-     * @param npcId         the Id of the npc to spawn
-     * @param x             the X coordinate of the npc spawn location
-     * @param y             the Y coordinate of the npc spawn location
-     * @param z             the Z coordinate (height) of the npc spawn location
-     * @param heading       the heading of the npc
-     * @param randomOffset  if {@code true}, adds +/- 50~100 to X/Y coordinates of the spawn location
-     * @param despawnDelay  time in milliseconds till the npc is despawned (default: 0)
-     * @param isSummonSpawn if {@code true}, displays a summon animation on npc spawn (default: {@code false})
-     * @return the {@link L2Npc} object of the newly spawned npc or {@code null} if the npc doesn't exist
-     * @see #addSpawn(int)
-     * @see #addSpawn(int, int)
-     * @see #addSpawn(int, L2Character)
-     * @see #addSpawn(int, L2Character, int)
-     * @see #addSpawn(int, int, int, int)
-     * @see #addSpawn(int, L2Character, boolean, int)
-     * @see #addSpawn(int, int, int, int, int)
-     * @see #addSpawn(int, int, int, int, int, boolean, int)
-     * @see #addSpawn(int, int, int, int, int, boolean, int, boolean)
      */
     public L2Npc addSpawn(int npcId, int x, int y, int z, int heading, boolean randomOffset, int despawnDelay, boolean isSummonSpawn) {
-        return AbstractScript.addSpawn(npcId, x, y, z, heading, randomOffset, despawnDelay, isSummonSpawn);
+    return new AbstractScript()
+        .addSpawn(npcId, x, y, z, heading, randomOffset, despawnDelay, isSummonSpawn);
     }
 
     /**

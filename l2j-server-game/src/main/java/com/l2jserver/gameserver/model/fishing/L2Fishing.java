@@ -109,7 +109,8 @@ public class L2Fishing implements Runnable {
 			if (fishingMonster != null) {
 				if (Rnd.get(100) <= fishingMonster.getProbability()) {
 					_fisher.sendPacket(SystemMessageId.YOU_CAUGHT_SOMETHING_SMELLY_THROW_IT_BACK);
-					final L2Npc monster = AbstractScript.addSpawn(fishingMonster.getFishingMonsterId(), _fisher);
+          final L2Npc monster =
+              new AbstractScript().addSpawn(fishingMonster.getFishingMonsterId(), _fisher);
 					monster.setTarget(_fisher);
 				} else {
 					_fisher.sendPacket(SystemMessageId.YOU_CAUGHT_SOMETHING);

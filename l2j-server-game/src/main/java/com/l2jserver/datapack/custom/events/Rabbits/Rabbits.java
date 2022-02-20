@@ -71,7 +71,7 @@ public class Rabbits extends Event {
     }
   }
 
-  private static void recordSpawn(
+  private void recordSpawn(
       Set<L2Npc> npcs,
       int npcId,
       int x,
