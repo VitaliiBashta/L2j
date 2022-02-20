@@ -98,9 +98,6 @@ public class L2Spawn implements IPositionable, Identifiable {
    * </ul>
    *
    * @param template The L2NpcTemplate to link to this L2Spawn
-   * @throws SecurityException
-   * @throws ClassNotFoundException
-   * @throws NoSuchMethodException
    * @throws ClassCastException when template type is not subclass of L2Npc
    */
   public L2Spawn(L2NpcTemplate template)

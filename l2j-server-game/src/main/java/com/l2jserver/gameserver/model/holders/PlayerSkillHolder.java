@@ -1,39 +1,27 @@
 package com.l2jserver.gameserver.model.holders;
 
-import com.l2jserver.gameserver.data.xml.impl.SkillTreesData;
-import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.interfaces.ISkillsHolder;
 import com.l2jserver.gameserver.model.skills.Skill;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class PlayerSkillHolder implements ISkillsHolder {
-  private final Map<Integer, Skill> _skills = new HashMap<>();
+  private final Map<Integer, Skill> skills;
 
-  public PlayerSkillHolder(L2PcInstance player) {
-    for (Skill skill : player.getSkills().values()) {
-      // Adding only skills that can be learned by the player.
-      if (SkillTreesData.getInstance().isSkillAllowed(player, skill)) {
-        addSkill(skill);
-      }
-    }
+  public PlayerSkillHolder(Map<Integer, Skill> skills) {
+    this.skills = skills;
   }
 
-  /**
-   * @return the map containing this character skills.
-   */
+  /** @return the map containing this character skills. */
   @Override
   public Map<Integer, Skill> getSkills() {
-    return _skills;
+    return skills;
   }
 
-  /**
-   * Add a skill to the skills map.<br>
-   */
+  /** Add a skill to the skills map.<br> */
   @Override
   public Skill addSkill(Skill skill) {
-    return _skills.put(skill.getId(), skill);
+    return skills.put(skill.getId(), skill);
   }
 
   /**
@@ -42,11 +30,12 @@ public class PlayerSkillHolder implements ISkillsHolder {
    */
   @Override
   public Skill getKnownSkill(int skillId) {
-    return _skills.get(skillId);
+    return skills.get(skillId);
   }
 
   /**
    * Return the level of a skill owned by the L2Character.
+   *
    * @param skillId The identifier of the L2Skill whose level must be returned
    * @return The level of the L2Skill identified by skillId
    */

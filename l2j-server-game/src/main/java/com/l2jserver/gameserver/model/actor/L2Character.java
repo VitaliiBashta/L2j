@@ -124,7 +124,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder {
 	/**
 	 * Map containing all skills of this character.
 	 */
-	private final Map<Integer, Skill> _skills = new ConcurrentHashMap<>();
+	private final Map<Integer, Skill> skills = new ConcurrentHashMap<>();
 	private final byte[] _zones = new byte[ZoneId.getZoneCount()];
 	private final ReentrantLock _teleportLock = new ReentrantLock();
 	private final StampedLock _attackLock = new StampedLock();
@@ -4259,7 +4259,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder {
 
 	public Skill removeSkill(int skillId, boolean cancelEffect) {
 		// Remove the skill from the L2Character _skills
-		Skill oldSkill = _skills.remove(skillId);
+		Skill oldSkill = skills.remove(skillId);
 		// Remove all its Func objects from the L2Character calculator set
 		if (oldSkill != null) {
 			// Stop casting if this skill is used right now
@@ -4290,7 +4290,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder {
 	 * @return all skills own by the L2Character in a table of L2Skill.
 	 */
 	public final Collection<Skill> getAllSkills() {
-		return _skills.values();
+		return skills.values();
 	}
 
 	/**
@@ -4298,7 +4298,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder {
 	 */
 	@Override
 	public Map<Integer, Skill> getSkills() {
-		return _skills;
+		return skills;
 	}
 
 	/**
@@ -4323,7 +4323,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder {
 		Skill oldSkill = null;
 		if (newSkill != null) {
 			// Replace oldSkill by newSkill or Add the newSkill
-			oldSkill = _skills.put(newSkill.getId(), newSkill);
+			oldSkill = skills.put(newSkill.getId(), newSkill);
 			// If an old skill has been replaced, remove all its Func objects
 			if (oldSkill != null) {
 				removeStatsOwner(oldSkill);
@@ -4430,7 +4430,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder {
 	 */
 	@Override
 	public final Skill getKnownSkill(int skillId) {
-		return _skills.get(skillId);
+		return skills.get(skillId);
 	}
 
 	/**
