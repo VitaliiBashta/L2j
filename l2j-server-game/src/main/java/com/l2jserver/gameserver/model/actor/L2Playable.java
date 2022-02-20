@@ -1,21 +1,3 @@
-/*
- * Copyright © 2004-2021 L2J Server
- *
- * This file is part of L2J Server.
- *
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.model.actor;
 
 import com.l2jserver.gameserver.ai.CtrlEvent;
@@ -37,15 +19,6 @@ import com.l2jserver.gameserver.model.quest.QuestState;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.serverpackets.EtcStatusUpdate;
 
-/**
- * This class represents all Playable characters in the world.<br>
- * L2Playable:
- *
- * <ul>
- *   <li>L2PcInstance
- *   <li>L2Summon
- * </ul>
- */
 public abstract class L2Playable extends L2Character {
   private L2Character _lockedTarget = null;
   private L2PcInstance transferDmgTo = null;

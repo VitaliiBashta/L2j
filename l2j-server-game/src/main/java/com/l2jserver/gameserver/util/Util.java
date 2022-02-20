@@ -12,16 +12,20 @@ import com.l2jserver.gameserver.model.actor.tasks.player.IllegalPlayerActionTask
 import com.l2jserver.gameserver.model.interfaces.ILocational;
 import com.l2jserver.gameserver.network.serverpackets.AbstractHtmlPacket;
 import com.l2jserver.gameserver.network.serverpackets.ShowBoard;
-import com.l2jserver.gameserver.util.file.filter.ExtFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.text.*;
-import java.util.*;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Locale;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
-import static com.l2jserver.gameserver.config.Configuration.server;
 
 public final class Util {
 
@@ -79,6 +83,28 @@ public final class Util {
   }
 
   /**
+   * Calculates distance between 2 locations.
+   *
+   * @param loc1 - First location.
+   * @param loc2 - Second location.
+   * @param includeZAxis - If set to true, Z coordinates will be included.
+   * @param squared - If set to true, distance returned will be squared.
+   * @return {@code double} - Distance between object and given location.
+   */
+  public static double calculateDistance(
+      ILocational loc1, ILocational loc2, boolean includeZAxis, boolean squared) {
+    return calculateDistance(
+        loc1.getX(),
+        loc1.getY(),
+        loc1.getZ(),
+        loc2.getX(),
+        loc2.getY(),
+        loc2.getZ(),
+        includeZAxis,
+        squared);
+  }
+
+  /**
    * Calculates distance between one set of x, y, z and another set of x, y, z.
    *
    * @param x1 - X coordinate of first point.
@@ -106,28 +132,6 @@ public final class Util {
   }
 
   /**
-   * Calculates distance between 2 locations.
-   *
-   * @param loc1 - First location.
-   * @param loc2 - Second location.
-   * @param includeZAxis - If set to true, Z coordinates will be included.
-   * @param squared - If set to true, distance returned will be squared.
-   * @return {@code double} - Distance between object and given location.
-   */
-  public static double calculateDistance(
-      ILocational loc1, ILocational loc2, boolean includeZAxis, boolean squared) {
-    return calculateDistance(
-        loc1.getX(),
-        loc1.getY(),
-        loc1.getZ(),
-        loc2.getX(),
-        loc2.getY(),
-        loc2.getZ(),
-        includeZAxis,
-        squared);
-  }
-
-  /**
    * @param str - the string whose first letter to capitalize
    * @return a string with the first letter of the {@code str} capitalized
    */
@@ -144,42 +148,11 @@ public final class Util {
     return new String(arr);
   }
 
-  /** true if the two objects are within specified range between each other, false otherwise */
-  public static boolean checkIfInRange(
-      int range, L2Object obj1, L2Object obj2, boolean includeZAxis) {
-    if ((obj1 == null) || (obj2 == null)) {
-      return false;
-    }
-    if (obj1.getInstanceId() != obj2.getInstanceId()) {
-      return false;
-    }
-    if (range == -1) {
-      return true; // not limited
-    }
-
-    int rad = 0;
-    if (obj1 instanceof L2Character) {
-      rad += ((L2Character) obj1).getTemplate().getCollisionRadius();
-    }
-    if (obj2 instanceof L2Character) {
-      rad += ((L2Character) obj2).getTemplate().getCollisionRadius();
-    }
-
-    double d = Math.hypot(obj1.getX() - obj2.getX(), obj1.getY() - obj2.getY());
-    if (includeZAxis) {
-      d = Math.hypot(d, obj1.getZ() - obj2.getZ());
-    }
-    return (d - (rad / 2.0)) <= range;
-  }
-
   /**
    * Checks if object is within short (sqrt(int.max_value)) radius, not using collisionRadius.
    * Faster calculation than checkIfInRange if distance is short and collisionRadius isn't needed.
    * Not for long distance checks (potential teleports, far away castles etc).
    *
-   * @param radius
-   * @param obj1
-   * @param obj2
    * @param includeZAxis if true, check also Z axis (3-dimensional check), otherwise only 2D
    * @return {@code true} if objects are within specified range between each other, {@code false}
    *     otherwise
@@ -198,46 +171,6 @@ public final class Util {
       return Math.hypot(d, obj1.getZ() - obj2.getZ()) <= radius;
     }
     return d <= radius;
-  }
-
-  /**
-   * @param str - the String to count
-   * @return the number of "words" in a given string.
-   */
-  public static int countWords(String str) {
-    return str.trim().split("\\s+").length;
-  }
-
-  /**
-   * (Based on implode() in PHP)
-   *
-   * @param strings an array of strings to concatenate
-   * @param delimiter the delimiter to put between the strings
-   * @return a delimited string for a given array of string elements.
-   */
-  public static String implodeString(Iterable<String> strings, String delimiter) {
-    final StringJoiner sj = new StringJoiner(delimiter);
-    strings.forEach(sj::add);
-    return sj.toString();
-  }
-
-  /**
-   * Based on implode() in PHP
-   *
-   * @param <T>
-   * @param array
-   * @param delimiter
-   * @return a delimited string for a given array of string elements.
-   */
-  public static <T> String implode(T[] array, String delimiter) {
-    StringBuilder result = new StringBuilder();
-    for (T val : array) {
-      result.append(val.toString()).append(delimiter);
-    }
-    if (result.length() > 0) {
-      result = new StringBuilder(result.substring(0, result.length() - 1));
-    }
-    return result.toString();
   }
 
   /**
@@ -303,11 +236,6 @@ public final class Util {
     }
   }
 
-  /**
-   * @param val
-   * @param format
-   * @return formatted double value by specified format.
-   */
   public static String formatDouble(double val, String format) {
     final DecimalFormat formatter =
         new DecimalFormat(format, new DecimalFormatSymbols(Locale.ENGLISH));
@@ -330,21 +258,6 @@ public final class Util {
   }
 
   /**
-   * @param <T>
-   * @param array - the array to look into
-   * @param obj - the object to search for
-   * @return {@code true} if the {@code array} contains the {@code obj}, {@code false} otherwise.
-   */
-  public static <T> boolean contains(T[] array, T obj) {
-    for (T element : array) {
-      if (element == obj) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
    * @param array - the array to look into
    * @param obj - the integer to search for
    * @return {@code true} if the {@code array} contains the {@code obj}, {@code false} otherwise
@@ -358,17 +271,104 @@ public final class Util {
     return false;
   }
 
-  public static File[] getDatapackFiles(String dirname, String extension) {
-    File dir = new File(server().getDatapackRoot(), "data/" + dirname);
-    if (!dir.exists()) {
-      return null;
-    }
-    return dir.listFiles(new ExtFilter(extension));
+  /**
+   * Helper method to send a community board html to the specified player.<br>
+   * HtmlActionCache will be build with npc origin 0 which means the<br>
+   * links on the html are not bound to a specific npc.
+   *
+   * @param activeChar the player
+   * @param html the html content
+   */
+  public static void sendCBHtml(L2PcInstance activeChar, String html) {
+    sendCBHtml(activeChar, html, 0);
   }
 
-  public static String getDateString(Date date) {
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    return dateFormat.format(date.getTime());
+  /**
+   * Helper method to send a community board html to the specified player.<br>
+   * When {@code npcObjId} is greater -1 the HtmlActionCache will be build<br>
+   * with the npcObjId as origin. An origin of 0 means the cached bypasses<br>
+   * are not bound to a specific npc.
+   *
+   * @param activeChar the player to send the html content to
+   * @param html the html content
+   * @param npcObjId bypass origin to use
+   */
+  public static void sendCBHtml(L2PcInstance activeChar, String html, int npcObjId) {
+    sendCBHtml(activeChar, html, null, npcObjId);
+  }
+
+  /**
+   * Helper method to send a community board html to the specified player.<br>
+   * It fills a multiedit field in the send html if {@code fillMultiEdit}<br>
+   * is not null. When {@code npcObjId} is greater -1 the HtmlActionCache will be build<br>
+   * with the npcObjId as origin. An origin of 0 means the cached bypasses<br>
+   * are not bound to a specific npc.
+   *
+   * @param activeChar the player
+   * @param html the html content
+   * @param fillMultiEdit text to fill the multiedit field with(may be null)
+   * @param npcObjId bypass origin to use
+   */
+  public static void sendCBHtml(
+      L2PcInstance activeChar, String html, String fillMultiEdit, int npcObjId) {
+    if ((activeChar == null) || (html == null)) {
+      return;
+    }
+
+    activeChar.clearHtmlActions(HtmlActionScope.COMM_BOARD_HTML);
+
+    if (npcObjId > -1) {
+      buildHtmlActionCache(activeChar, HtmlActionScope.COMM_BOARD_HTML, npcObjId, html);
+    }
+
+    if (fillMultiEdit != null) {
+      activeChar.sendPacket(new ShowBoard(html, "1001"));
+      fillMultiEditContent(activeChar, fillMultiEdit);
+    } else {
+      if (html.length() < 16250) {
+        activeChar.sendPacket(new ShowBoard(html, "101"));
+        activeChar.sendPacket(new ShowBoard(null, "102"));
+        activeChar.sendPacket(new ShowBoard(null, "103"));
+      } else if (html.length() < (16250 * 2)) {
+        activeChar.sendPacket(new ShowBoard(html.substring(0, 16250), "101"));
+        activeChar.sendPacket(new ShowBoard(html.substring(16250), "102"));
+        activeChar.sendPacket(new ShowBoard(null, "103"));
+      } else if (html.length() < (16250 * 3)) {
+        activeChar.sendPacket(new ShowBoard(html.substring(0, 16250), "101"));
+        activeChar.sendPacket(new ShowBoard(html.substring(16250, 16250 * 2), "102"));
+        activeChar.sendPacket(new ShowBoard(html.substring(16250 * 2), "103"));
+      } else {
+        activeChar.sendPacket(
+            new ShowBoard(
+                "<html><body><br><center>Error: HTML was too long!</center></body></html>", "101"));
+        activeChar.sendPacket(new ShowBoard(null, "102"));
+        activeChar.sendPacket(new ShowBoard(null, "103"));
+      }
+    }
+  }
+
+  /**
+   * Builds the html action cache for the specified scope.<br>
+   * An {@code npcObjId} of 0 means, the cached actions can be clicked<br>
+   * without being near an npc which is spawned in the world.
+   *
+   * @param player the player to build the html action cache for
+   * @param scope the scope to build the html action cache for
+   * @param npcObjId the npc object id the html actions are cached for
+   * @param html the html code to parse
+   */
+  public static void buildHtmlActionCache(
+      L2PcInstance player, HtmlActionScope scope, int npcObjId, String html) {
+    if ((player == null) || (scope == null) || (npcObjId < 0) || (html == null)) {
+      throw new IllegalArgumentException();
+    }
+
+    if (general().htmlActionCacheDebug()) {
+      LOGGER.info("Set html action npc({}): {}", scope, npcObjId);
+    }
+    player.setHtmlActionOriginObjectId(scope, npcObjId);
+    buildHtmlBypassCache(player, scope, html);
+    buildHtmlLinkCache(player, scope, html);
   }
 
   private static void buildHtmlBypassCache(
@@ -437,126 +437,7 @@ public final class Util {
     }
   }
 
-  /**
-   * Builds the html action cache for the specified scope.<br>
-   * An {@code npcObjId} of 0 means, the cached actions can be clicked<br>
-   * without being near an npc which is spawned in the world.
-   *
-   * @param player the player to build the html action cache for
-   * @param scope the scope to build the html action cache for
-   * @param npcObjId the npc object id the html actions are cached for
-   * @param html the html code to parse
-   */
-  public static void buildHtmlActionCache(
-      L2PcInstance player, HtmlActionScope scope, int npcObjId, String html) {
-    if ((player == null) || (scope == null) || (npcObjId < 0) || (html == null)) {
-      throw new IllegalArgumentException();
-    }
-
-    if (general().htmlActionCacheDebug()) {
-      LOGGER.info("Set html action npc({}): {}", scope, npcObjId);
-    }
-    player.setHtmlActionOriginObjectId(scope, npcObjId);
-    buildHtmlBypassCache(player, scope, html);
-    buildHtmlLinkCache(player, scope, html);
-  }
-
-  /**
-   * Helper method to send a community board html to the specified player.<br>
-   * HtmlActionCache will be build with npc origin 0 which means the<br>
-   * links on the html are not bound to a specific npc.
-   *
-   * @param activeChar the player
-   * @param html the html content
-   */
-  public static void sendCBHtml(L2PcInstance activeChar, String html) {
-    sendCBHtml(activeChar, html, 0);
-  }
-
-  /**
-   * Helper method to send a community board html to the specified player.<br>
-   * When {@code npcObjId} is greater -1 the HtmlActionCache will be build<br>
-   * with the npcObjId as origin. An origin of 0 means the cached bypasses<br>
-   * are not bound to a specific npc.
-   *
-   * @param activeChar the player to send the html content to
-   * @param html the html content
-   * @param npcObjId bypass origin to use
-   */
-  public static void sendCBHtml(L2PcInstance activeChar, String html, int npcObjId) {
-    sendCBHtml(activeChar, html, null, npcObjId);
-  }
-
-  /**
-   * Helper method to send a community board html to the specified player.<br>
-   * HtmlActionCache will be build with npc origin 0 which means the<br>
-   * links on the html are not bound to a specific npc. It also fills a<br>
-   * multiedit field in the send html if fillMultiEdit is not null.
-   *
-   * @param activeChar the player
-   * @param html the html content
-   * @param fillMultiEdit text to fill the multiedit field with(may be null)
-   */
-  public static void sendCBHtml(L2PcInstance activeChar, String html, String fillMultiEdit) {
-    sendCBHtml(activeChar, html, fillMultiEdit, 0);
-  }
-
-  /**
-   * Helper method to send a community board html to the specified player.<br>
-   * It fills a multiedit field in the send html if {@code fillMultiEdit}<br>
-   * is not null. When {@code npcObjId} is greater -1 the HtmlActionCache will be build<br>
-   * with the npcObjId as origin. An origin of 0 means the cached bypasses<br>
-   * are not bound to a specific npc.
-   *
-   * @param activeChar the player
-   * @param html the html content
-   * @param fillMultiEdit text to fill the multiedit field with(may be null)
-   * @param npcObjId bypass origin to use
-   */
-  public static void sendCBHtml(
-      L2PcInstance activeChar, String html, String fillMultiEdit, int npcObjId) {
-    if ((activeChar == null) || (html == null)) {
-      return;
-    }
-
-    activeChar.clearHtmlActions(HtmlActionScope.COMM_BOARD_HTML);
-
-    if (npcObjId > -1) {
-      buildHtmlActionCache(activeChar, HtmlActionScope.COMM_BOARD_HTML, npcObjId, html);
-    }
-
-    if (fillMultiEdit != null) {
-      activeChar.sendPacket(new ShowBoard(html, "1001"));
-      fillMultiEditContent(activeChar, fillMultiEdit);
-    } else {
-      if (html.length() < 16250) {
-        activeChar.sendPacket(new ShowBoard(html, "101"));
-        activeChar.sendPacket(new ShowBoard(null, "102"));
-        activeChar.sendPacket(new ShowBoard(null, "103"));
-      } else if (html.length() < (16250 * 2)) {
-        activeChar.sendPacket(new ShowBoard(html.substring(0, 16250), "101"));
-        activeChar.sendPacket(new ShowBoard(html.substring(16250), "102"));
-        activeChar.sendPacket(new ShowBoard(null, "103"));
-      } else if (html.length() < (16250 * 3)) {
-        activeChar.sendPacket(new ShowBoard(html.substring(0, 16250), "101"));
-        activeChar.sendPacket(new ShowBoard(html.substring(16250, 16250 * 2), "102"));
-        activeChar.sendPacket(new ShowBoard(html.substring(16250 * 2), "103"));
-      } else {
-        activeChar.sendPacket(
-            new ShowBoard(
-                "<html><body><br><center>Error: HTML was too long!</center></body></html>", "101"));
-        activeChar.sendPacket(new ShowBoard(null, "102"));
-        activeChar.sendPacket(new ShowBoard(null, "103"));
-      }
-    }
-  }
-
-  /**
-   * Fills the community board's multiedit window with text. Must send after sendCBHtml
-   *
-   * @param activeChar
-   * @param text
-   */
+  /** Fills the community board's multiedit window with text. Must send after sendCBHtml */
   public static void fillMultiEditContent(L2PcInstance activeChar, String text) {
     activeChar.sendPacket(
         new ShowBoard(
@@ -578,6 +459,20 @@ public final class Util {
                 "0",
                 "0",
                 "0")));
+  }
+
+  /**
+   * Helper method to send a community board html to the specified player.<br>
+   * HtmlActionCache will be build with npc origin 0 which means the<br>
+   * links on the html are not bound to a specific npc. It also fills a<br>
+   * multiedit field in the send html if fillMultiEdit is not null.
+   *
+   * @param activeChar the player
+   * @param html the html content
+   * @param fillMultiEdit text to fill the multiedit field with(may be null)
+   */
+  public static void sendCBHtml(L2PcInstance activeChar, String html, String fillMultiEdit) {
+    sendCBHtml(activeChar, html, fillMultiEdit, 0);
   }
 
   /**
@@ -613,6 +508,34 @@ public final class Util {
       }
     }
     return count;
+  }
+
+  /** true if the two objects are within specified range between each other, false otherwise */
+  public static boolean checkIfInRange(
+      int range, L2Object obj1, L2Object obj2, boolean includeZAxis) {
+    if ((obj1 == null) || (obj2 == null)) {
+      return false;
+    }
+    if (obj1.getInstanceId() != obj2.getInstanceId()) {
+      return false;
+    }
+    if (range == -1) {
+      return true; // not limited
+    }
+
+    int rad = 0;
+    if (obj1 instanceof L2Character) {
+      rad += ((L2Character) obj1).getTemplate().getCollisionRadius();
+    }
+    if (obj2 instanceof L2Character) {
+      rad += ((L2Character) obj2).getTemplate().getCollisionRadius();
+    }
+
+    double d = Math.hypot(obj1.getX() - obj2.getX(), obj1.getY() - obj2.getY());
+    if (includeZAxis) {
+      d = Math.hypot(d, obj1.getZ() - obj2.getZ());
+    }
+    return (d - (rad / 2.0)) <= range;
   }
 
   public static boolean isInsideRangeOfObjectId(L2Object obj, int targetObjId, int radius) {
@@ -730,10 +653,36 @@ public final class Util {
     return (((input - inputMin) * (outputMax - outputMin)) / (inputMax - inputMin)) + outputMin;
   }
 
+  /**
+   * Constrains a number to be within a range.
+   *
+   * @param input the number to constrain, all data types
+   * @param min the lower end of the range, all data types
+   * @param max the upper end of the range, all data types
+   * @return input: if input is between min and max, min: if input is less than min, max: if input
+   *     is greater than max
+   */
+  public static int constrain(int input, int min, int max) {
+    return (input < min) ? min : Math.min(input, max);
+  }
+
   /** Re-Maps a value from one range to another. */
   public static long map(long input, long inputMin, long inputMax, long outputMin, long outputMax) {
     input = constrain(input, inputMin, inputMax);
     return (((input - inputMin) * (outputMax - outputMin)) / (inputMax - inputMin)) + outputMin;
+  }
+
+  /**
+   * Constrains a number to be within a range.
+   *
+   * @param input the number to constrain, all data types
+   * @param min the lower end of the range, all data types
+   * @param max the upper end of the range, all data types
+   * @return input: if input is between min and max, min: if input is less than min, max: if input
+   *     is greater than max
+   */
+  public static long constrain(long input, long min, long max) {
+    return (input < min) ? min : Math.min(input, max);
   }
 
   /** Re-Maps a value from one range to another. */
@@ -752,57 +701,9 @@ public final class Util {
    * @return input: if input is between min and max, min: if input is less than min, max: if input
    *     is greater than max
    */
-  public static int constrain(int input, int min, int max) {
-    return (input < min) ? min : Math.min(input, max);
-  }
-
-  /**
-   * Constrains a number to be within a range.
-   *
-   * @param input the number to constrain, all data types
-   * @param min the lower end of the range, all data types
-   * @param max the upper end of the range, all data types
-   * @return input: if input is between min and max, min: if input is less than min, max: if input
-   *     is greater than max
-   */
-  public static long constrain(long input, long min, long max) {
-    return (input < min) ? min : Math.min(input, max);
-  }
-
-  /**
-   * Constrains a number to be within a range.
-   *
-   * @param input the number to constrain, all data types
-   * @param min the lower end of the range, all data types
-   * @param max the upper end of the range, all data types
-   * @return input: if input is between min and max, min: if input is less than min, max: if input
-   *     is greater than max
-   */
   public static double constrain(double input, double min, double max) {
     return (input < min) ? min : Math.min(input, max);
   }
 
-  /**
-   * @param array - the array to look into
-   * @param obj - the object to search for
-   * @return {@code true} if the {@code array} contains the {@code obj}, {@code false} otherwise.
-   */
-  public static boolean startsWith(String[] array, String obj) {
-    for (String element : array) {
-      if (element.startsWith(obj)) {
-        return true;
-      }
-    }
-    return false;
-  }
 
-  /** if the array contains the obj, false otherwise. */
-  public static boolean contains(String[] array, String obj, boolean ignoreCase) {
-    for (String element : array) {
-      if (element.equals(obj) || (ignoreCase && element.equalsIgnoreCase(obj))) {
-        return true;
-      }
-    }
-    return false;
-  }
 }

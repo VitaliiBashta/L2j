@@ -123,7 +123,7 @@ public class AbstractScript {
 					LOG.warn("Non properly defined annotation listener on method: " + method.getName() + " expected parameter to be type of: " + eventType.getEventClass().getSimpleName() + " but found: " + method.getParameterTypes()[0].getSimpleName());
 					continue;
 				} else if (!eventType.isReturnClass(method.getReturnType())) {
-					LOG.warn("Non properly defined annotation listener on method: " + method.getName() + " expected return type to be one of: " + Arrays.toString(eventType.getReturnClasses()) + " but found: " + method.getReturnType().getSimpleName());
+					LOG.warn("Non properly defined annotation listener on method: " + method.getName() + " expected return type to be one of: " + eventType.getReturnClasses() + " but found: " + method.getReturnType().getSimpleName());
 					continue;
 				}
 

@@ -7,24 +7,23 @@ import com.l2jserver.gameserver.model.items.type.CrystalType;
 import com.l2jserver.gameserver.model.items.type.EtcItemType;
 import com.l2jserver.gameserver.model.items.type.ItemType;
 import com.l2jserver.gameserver.model.items.type.ItemType2;
-import com.l2jserver.gameserver.util.Util;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class AbstractEnchantItem {
   protected static final Logger _log = Logger.getLogger(AbstractEnchantItem.class.getName());
 
-  private static final ItemType[] ENCHANT_TYPES =
-      new ItemType[] {
-        EtcItemType.ANCIENT_CRYSTAL_ENCHANT_AM,
-        EtcItemType.ANCIENT_CRYSTAL_ENCHANT_WP,
-        EtcItemType.BLESS_SCRL_ENCHANT_AM,
-        EtcItemType.BLESS_SCRL_ENCHANT_WP,
-        EtcItemType.SCRL_ENCHANT_AM,
-        EtcItemType.SCRL_ENCHANT_WP,
-        EtcItemType.SCRL_INC_ENCHANT_PROP_AM,
-        EtcItemType.SCRL_INC_ENCHANT_PROP_WP,
-      };
+  private static final List<ItemType> ENCHANT_TYPES =
+      List.of(
+          EtcItemType.ANCIENT_CRYSTAL_ENCHANT_AM,
+          EtcItemType.ANCIENT_CRYSTAL_ENCHANT_WP,
+          EtcItemType.BLESS_SCRL_ENCHANT_AM,
+          EtcItemType.BLESS_SCRL_ENCHANT_WP,
+          EtcItemType.SCRL_ENCHANT_AM,
+          EtcItemType.SCRL_ENCHANT_WP,
+          EtcItemType.SCRL_INC_ENCHANT_PROP_AM,
+          EtcItemType.SCRL_INC_ENCHANT_PROP_WP);
 
   private final int _id;
   private final CrystalType _grade;
@@ -37,12 +36,17 @@ public abstract class AbstractEnchantItem {
     this.l2Item = l2Item;
     if (getItem() == null) {
       throw new NullPointerException();
-    } else if (!Util.contains(ENCHANT_TYPES, getItem().getItemType())) {
+    } else if (!ENCHANT_TYPES.contains(getItem().getItemType())) {
       throw new IllegalAccessError();
     }
     _grade = set.getEnum("targetGrade", CrystalType.class, CrystalType.NONE);
     _maxEnchantLevel = set.getInt("maxEnchant", 65535);
     _bonusRate = set.getDouble("bonusRate", 0);
+  }
+
+  /** @return {@link L2Item} current item/scroll */
+  public final L2Item getItem() {
+    return l2Item;
   }
 
   /** @return id of current item */
@@ -55,18 +59,10 @@ public abstract class AbstractEnchantItem {
     return _bonusRate;
   }
 
-  /** @return {@link L2Item} current item/scroll */
-  public final L2Item getItem() {
-    return l2Item;
-  }
-
   /** @return grade of the item/scroll. */
   public final CrystalType getGrade() {
     return _grade;
   }
-
-  /** @return {@code true} if scroll is for weapon, {@code false} for armor */
-  public abstract boolean isWeapon();
 
   /** @return the maximum enchant level that this scroll/item can be used with */
   public int getMaxEnchantLevel() {
@@ -104,4 +100,7 @@ public abstract class AbstractEnchantItem {
     }
     return false;
   }
+
+  /** @return {@code true} if scroll is for weapon, {@code false} for armor */
+  public abstract boolean isWeapon();
 }

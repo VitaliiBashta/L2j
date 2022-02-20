@@ -574,8 +574,8 @@ public class NpcData extends IXmlReader {
 	 * @param classTypes of all the templates to get.
 	 * @return the template list for the given class type.
 	 */
-	public List<L2NpcTemplate> getAllNpcOfClassType(String... classTypes) {
-		return getTemplates(template -> Util.contains(classTypes, template.getType(), true));
+	public List<L2NpcTemplate> getAllNpcOfClassType(String classTypes) {
+		return getTemplates(template -> classTypes.equalsIgnoreCase(template.getType()));
 	}
 	
 	private static class SingletonHolder {

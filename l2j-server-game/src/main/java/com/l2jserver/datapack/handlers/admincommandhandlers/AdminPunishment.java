@@ -68,10 +68,8 @@ public class AdminPunishment implements IAdminCommandHandler {
                 HtmCache.getInstance()
                     .getHtm(activeChar.getHtmlPrefix(), "data/html/admin/punishment.htm");
             if (content != null) {
-              content =
-                  content.replaceAll("%punishments%", Util.implode(PunishmentType.values(), ";"));
-              content =
-                  content.replaceAll("%affects%", Util.implode(PunishmentAffect.values(), ";"));
+              content = content.replaceAll("%punishments%", PunishmentType.values().toString());
+              content = content.replaceAll("%affects%", PunishmentAffect.values().toString());
               activeChar.sendPacket(new NpcHtmlMessage(0, 1, content));
             } else {
               _log.log(
@@ -138,9 +136,7 @@ public class AdminPunishment implements IAdminCommandHandler {
 
                     content = content.replaceAll("%player_name%", name);
                     content = content.replaceAll("%punishments%", sb.toString());
-                    content =
-                        content.replaceAll(
-                            "%affects%", Util.implode(PunishmentAffect.values(), ";"));
+                    content = content.replaceAll("%affects%", PunishmentAffect.values().toString());
                     content = content.replaceAll("%affect_type%", affect.name());
                     activeChar.sendPacket(new NpcHtmlMessage(0, 1, content));
                   } else {
@@ -178,8 +174,7 @@ public class AdminPunishment implements IAdminCommandHandler {
                   if (content != null) {
                     content = content.replaceAll("%player_name%", target.getName());
                     content =
-                        content.replaceAll(
-                            "%punishments%", Util.implode(PunishmentType.values(), ";"));
+                        content.replaceAll("%punishments%", PunishmentType.values().toString());
                     content = content.replaceAll("%acc%", target.getAccountName());
                     content = content.replaceAll("%char%", target.getName());
                     content = content.replaceAll("%ip%", target.getIPAddress());
