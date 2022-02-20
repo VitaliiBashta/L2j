@@ -1,4 +1,3 @@
-
 package com.l2jserver.datapack.ai.group_template;
 
 import com.l2jserver.datapack.ai.npc.AbstractNpcAI;
@@ -13,10 +12,12 @@ import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public final class MonasteryOfSilence extends AbstractNpcAI {
+@Service
+public class MonasteryOfSilence extends AbstractNpcAI {
   // NPCs
   private static final int CAPTAIN = 18910; // Solina Knight Captain
   private static final int KNIGHT = 18909; // Solina Knights
@@ -56,55 +57,6 @@ public final class MonasteryOfSilence extends AbstractNpcAI {
     addNpcHateId(GUIDE, SEEKER, SAVIOR, ASCETIC);
     addAggroRangeEnterId(GUIDE, SEEKER, SAVIOR, ASCETIC);
     addSpawnId(SCARECROW);
-  }
-
-  @Override
-  public String onAdvEvent(String event, L2Npc npc, L2PcInstance player) {
-    switch (event) {
-      case "TRAINING":
-        {
-          for (L2Character character : npc.getKnownList().getKnownCharactersInRadius(400)) {
-            if ((getRandom(100) < 30)
-                && character.isNpc()
-                && !character.isDead()
-                && !character.isInCombat()) {
-              if ((character.getId() == CAPTAIN) && (getRandom(100) < 10) && npc.isScriptValue(0)) {
-                final L2Npc captain = (L2Npc) character;
-                broadcastNpcSay(
-                    captain,
-                    Say2.NPC_ALL,
-                    SOLINA_KNIGHTS_MSG[getRandom(SOLINA_KNIGHTS_MSG.length)]);
-                captain.setScriptValue(1);
-                startQuestTimer("TIMER", 10000, captain, null);
-              } else if (character.getId() == KNIGHT) {
-                character.setRunning();
-                ((L2Attackable) character).addDamageHate(npc, 0, 100);
-                character.getAI().setIntention(CtrlIntention.AI_INTENTION_ATTACK, npc, null);
-              }
-            }
-          }
-          break;
-        }
-      case "DO_CAST":
-        {
-          if ((npc != null) && (player != null) && (getRandom(100) < 3)) {
-            if (npc.checkDoCastConditions(STUDENT_CANCEL.getSkill())) {
-              npc.setTarget(player);
-              npc.doCast(STUDENT_CANCEL);
-            }
-            npc.setScriptValue(0);
-          }
-          break;
-        }
-      case "TIMER":
-        {
-          if (npc != null) {
-            npc.setScriptValue(0);
-          }
-          break;
-        }
-    }
-    return super.onAdvEvent(event, npc, player);
   }
 
   @Override
@@ -170,8 +122,68 @@ public final class MonasteryOfSilence extends AbstractNpcAI {
   }
 
   @Override
-  public boolean onNpcHate(L2Attackable mob, L2PcInstance player, boolean isSummon) {
-    return player.getActiveWeaponInstance() != null;
+  public String onAdvEvent(String event, L2Npc npc, L2PcInstance player) {
+    switch (event) {
+      case "TRAINING":
+        {
+          for (L2Character character : npc.getKnownList().getKnownCharactersInRadius(400)) {
+            if ((getRandom(100) < 30)
+                && character.isNpc()
+                && !character.isDead()
+                && !character.isInCombat()) {
+              if ((character.getId() == CAPTAIN) && (getRandom(100) < 10) && npc.isScriptValue(0)) {
+                final L2Npc captain = (L2Npc) character;
+                broadcastNpcSay(
+                    captain,
+                    Say2.NPC_ALL,
+                    SOLINA_KNIGHTS_MSG[getRandom(SOLINA_KNIGHTS_MSG.length)]);
+                captain.setScriptValue(1);
+                startQuestTimer("TIMER", 10000, captain, null);
+              } else if (character.getId() == KNIGHT) {
+                character.setRunning();
+                ((L2Attackable) character).addDamageHate(npc, 0, 100);
+                character.getAI().setIntention(CtrlIntention.AI_INTENTION_ATTACK, npc, null);
+              }
+            }
+          }
+          break;
+        }
+      case "DO_CAST":
+        {
+          if ((npc != null) && (player != null) && (getRandom(100) < 3)) {
+            if (npc.checkDoCastConditions(STUDENT_CANCEL.getSkill())) {
+              npc.setTarget(player);
+              npc.doCast(STUDENT_CANCEL);
+            }
+            npc.setScriptValue(0);
+          }
+          break;
+        }
+      case "TIMER":
+        {
+          if (npc != null) {
+            npc.setScriptValue(0);
+          }
+          break;
+        }
+    }
+    return super.onAdvEvent(event, npc, player);
+  }
+
+  @Override
+  public String onSkillSee(
+      L2Npc npc, L2PcInstance caster, Skill skill, List<L2Object> targets, boolean isSummon) {
+    if (skill.hasEffectType(L2EffectType.AGGRESSION) && !targets.isEmpty()) {
+      for (L2Object obj : targets) {
+        if (obj.equals(npc)) {
+          broadcastNpcSay(
+              npc, Say2.NPC_ALL, DIVINITY_MSG[getRandom(DIVINITY_MSG.length)], caster.getName());
+          addAttackDesire(npc, caster);
+          break;
+        }
+      }
+    }
+    return super.onSkillSee(npc, caster, skill, targets, isSummon);
   }
 
   @Override
@@ -226,26 +238,15 @@ public final class MonasteryOfSilence extends AbstractNpcAI {
   }
 
   @Override
-  public String onSkillSee(
-      L2Npc npc, L2PcInstance caster, Skill skill, List<L2Object> targets, boolean isSummon) {
-    if (skill.hasEffectType(L2EffectType.AGGRESSION) && !targets.isEmpty()) {
-      for (L2Object obj : targets) {
-        if (obj.equals(npc)) {
-          broadcastNpcSay(
-              npc, Say2.NPC_ALL, DIVINITY_MSG[getRandom(DIVINITY_MSG.length)], caster.getName());
-          addAttackDesire(npc, caster);
-          break;
-        }
-      }
-    }
-    return super.onSkillSee(npc, caster, skill, targets, isSummon);
-  }
-
-  @Override
   public String onSpawn(L2Npc npc) {
     npc.setIsInvul(true);
     npc.disableCoreAI(true);
     startQuestTimer("TRAINING", 30000, npc, null, true);
     return super.onSpawn(npc);
+  }
+
+  @Override
+  public boolean onNpcHate(L2Attackable mob, L2PcInstance player, boolean isSummon) {
+    return player.getActiveWeaponInstance() != null;
   }
 }

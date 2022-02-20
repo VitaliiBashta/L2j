@@ -11,7 +11,6 @@ import com.l2jserver.datapack.quests.Q00008_AnAdventureBegins.Q00008_AnAdventure
 import com.l2jserver.datapack.quests.Q00009_IntoTheCityOfHumans.Q00009_IntoTheCityOfHumans;
 import com.l2jserver.datapack.quests.Q00010_IntoTheWorld.Q00010_IntoTheWorld;
 import com.l2jserver.datapack.quests.Q00011_SecretMeetingWithKetraOrcs.Q00011_SecretMeetingWithKetraOrcs;
-import com.l2jserver.datapack.quests.Q00012_SecretMeetingWithVarkaSilenos.Q00012_SecretMeetingWithVarkaSilenos;
 import com.l2jserver.datapack.quests.Q00013_ParcelDelivery.Q00013_ParcelDelivery;
 import com.l2jserver.datapack.quests.Q00014_WhereaboutsOfTheArchaeologist.Q00014_WhereaboutsOfTheArchaeologist;
 import com.l2jserver.datapack.quests.Q00016_TheComingDarkness.Q00016_TheComingDarkness;
@@ -28,7 +27,6 @@ import com.l2jserver.datapack.quests.Q00027_ChestCaughtWithABaitOfWind.Q00027_Ch
 import com.l2jserver.datapack.quests.Q00028_ChestCaughtWithABaitOfIcyAir.Q00028_ChestCaughtWithABaitOfIcyAir;
 import com.l2jserver.datapack.quests.Q00029_ChestCaughtWithABaitOfEarth.Q00029_ChestCaughtWithABaitOfEarth;
 import com.l2jserver.datapack.quests.Q00030_ChestCaughtWithABaitOfFire.Q00030_ChestCaughtWithABaitOfFire;
-import com.l2jserver.datapack.quests.Q00031_SecretBuriedInTheSwamp.Q00031_SecretBuriedInTheSwamp;
 import com.l2jserver.datapack.quests.Q00032_AnObviousLie.Q00032_AnObviousLie;
 import com.l2jserver.datapack.quests.Q00033_MakeAPairOfDressShoes.Q00033_MakeAPairOfDressShoes;
 import com.l2jserver.datapack.quests.Q00034_InSearchOfCloth.Q00034_InSearchOfCloth;
@@ -424,13 +422,11 @@ import com.l2jserver.datapack.quests.Q00645_GhostsOfBatur.Q00645_GhostsOfBatur;
 import com.l2jserver.datapack.quests.Q00646_SignsOfRevolt.Q00646_SignsOfRevolt;
 import com.l2jserver.datapack.quests.Q00647_InfluxOfMachines.Q00647_InfluxOfMachines;
 import com.l2jserver.datapack.quests.Q00648_AnIceMerchantsDream.Q00648_AnIceMerchantsDream;
-import com.l2jserver.datapack.quests.Q00649_ALooterAndARailroadMan.Q00649_ALooterAndARailroadMan;
 import com.l2jserver.datapack.quests.Q00650_ABrokenDream.Q00650_ABrokenDream;
 import com.l2jserver.datapack.quests.Q00651_RunawayYouth.Q00651_RunawayYouth;
 import com.l2jserver.datapack.quests.Q00652_AnAgedExAdventurer.Q00652_AnAgedExAdventurer;
 import com.l2jserver.datapack.quests.Q00653_WildMaiden.Q00653_WildMaiden;
 import com.l2jserver.datapack.quests.Q00654_JourneyToASettlement.Q00654_JourneyToASettlement;
-import com.l2jserver.datapack.quests.Q00655_AGrandPlanForTamingWildBeasts.Q00655_AGrandPlanForTamingWildBeasts;
 import com.l2jserver.datapack.quests.Q00659_IdRatherBeCollectingFairyBreath.Q00659_IdRatherBeCollectingFairyBreath;
 import com.l2jserver.datapack.quests.Q00660_AidingTheFloranVillage.Q00660_AidingTheFloranVillage;
 import com.l2jserver.datapack.quests.Q00661_MakingTheHarvestGroundsSafe.Q00661_MakingTheHarvestGroundsSafe;
@@ -447,7 +443,6 @@ import com.l2jserver.datapack.quests.Q00701_ProofOfExistence.Q00701_ProofOfExist
 import com.l2jserver.datapack.quests.Q00708_PathToBecomingALordGludio.Q00708_PathToBecomingALordGludio;
 import com.l2jserver.datapack.quests.Q00901_HowLavasaurusesAreMade.Q00901_HowLavasaurusesAreMade;
 import com.l2jserver.datapack.quests.Q00902_ReclaimOurEra.Q00902_ReclaimOurEra;
-import com.l2jserver.datapack.quests.Q00903_TheCallOfAntharas.Q00903_TheCallOfAntharas;
 import com.l2jserver.datapack.quests.Q00904_DragonTrophyAntharas.Q00904_DragonTrophyAntharas;
 import com.l2jserver.datapack.quests.Q00905_RefinedDragonBlood.Q00905_RefinedDragonBlood;
 import com.l2jserver.datapack.quests.Q00906_TheCallOfValakas.Q00906_TheCallOfValakas;
@@ -469,7 +464,6 @@ import com.l2jserver.datapack.quests.Q10282_ToTheSeedOfAnnihilation.Q10282_ToThe
 import com.l2jserver.datapack.quests.Q10283_RequestOfIceMerchant.Q10283_RequestOfIceMerchant;
 import com.l2jserver.datapack.quests.Q10284_AcquisitionOfDivineSword.Q10284_AcquisitionOfDivineSword;
 import com.l2jserver.datapack.quests.Q10285_MeetingSirra.Q10285_MeetingSirra;
-import com.l2jserver.datapack.quests.Q10287_StoryOfThoseLeft.Q10287_StoryOfThoseLeft;
 import com.l2jserver.datapack.quests.Q10288_SecretMission.Q10288_SecretMission;
 import com.l2jserver.datapack.quests.Q10289_FadeToBlack.Q10289_FadeToBlack;
 import com.l2jserver.datapack.quests.Q10290_LandDragonConqueror.Q10290_LandDragonConqueror;
@@ -499,7 +493,6 @@ public class QuestLoader {
     Q00009_IntoTheCityOfHumans.class,
     Q00010_IntoTheWorld.class,
     Q00011_SecretMeetingWithKetraOrcs.class,
-    Q00012_SecretMeetingWithVarkaSilenos.class,
     Q00013_ParcelDelivery.class,
     Q00014_WhereaboutsOfTheArchaeologist.class,
     Q00016_TheComingDarkness.class,
@@ -516,7 +509,6 @@ public class QuestLoader {
     Q00028_ChestCaughtWithABaitOfIcyAir.class,
     Q00029_ChestCaughtWithABaitOfEarth.class,
     Q00030_ChestCaughtWithABaitOfFire.class,
-    Q00031_SecretBuriedInTheSwamp.class,
     Q00032_AnObviousLie.class,
     Q00033_MakeAPairOfDressShoes.class,
     Q00034_InSearchOfCloth.class,
@@ -921,13 +913,11 @@ public class QuestLoader {
     Q00646_SignsOfRevolt.class,
     Q00647_InfluxOfMachines.class,
     Q00648_AnIceMerchantsDream.class,
-    Q00649_ALooterAndARailroadMan.class,
     Q00650_ABrokenDream.class,
     Q00651_RunawayYouth.class,
     Q00652_AnAgedExAdventurer.class,
     Q00653_WildMaiden.class,
     Q00654_JourneyToASettlement.class,
-    Q00655_AGrandPlanForTamingWildBeasts.class,
     Q00659_IdRatherBeCollectingFairyBreath.class,
     Q00660_AidingTheFloranVillage.class,
     Q00661_MakingTheHarvestGroundsSafe.class,
@@ -944,7 +934,6 @@ public class QuestLoader {
     Q00708_PathToBecomingALordGludio.class,
     Q00901_HowLavasaurusesAreMade.class,
     Q00902_ReclaimOurEra.class,
-    Q00903_TheCallOfAntharas.class,
     Q00904_DragonTrophyAntharas.class,
     Q00905_RefinedDragonBlood.class,
     Q00906_TheCallOfValakas.class,
@@ -966,7 +955,6 @@ public class QuestLoader {
     Q10283_RequestOfIceMerchant.class,
     Q10284_AcquisitionOfDivineSword.class,
     Q10285_MeetingSirra.class,
-    Q10287_StoryOfThoseLeft.class,
     Q10288_SecretMission.class,
     Q10289_FadeToBlack.class,
     Q10290_LandDragonConqueror.class,

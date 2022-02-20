@@ -12,7 +12,7 @@ import com.l2jserver.gameserver.network.serverpackets.SocialAction;
 import com.l2jserver.gameserver.util.Broadcast;
 
 public abstract class AbstractNpcAI extends Quest {
-  public AbstractNpcAI(String name, String descr) {
+  protected AbstractNpcAI(String name, String descr) {
     super(-1, name, descr);
   }
 
@@ -35,7 +35,6 @@ public abstract class AbstractNpcAI extends Quest {
    *   <li>ON_AGGR_RANGE_ENTER
    * </ul>
    *
-   * @param mobs
    */
   public void registerMobs(int... mobs) {
     addAttackId(mobs);

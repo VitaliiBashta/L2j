@@ -13,11 +13,19 @@ import com.l2jserver.gameserver.model.events.annotations.RegisterEvent;
 import com.l2jserver.gameserver.model.events.annotations.RegisterType;
 import com.l2jserver.gameserver.model.events.impl.character.npc.OnNpcManorBypass;
 import com.l2jserver.gameserver.network.SystemMessageId;
-import com.l2jserver.gameserver.network.serverpackets.*;
+import com.l2jserver.gameserver.network.serverpackets.BuyListSeed;
+import com.l2jserver.gameserver.network.serverpackets.ExShowCropInfo;
+import com.l2jserver.gameserver.network.serverpackets.ExShowManorDefaultInfo;
+import com.l2jserver.gameserver.network.serverpackets.ExShowProcureCropDetail;
+import com.l2jserver.gameserver.network.serverpackets.ExShowSeedInfo;
+import com.l2jserver.gameserver.network.serverpackets.ExShowSellCropList;
+import com.l2jserver.gameserver.network.serverpackets.SystemMessage;
+import org.springframework.stereotype.Service;
 
 import static com.l2jserver.gameserver.config.Configuration.general;
 
-public final class ManorManager extends AbstractNpcAI {
+@Service
+public class ManorManager extends AbstractNpcAI {
   private static final int[] NPC = {
     35644, 35645, 35319, 35366, 36456, 35512, 35558, 35229, 35230, 35231, 35277, 35103, 35145, 35187
   };

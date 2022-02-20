@@ -10,11 +10,12 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.serverpackets.MagicSkillUse;
 import com.l2jserver.gameserver.util.Broadcast;
 import com.l2jserver.gameserver.util.Util;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public final class StakatoNest extends AbstractNpcAI {
-  // @formatter:off
+@Service
+public class StakatoNest extends AbstractNpcAI {
   // List of all mobs just for register
   private static final int[] STAKATO_MOBS = {
     18793, 18794, 18795, 18796, 18797, 18798, 22617, 22618, 22619, 22620,
@@ -23,7 +24,6 @@ public final class StakatoNest extends AbstractNpcAI {
   };
   // Coocons
   private static final int[] COCOONS = {18793, 18794, 18795, 18796, 18797, 18798};
-  // @formatter:on
   // Cannibalistic Stakato Leader
   private static final int STAKATO_LEADER = 22625;
 
@@ -85,6 +85,11 @@ public final class StakatoNest extends AbstractNpcAI {
       }
     }
     return super.onAttack(npc, attacker, damage, isSummon);
+  }
+
+  private static void giveCocoon(L2PcInstance player, L2Npc npc) {
+    player.addItem(
+        "StakatoCocoon", ((getRandom(100) > 80) ? LARGE_COCOON : SMALL_COCOON), 1, npc, true);
   }
 
   @Override
@@ -196,10 +201,5 @@ public final class StakatoNest extends AbstractNpcAI {
       }
     }
     return null;
-  }
-
-  private static void giveCocoon(L2PcInstance player, L2Npc npc) {
-    player.addItem(
-        "StakatoCocoon", ((getRandom(100) > 80) ? LARGE_COCOON : SMALL_COCOON), 1, npc, true);
   }
 }

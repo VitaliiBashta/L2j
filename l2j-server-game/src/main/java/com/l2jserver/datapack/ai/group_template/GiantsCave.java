@@ -6,8 +6,10 @@ import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.network.NpcStringId;
 import com.l2jserver.gameserver.network.clientpackets.Say2;
+import org.springframework.stereotype.Service;
 
-public final class GiantsCave extends AbstractNpcAI {
+@Service
+public class GiantsCave extends AbstractNpcAI {
   // NPC
   private static final int[] SCOUTS = {
     22668, // Gamlin (Scout)
@@ -18,6 +20,16 @@ public final class GiantsCave extends AbstractNpcAI {
     super(GiantsCave.class.getSimpleName(), "ai/group_template");
     addAttackId(SCOUTS);
     addAggroRangeEnterId(SCOUTS);
+  }
+
+  @Override
+  public String onAttack(L2Npc npc, L2PcInstance attacker, int damage, boolean isSummon) {
+    if (npc.isScriptValue(0)) {
+      npc.setScriptValue(1);
+      startQuestTimer("ATTACK", 6000, npc, attacker);
+      startQuestTimer("CLEAR", 120000, npc, null);
+    }
+    return super.onAttack(npc, attacker, damage, isSummon);
   }
 
   @Override
@@ -39,16 +51,6 @@ public final class GiantsCave extends AbstractNpcAI {
       npc.setScriptValue(0);
     }
     return super.onAdvEvent(event, npc, player);
-  }
-
-  @Override
-  public String onAttack(L2Npc npc, L2PcInstance attacker, int damage, boolean isSummon) {
-    if (npc.isScriptValue(0)) {
-      npc.setScriptValue(1);
-      startQuestTimer("ATTACK", 6000, npc, attacker);
-      startQuestTimer("CLEAR", 120000, npc, null);
-    }
-    return super.onAttack(npc, attacker, damage, isSummon);
   }
 
   @Override

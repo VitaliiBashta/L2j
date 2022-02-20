@@ -7,12 +7,14 @@ import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
 import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.network.SystemMessageId;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 import static com.l2jserver.gameserver.config.Configuration.clan;
 
-public final class Ballista extends AbstractNpcAI {
+@Service
+public class Ballista extends AbstractNpcAI {
   // NPCs
   private static final int[] BALLISTA = {
     35685, // Shanty Fortress

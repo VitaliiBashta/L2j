@@ -349,95 +349,44 @@ public class AbstractScript {
 	}
 	
 	/**
-	 * Give the specified player a set amount of items if he is lucky enough.<br>
-	 * Not recommended to use this for non-stacking items.
-	 * @param player the player to give the item(s) to
-	 * @param npc the NPC that "dropped" the item (can be null)
-	 * @param itemId the ID of the item to give
-	 * @param amountToGive the amount of items to give
-	 * @param limit the maximum amount of items the player can have. Won't give more if this limit is reached. 0 - no limit.
-	 * @param dropChance the drop chance as a decimal digit from 0 to 1
-	 * @param playSound if true, plays ItemSound.quest_itemget when items are given and ItemSound.quest_middle when the limit is reached
-	 * @return {@code true} if limit > 0 and the limit was reached or if limit <= 0 and items were given; {@code false} in all other cases
+	 * @param player
+	 * @param item
+	 * @param victim the character that "dropped" the item
+	 * @param limit the maximum amount of items the player can have. Won't give more if this limit is reached.
+	 * @return <code>true</code> if at least one item was given to the player, <code>false</code> otherwise
 	 */
-	public static boolean giveItemRandomly(L2PcInstance player, L2Npc npc, int itemId, long amountToGive, long limit, double dropChance, boolean playSound) {
-		return giveItemRandomly(player, npc, itemId, amountToGive, amountToGive, limit, dropChance, playSound);
+	protected static boolean giveItems(L2PcInstance player, IDropItem item, L2Character victim, int limit) {
+		return giveItems(player, item.calculateDrops(victim, player), limit);
 	}
 	
 	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
-	 * Give the specified player a random amount of items if he is lucky enough.<br>
-	 * Not recommended to use this for non-stacking items.
-	 * @param player the player to give the item(s) to
-	 * @param npc the NPC that "dropped" the item (can be null)
-	 * @param itemId the ID of the item to give
-	 * @param minAmount the minimum amount of items to give
-	 * @param maxAmount the maximum amount of items to give (will give a random amount between min/maxAmount multiplied by quest rates)
-	 * @param limit the maximum amount of items the player can have. Won't give more if this limit is reached. 0 - no limit.
-	 * @param dropChance the drop chance as a decimal digit from 0 to 1
-	 * @param playSound if true, plays ItemSound.quest_itemget when items are given and ItemSound.quest_middle when the limit is reached
-	 * @return {@code true} if limit > 0 and the limit was reached or if limit <= 0 and items were given; {@code false} in all other cases
+	 * @param player
+	 * @param items
+	 * @param limit the maximum amount of items the player can have. Won't give more if this limit is reached.
+	 * @return <code>true</code> if at least one item was given to the player, <code>false</code> otherwise
 	 */
-	public static boolean giveItemRandomly(L2PcInstance player, L2Npc npc, int itemId, long minAmount, long maxAmount, long limit, double dropChance, boolean playSound) {
-		final long currentCount = getQuestItemsCount(player, itemId);
-
-		if ((limit > 0) && (currentCount >= limit)) {
-			return true;
+	protected static boolean giveItems(L2PcInstance player, List<ItemHolder> items, long limit) {
+		boolean b = false;
+		for (ItemHolder item : items) {
+			b |= giveItems(player, item, limit);
 		}
-
-		minAmount *= rates().getRateQuestDrop();
-		maxAmount *= rates().getRateQuestDrop();
-		dropChance *= rates().getRateQuestDrop(); // TODO separate configs for rate and amount
-		if ((npc != null) && customs().championEnable() && npc.isChampion()) {
-			if ((itemId == Inventory.ADENA_ID) || (itemId == Inventory.ANCIENT_ADENA_ID)) {
-				dropChance *= customs().getChampionAdenasRewardsChance();
-				minAmount *= customs().getChampionAdenasRewardsAmount();
-				maxAmount *= customs().getChampionAdenasRewardsAmount();
-			} else {
-				dropChance *= customs().getChampionRewardsChance();
-				minAmount *= customs().getChampionRewardsAmount();
-				maxAmount *= customs().getChampionRewardsAmount();
-			}
-		}
-
-		long amountToGive = ((minAmount == maxAmount) ? minAmount : Rnd.get(minAmount, maxAmount));
-		final double random = Rnd.nextDouble();
-		// Inventory slot check (almost useless for non-stacking items)
-		if ((dropChance >= random) && (amountToGive > 0) && player.getInventory().validateCapacityByItemId(itemId)) {
-			if ((limit > 0) && ((currentCount + amountToGive) > limit)) {
-				amountToGive = limit - currentCount;
-			}
-
-			// Give the item to player
-			L2ItemInstance item = player.addItem("Quest", itemId, amountToGive, npc, true);
-			if (item != null) {
-				// limit reached (if there is no limit, this block doesn't execute)
-				if ((currentCount + amountToGive) == limit) {
-					if (playSound) {
-						playSound(player, Sound.ITEMSOUND_QUEST_MIDDLE);
-					}
-					return true;
-				}
-
-				if (playSound) {
-					playSound(player, Sound.ITEMSOUND_QUEST_ITEMGET);
-				}
-				// if there is no limit, return true every time an item is given
-				return limit <= 0;
-			}
-		}
-		return false;
+		return b;
 	}
 	
 	/**
-	 * Get the amount of an item in player's inventory.
-	 * @param player the player whose inventory to check
-	 * @param itemId the ID of the item whose amount to get
-	 * @return the amount of the specified item in player's inventory
+	 * Distributes items to players equally
+	 * @param players the players to whom the items will be distributed
+	 * @param items the items to distribute
+	 * @param killer the one who "kills" the victim
+	 * @param victim the character that "dropped" the item
+	 * @param limit the limit what single player can have of each item
+	 * @param playSound if to play sound if a player gets at least one item
+	 * @return the counts of each items given to each player
 	 */
-	public static long getQuestItemsCount(L2PcInstance player, int itemId) {
-		return player.getInventory().getInventoryItemCount(itemId, -1);
+	protected static Map<L2PcInstance, Map<Integer, Long>> distributeItems(Collection<L2PcInstance> players, IDropItem items, L2Character killer, L2Character victim, Function<Integer, Long> limit, boolean playSound) {
+		return distributeItems(players, items.calculateDrops(victim, killer), limit, playSound);
 	}
 	
 	/**
@@ -452,31 +401,34 @@ public class AbstractScript {
 	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
-	 * Check if the player has the specified item in his inventory.
-	 * @param player the player whose inventory to check for the specified item
-	 * @param item the {@link ItemHolder} object containing the ID and count of the item to check
-	 * @return {@code true} if the player has the required count of the item
+	 * Distributes items to players equally
+	 * @param players the players to whom the items will be distributed
+	 * @param items the items to distribute
+	 * @param killer the one who "kills" the victim
+	 * @param victim the character that "dropped" the item
+	 * @param limit the limit what single player can have of each item
+	 * @param playSound if to play sound if a player gets at least one item
+	 * @param smartDrop true if to not calculate a drop, which can't be given to any player
+	 * @return the counts of each items given to each player
 	 */
-	protected static boolean hasItem(L2PcInstance player, ItemHolder item) {
-		return hasItem(player, item, true);
+	protected static Map<L2PcInstance, Map<Integer, Long>> distributeItems(Collection<L2PcInstance> players, final GroupedGeneralDropItem items, L2Character killer, L2Character victim, long limit, boolean playSound, boolean smartDrop) {
+		return distributeItems(players, items, killer, victim, t -> limit, playSound, smartDrop);
 	}
 	
 	/**
-	 * Check if the player has the required count of the specified item in his inventory.
-	 * @param player the player whose inventory to check for the specified item
-	 * @param item the {@link ItemHolder} object containing the ID and count of the item to check
-	 * @param checkCount if {@code true}, check if each item is at least of the count specified in the ItemHolder,<br>
-	 *            otherwise check only if the player has the item at all
-	 * @return {@code true} if the player has the item
+	 * Give the specified player a set amount of items if he is lucky enough.<br>
+	 * Not recommended to use this for non-stacking items.
+	 * @param player the player to give the item(s) to
+	 * @param npc the NPC that "dropped" the item (can be null)
+	 * @param itemId the ID of the item to give
+	 * @param amountToGive the amount of items to give
+	 * @param limit the maximum amount of items the player can have. Won't give more if this limit is reached. 0 - no limit.
+	 * @param dropChance the drop chance as a decimal digit from 0 to 1
+	 * @param playSound if true, plays ItemSound.quest_itemget when items are given and ItemSound.quest_middle when the limit is reached
+	 * @return {@code true} if limit > 0 and the limit was reached or if limit <= 0 and items were given; {@code false} in all other cases
 	 */
-	protected static boolean hasItem(L2PcInstance player, ItemHolder item, boolean checkCount) {
-		if (item == null) {
-			return false;
-		}
-		if (checkCount) {
-			return (getQuestItemsCount(player, item.getId()) >= item.getCount());
-		}
-		return hasQuestItems(player, item.getId());
+	public boolean giveItemRandomly(L2PcInstance player, L2Npc npc, int itemId, long amountToGive, long limit, double dropChance, boolean playSound) {
+		return giveItemRandomly(player, npc, itemId, amountToGive, amountToGive, limit, dropChance, playSound);
 	}
 	
 	// ---------------------------------------------------------------------------------------------------------------------------
@@ -647,23 +599,6 @@ public class AbstractScript {
 		sendItemGetMessage(player, item, count);
 	}
 	
-	/**
-	 * Give the specified player a set amount of items if he is lucky enough.<br>
-	 * Not recommended to use this for non-stacking items.
-	 * @param player the player to give the item(s) to
-	 * @param itemId the ID of the item to give
-	 * @param amountToGive the amount of items to give
-	 * @param limit the maximum amount of items the player can have. Won't give more if this limit is reached. 0 - no limit.
-	 * @param dropChance the drop chance as a decimal digit from 0 to 1
-	 * @param playSound if true, plays ItemSound.quest_itemget when items are given and ItemSound.quest_middle when the limit is reached
-	 * @return {@code true} if limit > 0 and the limit was reached or if limit <= 0 and items were given; {@code false} in all other cases
-	 */
-	public static boolean giveItemRandomly(L2PcInstance player, int itemId, long amountToGive, long limit, double dropChance, boolean playSound) {
-		return giveItemRandomly(player, null, itemId, amountToGive, amountToGive, limit, dropChance, playSound);
-	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	protected static boolean giveItems(L2PcInstance player, ItemHolder item, long limit, boolean playSound) {
 		boolean drop = giveItems(player, item, limit);
 		if (drop && playSound) {
@@ -672,10 +607,10 @@ public class AbstractScript {
 		return drop;
 	}
 	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	/**
 	 * Gives an item to the player
-	 * @param player
-	 * @param item
 	 * @param limit the maximum amount of items the player can have. Won't give more if this limit is reached.
 	 * @return <code>true</code> if at least one item was given to the player, <code>false</code> otherwise
 	 */
@@ -688,24 +623,15 @@ public class AbstractScript {
 		return true;
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
 	 * Give item/reward to the player
-	 * @param player
-	 * @param itemId
-	 * @param count
 	 */
 	public static void giveItems(L2PcInstance player, int itemId, long count) {
 		giveItems(player, itemId, count, 0);
 	}
 	
-	/**
-	 * @param player
-	 * @param itemId
-	 * @param count
-	 * @param enchantlevel
-	 */
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	public static void giveItems(L2PcInstance player, int itemId, long count, int enchantlevel) {
 		if (count <= 0) {
 			return;
@@ -725,8 +651,6 @@ public class AbstractScript {
 		sendItemGetMessage(player, item, count);
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
 	 * Gives an item to the player
 	 * @param player
@@ -743,6 +667,8 @@ public class AbstractScript {
 		return true;
 	}
 	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	/**
 	 * Gives an item to the player
 	 * @param player
@@ -755,14 +681,14 @@ public class AbstractScript {
 
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
 	 * Give item/reward to the player
 	 */
 	protected static void giveItems(L2PcInstance player, ItemHolder holder) {
 		giveItems(player, holder.getId(), holder.getCount());
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	protected static boolean giveItems(L2PcInstance player, List<ItemHolder> items, long limit, boolean playSound) {
 		boolean drop = giveItems(player, items, limit);
@@ -772,18 +698,71 @@ public class AbstractScript {
 		return drop;
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
-	 * @param player
-	 * @param item
-	 * @param victim the character that "dropped" the item
-	 * @param limit the maximum amount of items the player can have. Won't give more if this limit is reached.
-	 * @return <code>true</code> if at least one item was given to the player, <code>false</code> otherwise
+	 * Give the specified player a random amount of items if he is lucky enough.<br>
+	 * Not recommended to use this for non-stacking items.
+	 * @param player the player to give the item(s) to
+	 * @param npc the NPC that "dropped" the item (can be null)
+	 * @param itemId the ID of the item to give
+	 * @param minAmount the minimum amount of items to give
+	 * @param maxAmount the maximum amount of items to give (will give a random amount between min/maxAmount multiplied by quest rates)
+	 * @param limit the maximum amount of items the player can have. Won't give more if this limit is reached. 0 - no limit.
+	 * @param dropChance the drop chance as a decimal digit from 0 to 1
+	 * @param playSound if true, plays ItemSound.quest_itemget when items are given and ItemSound.quest_middle when the limit is reached
+	 * @return {@code true} if limit > 0 and the limit was reached or if limit <= 0 and items were given; {@code false} in all other cases
 	 */
-	protected static boolean giveItems(L2PcInstance player, IDropItem item, L2Character victim, int limit) {
-		return giveItems(player, item.calculateDrops(victim, player), limit);
+	public boolean giveItemRandomly(L2PcInstance player, L2Npc npc, int itemId, long minAmount, long maxAmount, long limit, double dropChance, boolean playSound) {
+		final long currentCount = getQuestItemsCount(player, itemId);
+
+		if ((limit > 0) && (currentCount >= limit)) {
+			return true;
+		}
+
+		minAmount *= rates().getRateQuestDrop();
+		maxAmount *= rates().getRateQuestDrop();
+		dropChance *= rates().getRateQuestDrop(); // TODO separate configs for rate and amount
+		if ((npc != null) && customs().championEnable() && npc.isChampion()) {
+			if ((itemId == Inventory.ADENA_ID) || (itemId == Inventory.ANCIENT_ADENA_ID)) {
+				dropChance *= customs().getChampionAdenasRewardsChance();
+				minAmount *= customs().getChampionAdenasRewardsAmount();
+				maxAmount *= customs().getChampionAdenasRewardsAmount();
+			} else {
+				dropChance *= customs().getChampionRewardsChance();
+				minAmount *= customs().getChampionRewardsAmount();
+				maxAmount *= customs().getChampionRewardsAmount();
+			}
+		}
+
+		long amountToGive = ((minAmount == maxAmount) ? minAmount : Rnd.get(minAmount, maxAmount));
+		final double random = Rnd.nextDouble();
+		// Inventory slot check (almost useless for non-stacking items)
+		if ((dropChance >= random) && (amountToGive > 0) && player.getInventory().validateCapacityByItemId(itemId)) {
+			if ((limit > 0) && ((currentCount + amountToGive) > limit)) {
+				amountToGive = limit - currentCount;
+			}
+
+			// Give the item to player
+			L2ItemInstance item = player.addItem("Quest", itemId, amountToGive, npc, true);
+			if (item != null) {
+				// limit reached (if there is no limit, this block doesn't execute)
+				if ((currentCount + amountToGive) == limit) {
+					if (playSound) {
+						playSound(player, Sound.ITEMSOUND_QUEST_MIDDLE);
+					}
+					return true;
+				}
+
+				if (playSound) {
+					playSound(player, Sound.ITEMSOUND_QUEST_ITEMGET);
+				}
+				// if there is no limit, return true every time an item is given
+				return limit <= 0;
+			}
+		}
+		return false;
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	protected static boolean giveItems(L2PcInstance player, IDropItem item, L2Character victim, int limit, boolean playSound) {
 		boolean drop = giveItems(player, item, victim, limit);
@@ -793,21 +772,11 @@ public class AbstractScript {
 		return drop;
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
-	/**
-	 * @param player
-	 * @param items
-	 * @param limit the maximum amount of items the player can have. Won't give more if this limit is reached.
-	 * @return <code>true</code> if at least one item was given to the player, <code>false</code> otherwise
-	 */
-	protected static boolean giveItems(L2PcInstance player, List<ItemHolder> items, long limit) {
-		boolean b = false;
-		for (ItemHolder item : items) {
-			b |= giveItems(player, item, limit);
-		}
-		return b;
+	public long getQuestItemsCount(L2PcInstance player, int itemId) {
+		return player.getInventory().getInventoryItemCount(itemId, -1);
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Distributes items to players equally
@@ -828,8 +797,6 @@ public class AbstractScript {
 		return returnMap;
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
 	 * Distributes items to players equally
 	 * @param players the players to whom the items will be distributed
@@ -841,6 +808,8 @@ public class AbstractScript {
 	protected static Map<L2PcInstance, Map<Integer, Long>> distributeItems(Collection<L2PcInstance> players, Collection<ItemHolder> items, long limit, boolean playSound) {
 		return distributeItems(players, items, t -> limit, playSound);
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Distributes items to players equally
@@ -856,8 +825,6 @@ public class AbstractScript {
 		giveItems(rewardedCounts, playSound);
 		return rewardedCounts;
 	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * @param players
@@ -919,6 +886,8 @@ public class AbstractScript {
 		return rewardedCounts;
 	}
 	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	/**
 	 * This function is for avoidance null returns in function limits
 	 * @param <T> the type of function arg
@@ -931,8 +900,6 @@ public class AbstractScript {
 		return longLimit == null ? Long.MAX_VALUE : longLimit;
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
 	 * Get a random integer from 0 (inclusive) to {@code max} (exclusive).<br>
 	 * Use this method instead of importing {@link com.l2jserver.commons.util.Rnd} utility.
@@ -942,7 +909,9 @@ public class AbstractScript {
 	public static int getRandom(int max) {
 		return Rnd.get(max);
 	}
-
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	/**
 	 * Distributes items to players
 	 * @param rewardedCounts A scheme of distribution items (the structure is: Map<player Map<itemId, count>>)
@@ -967,7 +936,7 @@ public class AbstractScript {
 	public static <T> T getRandom(List<? extends T> list) {
 		return list.get(Rnd.get(list.size()));
 	}
-	
+
 	/**
 	 * Distributes items to players equally
 	 * @param players the players to whom the items will be distributed
@@ -994,8 +963,6 @@ public class AbstractScript {
 		return distributeItems(players, items, Util.mapToFunction(limit), playSound);
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
 	 * @param player
 	 * @param items
@@ -1005,6 +972,8 @@ public class AbstractScript {
 	protected static boolean giveItems(L2PcInstance player, List<ItemHolder> items, Map<Integer, Long> limit) {
 		return giveItems(player, items, Util.mapToFunction(limit));
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * @param player
@@ -1044,8 +1013,6 @@ public class AbstractScript {
 		return giveItems(player, items, Util.mapToFunction(limit), playSound);
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
 	 * @param player
 	 * @param item
@@ -1056,6 +1023,8 @@ public class AbstractScript {
 	protected static boolean giveItems(L2PcInstance player, IDropItem item, L2Character victim, Map<Integer, Long> limit) {
 		return giveItems(player, item.calculateDrops(victim, player), limit);
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * @param player
@@ -1068,11 +1037,11 @@ public class AbstractScript {
 		return giveItems(player, item.calculateDrops(victim, player), limit);
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	protected static boolean giveItems(L2PcInstance player, IDropItem item, L2Character victim, Map<Integer, Long> limit, boolean playSound) {
 		return giveItems(player, item, victim, Util.mapToFunction(limit), playSound);
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	protected static boolean giveItems(L2PcInstance player, IDropItem item, L2Character victim, Function<Integer, Long> limit, boolean playSound) {
 		boolean drop = giveItems(player, item, victim, limit);
@@ -1081,8 +1050,6 @@ public class AbstractScript {
 		}
 		return drop;
 	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Distributes items to players equally
@@ -1098,6 +1065,8 @@ public class AbstractScript {
 		return distributeItems(players, items.calculateDrops(victim, killer), limit, playSound);
 	}
 	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	/**
 	 * Distributes items to players equally
 	 * @param players the players to whom the items will be distributed
@@ -1112,39 +1081,6 @@ public class AbstractScript {
 	protected static Map<L2PcInstance, Map<Integer, Long>> distributeItems(Collection<L2PcInstance> players, final GroupedGeneralDropItem items, L2Character killer, L2Character victim, Map<Integer, Long> limit, boolean playSound, boolean smartDrop) {
 		return distributeItems(players, items, killer, victim, Util.mapToFunction(limit), playSound, smartDrop);
 	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
-	/**
-	 * Distributes items to players equally
-	 * @param players the players to whom the items will be distributed
-	 * @param items the items to distribute
-	 * @param killer the one who "kills" the victim
-	 * @param victim the character that "dropped" the item
-	 * @param limit the limit what single player can have of each item
-	 * @param playSound if to play sound if a player gets at least one item
-	 * @param smartDrop true if to not calculate a drop, which can't be given to any player
-	 * @return the counts of each items given to each player
-	 */
-	protected static Map<L2PcInstance, Map<Integer, Long>> distributeItems(Collection<L2PcInstance> players, final GroupedGeneralDropItem items, L2Character killer, L2Character victim, long limit, boolean playSound, boolean smartDrop) {
-		return distributeItems(players, items, killer, victim, t -> limit, playSound, smartDrop);
-	}
-	
-	/**
-	 * Distributes items to players equally
-	 * @param players the players to whom the items will be distributed
-	 * @param items the items to distribute
-	 * @param killer the one who "kills" the victim
-	 * @param victim the character that "dropped" the item
-	 * @param limit the limit what single player can have of each item
-	 * @param playSound if to play sound if a player gets at least one item
-	 * @return the counts of each items given to each player
-	 */
-	protected static Map<L2PcInstance, Map<Integer, Long>> distributeItems(Collection<L2PcInstance> players, IDropItem items, L2Character killer, L2Character victim, Function<Integer, Long> limit, boolean playSound) {
-		return distributeItems(players, items.calculateDrops(victim, killer), limit, playSound);
-	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Distributes items to players equally
@@ -1183,13 +1119,45 @@ public class AbstractScript {
 		return distributeItems(players, toDrop, killer, victim, limit, playSound);
 	}
 	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
+	/**
+	 * Check if the player has the specified item in his inventory.
+	 * @param player the player whose inventory to check for the specified item
+	 * @param item the {@link ItemHolder} object containing the ID and count of the item to check
+	 * @return {@code true} if the player has the required count of the item
+	 */
+	protected boolean hasItem(L2PcInstance player, ItemHolder item) {
+		return hasItem(player, item, true);
+	}
+	
+	/**
+	 * Check if the player has the required count of the specified item in his inventory.
+	 * @param player the player whose inventory to check for the specified item
+	 * @param item the {@link ItemHolder} object containing the ID and count of the item to check
+	 * @param checkCount if {@code true}, check if each item is at least of the count specified in the ItemHolder,<br>
+	 *            otherwise check only if the player has the item at all
+	 * @return {@code true} if the player has the item
+	 */
+	protected boolean hasItem(L2PcInstance player, ItemHolder item, boolean checkCount) {
+		if (item == null) {
+			return false;
+		}
+		if (checkCount) {
+			return (getQuestItemsCount(player, item.getId()) >= item.getCount());
+		}
+		return hasQuestItems(player, item.getId());
+	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	/**
 	 * Take a set amount of all specified items from player's inventory.
 	 * @param player the player whose items to take
 	 * @param itemList the list of {@link ItemHolder} objects containing the IDs and counts of the items to take
 	 * @return {@code true} if all items were taken, {@code false} otherwise
 	 */
-	protected static boolean takeAllItems(L2PcInstance player, ItemHolder... itemList) {
+	protected boolean takeAllItems(L2PcInstance player, ItemHolder... itemList) {
 		if ((itemList == null) || (itemList.length == 0)) {
 			return false;
 		}
@@ -1206,8 +1174,6 @@ public class AbstractScript {
 		return true;
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
 	 * Check if the player has all the specified items in his inventory and, if necessary, if their count is also as required.
 	 * @param player the player whose inventory to check for the specified item
@@ -1216,7 +1182,7 @@ public class AbstractScript {
 	 * @param itemList a list of {@link ItemHolder} objects containing the IDs of the items to check
 	 * @return {@code true} if the player has all the items from the list
 	 */
-	protected static boolean hasAllItems(L2PcInstance player, boolean checkCount, ItemHolder... itemList) {
+	protected boolean hasAllItems(L2PcInstance player, boolean checkCount, ItemHolder... itemList) {
 		if ((itemList == null) || (itemList.length == 0)) {
 			return false;
 		}
@@ -1227,6 +1193,8 @@ public class AbstractScript {
 		}
 		return true;
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Take a set amount of a specified item from player's inventory.
@@ -1240,8 +1208,6 @@ public class AbstractScript {
 		}
 		return takeItems(player, holder.getId(), holder.getCount());
 	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Take an amount of a specified item from player's inventory.
@@ -1268,6 +1234,8 @@ public class AbstractScript {
 		return true;
 	}
 	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	private static boolean takeItem(L2PcInstance player, L2ItemInstance item, long toDelete) {
 		if (item.isEquipped()) {
 			final L2ItemInstance[] unequiped = player.getInventory().unEquipItemInBodySlotAndRecord(item.getItem().getBodyPart());
@@ -1280,8 +1248,6 @@ public class AbstractScript {
 		}
 		return player.destroyItemByItemId("Quest", item.getId(), toDelete, player, true);
 	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Take an amount of all specified items from player's inventory.
@@ -1318,6 +1284,8 @@ public class AbstractScript {
 		return Rnd.get();
 	}
 	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	/**
 	 * Get a random integer from {@code min} (inclusive) to {@code max} (inclusive).<br>
 	 * Use this method instead of importing {@link com.l2jserver.commons.util.Rnd} utility.
@@ -1329,8 +1297,6 @@ public class AbstractScript {
 		return Rnd.get(min, max);
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
 	 * Get a random boolean.<br>
 	 * Use this method instead of importing {@link com.l2jserver.commons.util.Rnd} utility.
@@ -1339,6 +1305,8 @@ public class AbstractScript {
 	public static boolean getRandomBoolean() {
 		return Rnd.nextBoolean();
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Get the ID of the item equipped in the specified inventory slot of the player.
@@ -1350,14 +1318,14 @@ public class AbstractScript {
 		return player.getInventory().getPaperdollItemId(slot);
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
 	 * @return the number of ticks from the {@link com.l2jserver.gameserver.GameTimeController}.
 	 */
 	public static int getGameTicks() {
 		return GameTimeController.getInstance().getGameTicks();
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Sends the special camera packet to the player.
@@ -1378,8 +1346,6 @@ public class AbstractScript {
 		player.sendPacket(new SpecialCamera(creature, force, angle1, angle2, time, range, duration, relYaw, relPitch, isWide, relAngle));
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	/**
 	 * Sends the special camera packet to the player.
 	 * @param player
@@ -1397,6 +1363,8 @@ public class AbstractScript {
 	public static void specialCameraEx(L2PcInstance player, L2Character creature, int force, int angle1, int angle2, int time, int duration, int relYaw, int relPitch, int isWide, int relAngle) {
 		player.sendPacket(new SpecialCamera(creature, player, force, angle1, angle2, time, duration, relYaw, relPitch, isWide, relAngle));
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Sends the special camera packet to the player.
@@ -1418,10 +1386,25 @@ public class AbstractScript {
 		player.sendPacket(new SpecialCamera(creature, force, angle1, angle2, time, range, duration, relYaw, relPitch, isWide, relAngle, unk));
 	}
 	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
 	public static void addRadar(L2PcInstance player, int x, int y, int z) {
 		player.getRadar().addMarker(x, y, z);
+	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
+	/**
+	 * Give the specified player a set amount of items if he is lucky enough.<br>
+	 * Not recommended to use this for non-stacking items.
+	 * @param player the player to give the item(s) to
+	 * @param itemId the ID of the item to give
+	 * @param amountToGive the amount of items to give
+	 * @param limit the maximum amount of items the player can have. Won't give more if this limit is reached. 0 - no limit.
+	 * @param dropChance the drop chance as a decimal digit from 0 to 1
+	 * @param playSound if true, plays ItemSound.quest_itemget when items are given and ItemSound.quest_middle when the limit is reached
+	 * @return {@code true} if limit > 0 and the limit was reached or if limit <= 0 and items were given; {@code false} in all other cases
+	 */
+	public boolean giveItemRandomly(L2PcInstance player, int itemId, long amountToGive, long limit, double dropChance, boolean playSound) {
+		return giveItemRandomly(player, null, itemId, amountToGive, amountToGive, limit, dropChance, playSound);
 	}
 	
 	/**
