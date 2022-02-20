@@ -830,8 +830,16 @@ public class AbstractScript {
 	
 	// ---------------------------------------------------------------------------------------------------------------------------
 	
-	public static <T> T getRandom(List<? extends T> list) {
-		return list.get(Rnd.get(list.size()));
+	/**
+	 * Distributes items to players equally
+	 * @param players the players to whom the items will be distributed
+	 * @param items the items to distribute
+	 * @param limit the limit what single player can have of each item
+	 * @param playSound if to play sound if a player gets at least one item
+	 * @return the counts of each items given to each player
+	 */
+	protected static Map<L2PcInstance, Map<Integer, Long>> distributeItems(Collection<L2PcInstance> players, Collection<ItemHolder> items, long limit, boolean playSound) {
+		return distributeItems(players, items, t -> limit, playSound);
 	}
 	
 	/**
@@ -936,20 +944,6 @@ public class AbstractScript {
 	}
 
 	/**
-	 * Distributes items to players equally
-	 * @param players the players to whom the items will be distributed
-	 * @param items the items to distribute
-	 * @param killer the one who "kills" the victim
-	 * @param victim the character that "dropped" the item
-	 * @param limit the limit what single player can have of each item
-	 * @param playSound if to play sound if a player gets at least one item
-	 * @return the counts of each items given to each player
-	 */
-	protected static Map<L2PcInstance, Map<Integer, Long>> distributeItems(Collection<L2PcInstance> players, IDropItem items, L2Character killer, L2Character victim, Map<Integer, Long> limit, boolean playSound) {
-		return distributeItems(players, items.calculateDrops(victim, killer), limit, playSound);
-	}
-
-	/**
 	 * Distributes items to players
 	 * @param rewardedCounts A scheme of distribution items (the structure is: Map<player Map<itemId, count>>)
 	 * @param playSound if to play sound if a player gets at least one item
@@ -969,6 +963,24 @@ public class AbstractScript {
 			}
 		}
 	}
+
+	public static <T> T getRandom(List<? extends T> list) {
+		return list.get(Rnd.get(list.size()));
+	}
+	
+	/**
+	 * Distributes items to players equally
+	 * @param players the players to whom the items will be distributed
+	 * @param items the items to distribute
+	 * @param killer the one who "kills" the victim
+	 * @param victim the character that "dropped" the item
+	 * @param limit the limit what single player can have of each item
+	 * @param playSound if to play sound if a player gets at least one item
+	 * @return the counts of each items given to each player
+	 */
+	protected static Map<L2PcInstance, Map<Integer, Long>> distributeItems(Collection<L2PcInstance> players, IDropItem items, L2Character killer, L2Character victim, Map<Integer, Long> limit, boolean playSound) {
+		return distributeItems(players, items.calculateDrops(victim, killer), limit, playSound);
+	}
 	
 	/**
 	 * Distributes items to players equally
@@ -982,6 +994,8 @@ public class AbstractScript {
 		return distributeItems(players, items, Util.mapToFunction(limit), playSound);
 	}
 	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	/**
 	 * @param player
 	 * @param items
@@ -991,8 +1005,6 @@ public class AbstractScript {
 	protected static boolean giveItems(L2PcInstance player, List<ItemHolder> items, Map<Integer, Long> limit) {
 		return giveItems(player, items, Util.mapToFunction(limit));
 	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * @param player
@@ -1032,6 +1044,8 @@ public class AbstractScript {
 		return giveItems(player, items, Util.mapToFunction(limit), playSound);
 	}
 	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	/**
 	 * @param player
 	 * @param item
@@ -1042,8 +1056,6 @@ public class AbstractScript {
 	protected static boolean giveItems(L2PcInstance player, IDropItem item, L2Character victim, Map<Integer, Long> limit) {
 		return giveItems(player, item.calculateDrops(victim, player), limit);
 	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * @param player
@@ -1056,11 +1068,11 @@ public class AbstractScript {
 		return giveItems(player, item.calculateDrops(victim, player), limit);
 	}
 	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
 	protected static boolean giveItems(L2PcInstance player, IDropItem item, L2Character victim, Map<Integer, Long> limit, boolean playSound) {
 		return giveItems(player, item, victim, Util.mapToFunction(limit), playSound);
 	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	protected static boolean giveItems(L2PcInstance player, IDropItem item, L2Character victim, Function<Integer, Long> limit, boolean playSound) {
 		boolean drop = giveItems(player, item, victim, limit);
@@ -1069,6 +1081,8 @@ public class AbstractScript {
 		}
 		return drop;
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Distributes items to players equally
@@ -1082,20 +1096,6 @@ public class AbstractScript {
 	 */
 	protected static Map<L2PcInstance, Map<Integer, Long>> distributeItems(Collection<L2PcInstance> players, IDropItem items, L2Character killer, L2Character victim, long limit, boolean playSound) {
 		return distributeItems(players, items.calculateDrops(victim, killer), limit, playSound);
-	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
-	/**
-	 * Distributes items to players equally
-	 * @param players the players to whom the items will be distributed
-	 * @param items the items to distribute
-	 * @param limit the limit what single player can have of each item
-	 * @param playSound if to play sound if a player gets at least one item
-	 * @return the counts of each items given to each player
-	 */
-	protected static Map<L2PcInstance, Map<Integer, Long>> distributeItems(Collection<L2PcInstance> players, Collection<ItemHolder> items, long limit, boolean playSound) {
-		return distributeItems(players, items, t -> limit, playSound);
 	}
 	
 	/**
@@ -1147,104 +1147,6 @@ public class AbstractScript {
 	// ---------------------------------------------------------------------------------------------------------------------------
 	
 	/**
-	 * Take a set amount of all specified items from player's inventory.
-	 * @param player the player whose items to take
-	 * @param itemList the list of {@link ItemHolder} objects containing the IDs and counts of the items to take
-	 * @return {@code true} if all items were taken, {@code false} otherwise
-	 */
-	protected static boolean takeAllItems(L2PcInstance player, ItemHolder... itemList) {
-		if ((itemList == null) || (itemList.length == 0)) {
-			return false;
-		}
-		// first check if the player has all items to avoid taking half the items from the list
-		if (!hasAllItems(player, true, itemList)) {
-			return false;
-		}
-		for (ItemHolder item : itemList) {
-			// this should never be false, but just in case
-			if (!takeItem(player, item)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	/**
-	 * Check if the player has all the specified items in his inventory and, if necessary, if their count is also as required.
-	 * @param player the player whose inventory to check for the specified item
-	 * @param checkCount if {@code true}, check if each item is at least of the count specified in the ItemHolder,<br>
-	 *            otherwise check only if the player has the item at all
-	 * @param itemList a list of {@link ItemHolder} objects containing the IDs of the items to check
-	 * @return {@code true} if the player has all the items from the list
-	 */
-	protected static boolean hasAllItems(L2PcInstance player, boolean checkCount, ItemHolder... itemList) {
-		if ((itemList == null) || (itemList.length == 0)) {
-			return false;
-		}
-		for (ItemHolder item : itemList) {
-			if (!hasItem(player, item, checkCount)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
-	/**
-	 * Take a set amount of a specified item from player's inventory.
-	 * @param player the player whose item to take
-	 * @param holder the {@link ItemHolder} object containing the ID and count of the item to take
-	 * @return {@code true} if the item was taken, {@code false} otherwise
-	 */
-	protected static boolean takeItem(L2PcInstance player, ItemHolder holder) {
-		if (holder == null) {
-			return false;
-		}
-		return takeItems(player, holder.getId(), holder.getCount());
-	}
-	
-	/**
-	 * Take an amount of a specified item from player's inventory.
-	 * @param player the player whose item to take
-	 * @param itemId the ID of the item to take
-	 * @param amount the amount to take
-	 * @return {@code true} if any items were taken, {@code false} otherwise
-	 */
-	public static boolean takeItems(L2PcInstance player, int itemId, long amount) {
-		final List<L2ItemInstance> items = player.getInventory().getItemsByItemId(itemId);
-		if (amount < 0) {
-			items.forEach(i -> takeItem(player, i, i.getCount()));
-		} else {
-			long currentCount = 0;
-			for (L2ItemInstance i : items) {
-				long toDelete = i.getCount();
-				if ((currentCount + toDelete) > amount) {
-					toDelete = amount - currentCount;
-				}
-				takeItem(player, i, toDelete);
-				currentCount += toDelete;
-			}
-		}
-		return true;
-	}
-	
-	// ---------------------------------------------------------------------------------------------------------------------------
-	
-	private static boolean takeItem(L2PcInstance player, L2ItemInstance item, long toDelete) {
-		if (item.isEquipped()) {
-			final L2ItemInstance[] unequiped = player.getInventory().unEquipItemInBodySlotAndRecord(item.getItem().getBodyPart());
-			final InventoryUpdate iu = new InventoryUpdate();
-			for (L2ItemInstance itm : unequiped) {
-				iu.addModifiedItem(itm);
-			}
-			player.sendPacket(iu);
-			player.broadcastUserInfo();
-		}
-		return player.destroyItemByItemId("Quest", item.getId(), toDelete, player, true);
-	}
-	
-	/**
 	 * Distributes items to players equally
 	 * @param players the players to whom the items will be distributed
 	 * @param items the items to distribute
@@ -1279,6 +1181,104 @@ public class AbstractScript {
 			toDrop = items;
 		}
 		return distributeItems(players, toDrop, killer, victim, limit, playSound);
+	}
+	
+	/**
+	 * Take a set amount of all specified items from player's inventory.
+	 * @param player the player whose items to take
+	 * @param itemList the list of {@link ItemHolder} objects containing the IDs and counts of the items to take
+	 * @return {@code true} if all items were taken, {@code false} otherwise
+	 */
+	protected static boolean takeAllItems(L2PcInstance player, ItemHolder... itemList) {
+		if ((itemList == null) || (itemList.length == 0)) {
+			return false;
+		}
+		// first check if the player has all items to avoid taking half the items from the list
+		if (!hasAllItems(player, true, itemList)) {
+			return false;
+		}
+		for (ItemHolder item : itemList) {
+			// this should never be false, but just in case
+			if (!takeItem(player, item)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
+	/**
+	 * Check if the player has all the specified items in his inventory and, if necessary, if their count is also as required.
+	 * @param player the player whose inventory to check for the specified item
+	 * @param checkCount if {@code true}, check if each item is at least of the count specified in the ItemHolder,<br>
+	 *            otherwise check only if the player has the item at all
+	 * @param itemList a list of {@link ItemHolder} objects containing the IDs of the items to check
+	 * @return {@code true} if the player has all the items from the list
+	 */
+	protected static boolean hasAllItems(L2PcInstance player, boolean checkCount, ItemHolder... itemList) {
+		if ((itemList == null) || (itemList.length == 0)) {
+			return false;
+		}
+		for (ItemHolder item : itemList) {
+			if (!hasItem(player, item, checkCount)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Take a set amount of a specified item from player's inventory.
+	 * @param player the player whose item to take
+	 * @param holder the {@link ItemHolder} object containing the ID and count of the item to take
+	 * @return {@code true} if the item was taken, {@code false} otherwise
+	 */
+	protected static boolean takeItem(L2PcInstance player, ItemHolder holder) {
+		if (holder == null) {
+			return false;
+		}
+		return takeItems(player, holder.getId(), holder.getCount());
+	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------
+	
+	/**
+	 * Take an amount of a specified item from player's inventory.
+	 * @param player the player whose item to take
+	 * @param itemId the ID of the item to take
+	 * @param amount the amount to take
+	 * @return {@code true} if any items were taken, {@code false} otherwise
+	 */
+	public static boolean takeItems(L2PcInstance player, int itemId, long amount) {
+		final List<L2ItemInstance> items = player.getInventory().getItemsByItemId(itemId);
+		if (amount < 0) {
+			items.forEach(i -> takeItem(player, i, i.getCount()));
+		} else {
+			long currentCount = 0;
+			for (L2ItemInstance i : items) {
+				long toDelete = i.getCount();
+				if ((currentCount + toDelete) > amount) {
+					toDelete = amount - currentCount;
+				}
+				takeItem(player, i, toDelete);
+				currentCount += toDelete;
+			}
+		}
+		return true;
+	}
+	
+	private static boolean takeItem(L2PcInstance player, L2ItemInstance item, long toDelete) {
+		if (item.isEquipped()) {
+			final L2ItemInstance[] unequiped = player.getInventory().unEquipItemInBodySlotAndRecord(item.getItem().getBodyPart());
+			final InventoryUpdate iu = new InventoryUpdate();
+			for (L2ItemInstance itm : unequiped) {
+				iu.addModifiedItem(itm);
+			}
+			player.sendPacket(iu);
+			player.broadcastUserInfo();
+		}
+		return player.destroyItemByItemId("Quest", item.getId(), toDelete, player, true);
 	}
 	
 	// ---------------------------------------------------------------------------------------------------------------------------
@@ -2187,9 +2187,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when L2Attackable is under attack to other clan mates.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setAttackableFactionIdId(Consumer<OnAttackableFactionCall> callback, int... npcIds) {
 		return registerConsumer(callback, EventType.ON_ATTACKABLE_FACTION_CALL, ListenerRegisterType.NPC, npcIds);
@@ -2197,9 +2194,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when L2Attackable is under attack to other clan mates.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setAttackableFactionIdId(Consumer<OnAttackableFactionCall> callback, Collection<Integer> npcIds) {
 		return registerConsumer(callback, EventType.ON_ATTACKABLE_FACTION_CALL, ListenerRegisterType.NPC, npcIds);
@@ -2207,9 +2201,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when L2Attackable is attacked from a player.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setAttackableAttackId(Consumer<OnAttackableAttack> callback, int... npcIds) {
 		return registerConsumer(callback, EventType.ON_ATTACKABLE_ATTACK, ListenerRegisterType.NPC, npcIds);
@@ -2217,9 +2208,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when L2Attackable is attacked from a player.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setAttackableAttackId(Consumer<OnAttackableAttack> callback, Collection<Integer> npcIds) {
 		return registerConsumer(callback, EventType.ON_ATTACKABLE_ATTACK, ListenerRegisterType.NPC, npcIds);
@@ -2227,9 +2215,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link L2PcInstance} enters in {@link L2Attackable}'s aggressive range.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setAttackableAggroRangeEnterId(Consumer<OnAttackableAggroRangeEnter> callback, int... npcIds) {
 		return registerConsumer(callback, EventType.ON_ATTACKABLE_AGGRO_RANGE_ENTER, ListenerRegisterType.NPC, npcIds);
@@ -2237,9 +2222,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link L2PcInstance} enters in {@link L2Attackable}'s aggressive range.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setAttackableAggroRangeEnterId(Consumer<OnAttackableAggroRangeEnter> callback, Collection<Integer> npcIds) {
 		return registerConsumer(callback, EventType.ON_ATTACKABLE_AGGRO_RANGE_ENTER, ListenerRegisterType.NPC, npcIds);
@@ -2247,9 +2229,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link L2PcInstance} learn's a {@link Skill}.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setPlayerSkillLearnId(Consumer<OnPlayerSkillLearn> callback, int... npcIds) {
 		return registerConsumer(callback, EventType.ON_PLAYER_SKILL_LEARN, ListenerRegisterType.NPC, npcIds);
@@ -2257,9 +2236,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link L2PcInstance} learn's a {@link Skill}.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setPlayerSkillLearnId(Consumer<OnPlayerSkillLearn> callback, Collection<Integer> npcIds) {
 		return registerConsumer(callback, EventType.ON_PLAYER_SKILL_LEARN, ListenerRegisterType.NPC, npcIds);
@@ -2267,9 +2243,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link L2PcInstance} summons a servitor or a pet
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setPlayerSummonSpawnId(Consumer<OnPlayerSummonSpawn> callback, int... npcIds) {
 		return registerConsumer(callback, EventType.ON_PLAYER_SUMMON_SPAWN, ListenerRegisterType.NPC, npcIds);
@@ -2277,9 +2250,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link L2PcInstance} summons a servitor or a pet
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setPlayerSummonSpawnId(Consumer<OnPlayerSummonSpawn> callback, Collection<Integer> npcIds) {
 		return registerConsumer(callback, EventType.ON_PLAYER_SUMMON_SPAWN, ListenerRegisterType.NPC, npcIds);
@@ -2287,9 +2257,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link L2PcInstance} talk with a servitor or a pet
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setPlayerSummonTalkId(Consumer<OnPlayerSummonTalk> callback, int... npcIds) {
 		return registerConsumer(callback, EventType.ON_PLAYER_SUMMON_TALK, ListenerRegisterType.NPC, npcIds);
@@ -2297,9 +2264,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link L2PcInstance} talk with a servitor or a pet
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setPlayerSummonTalkId(Consumer<OnPlayerSummonSpawn> callback, Collection<Integer> npcIds) {
 		return registerConsumer(callback, EventType.ON_PLAYER_SUMMON_TALK, ListenerRegisterType.NPC, npcIds);
@@ -2307,27 +2271,13 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link L2PcInstance} summons a servitor or a pet
-	 * @param callback
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setPlayerLoginId(Consumer<OnPlayerLogin> callback) {
 		return registerConsumer(callback, EventType.ON_PLAYER_LOGIN, ListenerRegisterType.GLOBAL);
 	}
-	
-	/**
-	 * Provides instant callback operation when {@link L2PcInstance} summons a servitor or a pet
-	 * @param callback
-	 * @return
-	 */
-	protected final List<AbstractEventListener> setPlayerLogoutId(Consumer<OnPlayerLogout> callback) {
-		return registerConsumer(callback, EventType.ON_PLAYER_LOGOUT, ListenerRegisterType.GLOBAL);
-	}
-	
+
 	/**
 	 * Provides instant callback operation when {@link com.l2jserver.gameserver.model.actor.L2Character} Enters on a {@link L2ZoneType}.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setCreatureZoneEnterId(Consumer<OnCreatureZoneEnter> callback, int... npcIds) {
 		return registerConsumer(callback, EventType.ON_CREATURE_ZONE_ENTER, ListenerRegisterType.ZONE, npcIds);
@@ -2335,9 +2285,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link com.l2jserver.gameserver.model.actor.L2Character} Enters on a {@link L2ZoneType}.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setCreatureZoneEnterId(Consumer<OnCreatureZoneEnter> callback, Collection<Integer> npcIds) {
 		return registerConsumer(callback, EventType.ON_CREATURE_ZONE_ENTER, ListenerRegisterType.ZONE, npcIds);
@@ -2365,9 +2312,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link com.l2jserver.gameserver.model.actor.instance.L2TrapInstance} acts.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setTrapActionId(Consumer<OnTrapAction> callback, int... npcIds) {
 		return registerConsumer(callback, EventType.ON_TRAP_ACTION, ListenerRegisterType.NPC, npcIds);
@@ -2375,9 +2319,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link com.l2jserver.gameserver.model.actor.instance.L2TrapInstance} acts.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setTrapActionId(Consumer<OnTrapAction> callback, Collection<Integer> npcIds) {
 		return registerConsumer(callback, EventType.ON_TRAP_ACTION, ListenerRegisterType.NPC, npcIds);
@@ -2385,9 +2326,6 @@ public class AbstractScript {
 	
 	/**
 	 * Provides instant callback operation when {@link L2Item} receives an event from {@link L2PcInstance}.
-	 * @param callback
-	 * @param npcIds
-	 * @return
 	 */
 	protected final List<AbstractEventListener> setItemBypassEvenId(Consumer<OnItemBypassEvent> callback, int... npcIds) {
 		return registerConsumer(callback, EventType.ON_ITEM_BYPASS_EVENT, ListenerRegisterType.ITEM, npcIds);

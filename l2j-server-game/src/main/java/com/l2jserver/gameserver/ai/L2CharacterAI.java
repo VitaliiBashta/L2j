@@ -1,36 +1,4 @@
-/*
- * Copyright © 2004-2021 L2J Server
- * 
- * This file is part of L2J Server.
- * 
- * L2J Server is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * L2J Server is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package com.l2jserver.gameserver.ai;
-
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_ACTIVE;
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_ATTACK;
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_CAST;
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_FOLLOW;
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_IDLE;
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_INTERACT;
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_MOVE_TO;
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_PICK_UP;
-import static com.l2jserver.gameserver.ai.CtrlIntention.AI_INTENTION_REST;
-import static com.l2jserver.gameserver.config.Configuration.geodata;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import com.l2jserver.commons.util.Rnd;
 import com.l2jserver.gameserver.GameTimeController;
@@ -62,9 +30,12 @@ import com.l2jserver.gameserver.network.serverpackets.AutoAttackStop;
 import com.l2jserver.gameserver.taskmanager.AttackStanceTaskManager;
 import com.l2jserver.gameserver.util.Util;
 
-/**
- * Creatures AI.
- */
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.l2jserver.gameserver.ai.CtrlIntention.*;
+import static com.l2jserver.gameserver.config.Configuration.geodata;
+
 public class L2CharacterAI extends AbstractAI {
 	public static class IntentionCommand {
 		protected final CtrlIntention _crtlIntention;
