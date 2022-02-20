@@ -18,13 +18,13 @@
  */
 package com.l2jserver.gameserver.model.variables;
 
-import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.model.L2World;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
+
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author UnAfraid
@@ -47,7 +47,6 @@ public class PlayerVariables extends AbstractVariables {
 		restoreMe();
 	}
 	
-	@Override
 	public boolean restoreMe() {
 		try (var con = ConnectionFactory.getInstance().getConnection();
 			var ps = con.prepareStatement(SELECT_QUERY)) {
@@ -66,7 +65,6 @@ public class PlayerVariables extends AbstractVariables {
 		return true;
 	}
 	
-	@Override
 	public boolean storeMe() {
 		// No changes, nothing to store.
 		if (!hasChanges()) {

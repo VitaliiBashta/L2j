@@ -56,18 +56,15 @@ public class EventAnnouncement implements IAnnouncement {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public boolean deleteMe() {
     IdFactory.getInstance().releaseId(id);
     return true;
   }
 
-  @Override
   public boolean storeMe() {
     return true;
   }
 
-  @Override
   public boolean updateMe() {
     throw new UnsupportedOperationException();
   }

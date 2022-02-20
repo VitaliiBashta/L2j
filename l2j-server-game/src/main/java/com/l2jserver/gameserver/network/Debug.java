@@ -53,7 +53,9 @@ public class Debug {
     msg.replace("%darkDef%", target.getDefenseElementValue((byte) 5));
     msg.replace("%skill%", skill.toString());
     msg.replace("%details%", sb.toString());
-    attacker.sendPacket(new TutorialShowHtml(msg.getHtml()));
+    String html = msg.getHtml();
+    TutorialShowHtml tutorialShowHtml = new TutorialShowHtml(html);
+    attacker.sendPacket(tutorialShowHtml);
   }
 
   private static BiConsumer<String, Object> appendLine(StringBuilder sb) {

@@ -1,14 +1,13 @@
 package com.l2jserver.gameserver.instancemanager;
 
-import java.util.Map.Entry;
-
+import com.l2jserver.commons.database.ConnectionFactory;
 import com.l2jserver.gameserver.Context;
+import com.l2jserver.gameserver.model.variables.AbstractVariables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.l2jserver.commons.database.ConnectionFactory;
-import com.l2jserver.gameserver.model.variables.AbstractVariables;
 import org.springframework.stereotype.Service;
+
+import java.util.Map.Entry;
 
 @Service
 public final class GlobalVariablesManager extends AbstractVariables {
@@ -27,7 +26,6 @@ public final class GlobalVariablesManager extends AbstractVariables {
 		restoreMe();
 	}
 	
-	@Override
 	public boolean restoreMe() {
 		// Restore previous variables.
 		try (var con = context.connectionFactory.getConnection();
@@ -46,7 +44,6 @@ public final class GlobalVariablesManager extends AbstractVariables {
 		return true;
 	}
 	
-	@Override
 	public boolean storeMe() {
 		// No changes, nothing to store.
 		if (!hasChanges()) {

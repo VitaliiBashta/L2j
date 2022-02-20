@@ -25,12 +25,6 @@ import java.util.List;
 
 import static com.l2jserver.gameserver.config.Configuration.server;
 
-/**
- * Parent class for long time events.<br>
- * Maintains config reading, spawn of NPC's, adding of event's drop.
- *
- * @author GKR
- */
 public class LongTimeEvent extends Quest {
   // NPC's to spawm and their spawn points
   private final List<NpcSpawn> spawnList = new ArrayList<>();

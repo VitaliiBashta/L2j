@@ -15,11 +15,8 @@ import com.l2jserver.gameserver.model.actor.knownlist.ObjectKnownList;
 import com.l2jserver.gameserver.model.actor.poly.ObjectPoly;
 import com.l2jserver.gameserver.model.entity.Instance;
 import com.l2jserver.gameserver.model.events.ListenersContainer;
-import com.l2jserver.gameserver.model.interfaces.IDecayable;
 import com.l2jserver.gameserver.model.interfaces.ILocational;
 import com.l2jserver.gameserver.model.interfaces.IPositionable;
-import com.l2jserver.gameserver.model.interfaces.ISpawnable;
-import com.l2jserver.gameserver.model.interfaces.IUniqueId;
 import com.l2jserver.gameserver.model.interfaces.Identifiable;
 import com.l2jserver.gameserver.model.zone.ZoneId;
 import com.l2jserver.gameserver.network.SystemMessageId;
@@ -34,9 +31,10 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/** Base class for all interactive objects. */
-public abstract class L2Object extends ListenersContainer
-    implements Identifiable, ISpawnable, IUniqueId, IDecayable, IPositionable {
+/**
+ * Base class for all interactive objects.
+ */
+public abstract class L2Object extends ListenersContainer implements Identifiable, IPositionable {
   /** X coordinate */
   private final AtomicInteger _x = new AtomicInteger(0);
   /** Y coordinate */
@@ -128,7 +126,6 @@ public abstract class L2Object extends ListenersContainer
 
   public void onSpawn() {}
 
-  @Override
   public boolean decayMe() {
     assert getWorldRegion() != null;
 
@@ -154,6 +151,11 @@ public abstract class L2Object extends ListenersContainer
     _objectId = IdFactory.getInstance().getNextId();
   }
 
+  public final ObjectPoly getPoly() {
+    final ObjectPoly poly = getScript(ObjectPoly.class);
+    return Objects.requireNonNullElseGet(poly, () -> (ObjectPoly) addScript(new ObjectPoly(this)));
+  }
+
   public final void setIsVisible(boolean value) {
     _isVisible = value;
     if (!_isVisible) {
@@ -161,7 +163,6 @@ public abstract class L2Object extends ListenersContainer
     }
   }
 
-  @Override
   public final boolean spawnMe() {
     assert (getWorldRegion() == null)
         && (getLocation().getX() != 0)
@@ -246,6 +247,14 @@ public abstract class L2Object extends ListenersContainer
     return getWorldRegion() != null;
   }
 
+  public void toggleVisible() {
+    if (isVisible()) {
+      decayMe();
+    } else {
+      spawnMe();
+    }
+  }
+
   public ObjectKnownList getKnownList() {
     return _knownList;
   }
@@ -254,26 +263,12 @@ public abstract class L2Object extends ListenersContainer
     _knownList = value;
   }
 
-  public void toggleVisible() {
-    if (isVisible()) {
-      decayMe();
-    } else {
-      spawnMe();
-    }
-  }
   /**
-   * @param <T>
-   * @param script
-   * @return
+   *
    */
   public final <T> Object addScript(Object script) {
     scripts.put(script.getClass(), script);
     return script;
-  }
-
-  public final ObjectPoly getPoly() {
-    final ObjectPoly poly = getScript(ObjectPoly.class);
-    return Objects.requireNonNullElseGet(poly, () -> (ObjectPoly) addScript(new ObjectPoly(this)));
   }
 
   @SuppressWarnings("unchecked")
@@ -282,13 +277,15 @@ public abstract class L2Object extends ListenersContainer
   }
 
   /**
-   * Verify if object is instance of L2Character.
+   * Verify if object is instance of L2Summon.
    *
-   * @return {@code true} if object is instance of L2Character, {@code false} otherwise
+   * @return {@code true} if object is instance of L2Summon, {@code false} otherwise
    */
-  public boolean isCharacter() {
+  public boolean isSummon() {
     return false;
   }
+
+  public abstract void sendInfo(L2PcInstance activeChar);
 
   public void sendPacket(SystemMessageId id) {}
 
@@ -301,7 +298,6 @@ public abstract class L2Object extends ListenersContainer
     return false;
   }
 
-  public abstract void sendInfo(L2PcInstance activeChar);
   /**
    * Verify if object is instance of L2DoorInstance.
    *
@@ -311,7 +307,6 @@ public abstract class L2Object extends ListenersContainer
     return false;
   }
 
-  public void sendPacket(L2GameServerPacket mov) {}
   /**
    * Verify if object is instance of L2Npc.
    *
@@ -330,9 +325,6 @@ public abstract class L2Object extends ListenersContainer
     return false;
   }
 
-  public L2PcInstance getActingPlayer() {
-    return null;
-  }
   /**
    * Verifies if the object is a walker NPC.
    *
@@ -370,12 +362,30 @@ public abstract class L2Object extends ListenersContainer
   }
 
   /**
-   * Verify if object is instance of L2Summon.
-   *
-   * @return {@code true} if object is instance of L2Summon, {@code false} otherwise
+   * Calculates distance between this L2Object and given x, y , z.
+   * @param x            the X coordinate
+   * @param y            the Y coordinate
+   * @param z            the Z coordinate
+   * @param includeZAxis if {@code true} Z axis will be included
+   * @param squared      if {@code true} return will be squared
+   * @return distance between object and given x, y, z.
    */
-  public boolean isSummon() {
-    return false;
+  public final double calculateDistance(
+          int x, int y, int z, boolean includeZAxis, boolean squared) {
+    final double distance =
+            Math.pow(x - getX(), 2)
+                    + Math.pow(y - getY(), 2)
+                    + (includeZAxis ? Math.pow(z - getZ(), 2) : 0);
+    return (squared) ? distance : Math.sqrt(distance);
+  }
+
+  /**
+   * Gets the Z coordinate.
+   * @return the Z coordinate
+   */
+  @Override
+  public int getZ() {
+    return _z.get();
   }
 
   /**
@@ -397,14 +407,6 @@ public abstract class L2Object extends ListenersContainer
   }
 
   /**
-   * Verify if object is instance of L2PcInstance.
-   *
-   * @return {@code true} if object is instance of L2PcInstance, {@code false} otherwise
-   */
-  public boolean isPlayer() {
-    return false;
-  }
-  /**
    * Calculates distance between this L2Object and given location.
    *
    * @param loc the location object
@@ -416,161 +418,15 @@ public abstract class L2Object extends ListenersContainer
     return calculateDistance(loc.getX(), loc.getY(), loc.getZ(), includeZAxis, squared);
   }
 
-  /**
-   * Verifies if this object is a vehicle.
-   *
-   * @return {@code true} if object is Vehicle, {@code false} otherwise
-   */
-  public boolean isVehicle() {
-    return false;
+  public void sendPacket(L2GameServerPacket mov) {
   }
 
-  /** @return {@code true} if object Can be targeted */
-  public boolean isTargetable() {
-    return true;
-  }
-
-  /**
-   * Check if the object is in the given zone Id.
-   *
-   * @param zone the zone Id to check
-   * @return {@code true} if the object is in that zone Id
-   */
-  public boolean isInsideZone(ZoneId zone) {
-    return false;
-  }
-
-  /**
-   * Check if current object has charged shot.
-   *
-   * @param type of the shot to be checked.
-   * @return {@code true} if the object has charged shot
-   */
-  public boolean isChargedShot(ShotType type) {
-    return false;
-  }
-
-  /**
-   * Charging shot into the current object.
-   *
-   * @param type of the shot to be charged.
-   * @param charged
-   */
-  public void setChargedShot(ShotType type, boolean charged) {}
-
-  /**
-   * Try to recharge a shot.
-   *
-   * @param physical skill are using Soul shots.
-   * @param magical skill are using Spirit shots.
-   */
-  public void rechargeShots(boolean physical, boolean magical) {}
-
-  /**
-   * @param <T>
-   * @param script
-   * @return
-   */
-  @SuppressWarnings("unchecked")
-  public final <T> T removeScript(Class<T> script) {
-    return (T) scripts.remove(script);
-  }
-
-  public void removeStatusListener(L2Character object) {}
-
-  protected void badCoords() {
-    if (isCharacter()) {
-      decayMe();
-    } else if (isPlayer()) {
-      ((L2Character) this).teleToLocation(new Location(0, 0, 0), false);
-      ((L2Character) this).sendMessage("Error with your coords, Please ask a GM for help!");
-    }
-  }
-
-  public final void setXYZInvisible(int x, int y, int z) {
-    assert getWorldRegion() == null;
-    if (x > L2World.MAP_MAX_X) {
-      x = L2World.MAP_MAX_X - 5000;
-    }
-    if (x < L2World.MAP_MIN_X) {
-      x = L2World.MAP_MIN_X + 5000;
-    }
-    if (y > L2World.MAP_MAX_Y) {
-      y = L2World.MAP_MAX_Y - 5000;
-    }
-    if (y < L2World.MAP_MIN_Y) {
-      y = L2World.MAP_MIN_Y + 5000;
-    }
-
-    setXYZ(x, y, z);
-    setIsVisible(false);
-  }
-
-  public final void setLocationInvisible(ILocational loc) {
-    setXYZInvisible(loc.getX(), loc.getY(), loc.getZ());
-  }
-
-  public void updateWorldRegion() {
-    if (!isVisible()) {
-      return;
-    }
-
-    L2WorldRegion newRegion = L2World.getInstance().getRegion(getLocation());
-    if (newRegion != getWorldRegion()) {
-      getWorldRegion().removeVisibleObject(this);
-
-      setWorldRegion(newRegion);
-
-      // Add the L2Object spawn to _visibleObjects and if necessary to _allplayers of its
-      // L2WorldRegion
-      getWorldRegion().addVisibleObject(this);
-    }
-  }
-
-  public final L2WorldRegion getWorldRegion() {
-    return _worldRegion;
-  }
-
-  public void setWorldRegion(L2WorldRegion value) {
-    if ((getWorldRegion() != null) && isCharacter()) // confirm revalidation of old region's zones
-    {
-      if (value != null) {
-        getWorldRegion().revalidateZones((L2Character) this); // at world region change
-      } else {
-        getWorldRegion().removeFromZones((L2Character) this); // at world region change
-      }
-    }
-
-    _worldRegion = value;
-  }
-
-  /**
-   * Calculates distance between this L2Object and given x, y , z.
-   *
-   * @param x the X coordinate
-   * @param y the Y coordinate
-   * @param z the Z coordinate
-   * @param includeZAxis if {@code true} Z axis will be included
-   * @param squared if {@code true} return will be squared
-   * @return distance between object and given x, y, z.
-   */
-  public final double calculateDistance(
-      int x, int y, int z, boolean includeZAxis, boolean squared) {
-    final double distance =
-        Math.pow(x - getX(), 2)
-            + Math.pow(y - getY(), 2)
-            + (includeZAxis ? Math.pow(z - getZ(), 2) : 0);
-    return (squared) ? distance : Math.sqrt(distance);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return ((obj instanceof L2Object) && (((L2Object) obj).getObjectId() == getObjectId()));
+  public L2PcInstance getActingPlayer() {
+    return null;
   }
 
   /**
    * Gets the X coordinate.
-   *
    * @return the X coordinate
    */
   @Override
@@ -609,18 +465,22 @@ public abstract class L2Object extends ListenersContainer
   }
 
   /**
-   * Gets the Z coordinate.
-   *
-   * @return the Z coordinate
+   * Verifies if this object is a vehicle.
+   * @return {@code true} if object is Vehicle, {@code false} otherwise
    */
-  @Override
-  public int getZ() {
-    return _z.get();
+  public boolean isVehicle() {
+    return false;
+  }
+
+  /**
+   * @return {@code true} if object Can be targeted
+   */
+  public boolean isTargetable() {
+    return true;
   }
 
   /**
    * Sets the Z coordinate
-   *
    * @param newZ the Z coordinate
    */
   @Override
@@ -628,10 +488,6 @@ public abstract class L2Object extends ListenersContainer
     _z.set(newZ);
   }
 
-  @Override
-  public int getObjectId() {
-    return _objectId;
-  }
   /**
    * Sets the x, y, z coordinate.
    *
@@ -639,7 +495,6 @@ public abstract class L2Object extends ListenersContainer
    * @param newY the Y coordinate
    * @param newZ the Z coordinate
    */
-
   @Override
   public final void setXYZ(int newX, int newY, int newZ) {
     assert getWorldRegion() != null;
@@ -657,16 +512,11 @@ public abstract class L2Object extends ListenersContainer
     }
   }
 
-  @Override
-  public String toString() {
-    return getName() + " [" + getObjectId() + "]";
-  }
   /**
    * Sets the x, y, z coordinate.
    *
    * @param loc the location object
    */
-
   @Override
   public void setXYZ(ILocational loc) {
     setXYZ(loc.getX(), loc.getY(), loc.getZ());
@@ -785,10 +635,158 @@ public abstract class L2Object extends ListenersContainer
   }
 
   /**
+   * Check if the object is in the given zone Id.
+   * @param zone the zone Id to check
+   * @return {@code true} if the object is in that zone Id
+   */
+  public boolean isInsideZone(ZoneId zone) {
+    return false;
+  }
+
+  /**
+   * Check if current object has charged shot.
+   * @param type of the shot to be checked.
+   * @return {@code true} if the object has charged shot
+   */
+  public boolean isChargedShot(ShotType type) {
+    return false;
+  }
+
+  /**
+   * Charging shot into the current object.
+   * @param type of the shot to be charged.
+   */
+  public void setChargedShot(ShotType type, boolean charged) {
+  }
+
+  /**
+   * Try to recharge a shot.
+   * @param physical skill are using Soul shots.
+   * @param magical  skill are using Spirit shots.
+   */
+  public void rechargeShots(boolean physical, boolean magical) {
+  }
+
+  /**
+   *
+   */
+  @SuppressWarnings("unchecked")
+  public final <T> T removeScript(Class<T> script) {
+    return (T) scripts.remove(script);
+  }
+
+  public void removeStatusListener(L2Character object) {
+  }
+
+  protected void badCoords() {
+    if (isCharacter()) {
+      decayMe();
+    } else if (isPlayer()) {
+      ((L2Character) this).teleToLocation(new Location(0, 0, 0), false);
+      ((L2Character) this).sendMessage("Error with your coords, Please ask a GM for help!");
+    }
+  }
+
+  /**
+   * Verify if object is instance of L2Character.
+   * @return {@code true} if object is instance of L2Character, {@code false} otherwise
+   */
+  public boolean isCharacter() {
+    return false;
+  }
+
+  /**
+   * Verify if object is instance of L2PcInstance.
+   * @return {@code true} if object is instance of L2PcInstance, {@code false} otherwise
+   */
+
+  public boolean isPlayer() {
+    return false;
+  }
+
+  public final void setLocationInvisible(ILocational loc) {
+    setXYZInvisible(loc.getX(), loc.getY(), loc.getZ());
+  }
+
+  public final void setXYZInvisible(int x, int y, int z) {
+    assert getWorldRegion() == null;
+    if (x > L2World.MAP_MAX_X) {
+      x = L2World.MAP_MAX_X - 5000;
+    }
+    if (x < L2World.MAP_MIN_X) {
+      x = L2World.MAP_MIN_X + 5000;
+    }
+    if (y > L2World.MAP_MAX_Y) {
+      y = L2World.MAP_MAX_Y - 5000;
+    }
+    if (y < L2World.MAP_MIN_Y) {
+      y = L2World.MAP_MIN_Y + 5000;
+    }
+
+    setXYZ(x, y, z);
+    setIsVisible(false);
+  }
+
+  public final L2WorldRegion getWorldRegion() {
+    return _worldRegion;
+  }
+
+  public void setWorldRegion(L2WorldRegion value) {
+    if ((getWorldRegion() != null) && isCharacter()) // confirm revalidation of old region's zones
+    {
+      if (value != null) {
+        getWorldRegion().revalidateZones((L2Character) this); // at world region change
+      } else {
+        getWorldRegion().removeFromZones((L2Character) this); // at world region change
+      }
+    }
+
+    _worldRegion = value;
+  }
+
+  public void updateWorldRegion() {
+    if (!isVisible()) {
+      return;
+    }
+
+    L2WorldRegion newRegion = L2World.getInstance().getRegion(getLocation());
+    if (newRegion != getWorldRegion()) {
+      getWorldRegion().removeVisibleObject(this);
+
+      setWorldRegion(newRegion);
+
+      // Add the L2Object spawn to _visibleObjects and if necessary to _allplayers of its
+      // L2WorldRegion
+      getWorldRegion().addVisibleObject(this);
+    }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return ((obj instanceof L2Object) && (((L2Object) obj).getObjectId() == getObjectId()));
+  }
+
+  public int getObjectId() {
+    return _objectId;
+  }
+
+  @Override
+  public String toString() {
+    return getName() + " [" + getObjectId() + "]";
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String value) {
+    name = value;
+  }
+
+  /**
    * Calculates the angle in degrees from this object to the given object.<br>
    * The return value can be described as how much this object has to turn<br>
    * to have the given object directly in front of it.
-   *
    * @param target the object to which to calculate the angle
    * @return the angle this object has to turn to have the given object in front of it
    */
@@ -822,13 +820,17 @@ public abstract class L2Object extends ListenersContainer
     }
   }
 
-  public String getName() {
-    return name;
-  }
 
-  public void setName(String value) {
-    name = value;
-  }
+
+
+
+
+
+
+
+
+
+
 
   /** @return {@code true} if this object is invisible, {@code false} otherwise. */
   public boolean isInvisible() {
@@ -875,8 +877,4 @@ public abstract class L2Object extends ListenersContainer
       }
     }
   }
-
-
-
-
 }

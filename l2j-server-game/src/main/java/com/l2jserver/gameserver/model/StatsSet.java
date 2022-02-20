@@ -2,21 +2,20 @@ package com.l2jserver.gameserver.model;
 
 import com.l2jserver.gameserver.model.holders.MinionHolder;
 import com.l2jserver.gameserver.model.holders.SkillHolder;
-import com.l2jserver.gameserver.model.interfaces.IParserAdvUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * This class is meant to hold a set of (key,value) pairs.<br>
- * They are stored as object but can be retrieved in any type wanted. As long as cast is available.
- * <br>
- *
- * @author mkizub
- */
-public class StatsSet implements IParserAdvUtils {
-  /** Static empty immutable map, used to avoid multiple null checks over the source. */
+
+public class StatsSet {
+  /**
+   * Static empty immutable map, used to avoid multiple null checks over the source.
+   */
   public static final StatsSet EMPTY_STATSET = new StatsSet(Map.of());
   private static final Logger _log = Logger.getLogger(StatsSet.class.getName());
   private final Map<String, Object> set;
@@ -30,17 +29,7 @@ public class StatsSet implements IParserAdvUtils {
   }
 
   /**
-   * Returns the set of values
-   *
-   * @return HashMap
-   */
-  public final Map<String, Object> getSet() {
-    return set;
-  }
-
-  /**
    * Add a set of couple values in the current set
-   *
    * @param newSet : StatsSet pointing out the list of couples to add in the current set
    */
   public void add(StatsSet newSet) {
@@ -48,8 +37,15 @@ public class StatsSet implements IParserAdvUtils {
   }
 
   /**
+   * Returns the set of values
+   * @return HashMap
+   */
+  public final Map<String, Object> getSet() {
+    return set;
+  }
+
+  /**
    * Verifies if the stat set is empty.
-   *
    * @return {@code true} if the stat set is empty, {@code false} otherwise
    */
   public boolean isEmpty() {
@@ -67,7 +63,6 @@ public class StatsSet implements IParserAdvUtils {
    * @return boolean : value associated to the key
    * @throws IllegalArgumentException : If value is not set or value is not boolean
    */
-  @Override
   public boolean getBoolean(String key) {
     Object val = set.get(key);
     if (val == null) {
@@ -90,7 +85,6 @@ public class StatsSet implements IParserAdvUtils {
    * @param key : String designating the key in the entry set
    * @return boolean : value associated to the key
    */
-  @Override
   public boolean getBoolean(String key, boolean defaultValue) {
     Object val = set.get(key);
     if (val == null) {
@@ -106,7 +100,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   public byte getByte(String key) {
     Object val = set.get(key);
     if (val == null) {
@@ -122,7 +115,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   public byte getByte(String key, byte defaultValue) {
     Object val = set.get(key);
     if (val == null) {
@@ -131,7 +123,11 @@ public class StatsSet implements IParserAdvUtils {
     if (val instanceof Number number) {
       return number.byteValue();
     }
-      return Byte.parseByte((String) val);
+    return Byte.parseByte((String) val);
+  }
+
+  public List<Byte> getByteList(String key, String splitOn) {
+    return getByteArray(key, splitOn);
   }
 
   private List<Byte> getByteArray(String key, String splitOn) {
@@ -146,11 +142,6 @@ public class StatsSet implements IParserAdvUtils {
     return Arrays.stream(values).map(Byte::parseByte).toList();
   }
 
-  public List<Byte> getByteList(String key, String splitOn) {
-    return getByteArray(key, splitOn);
-  }
-
-  @Override
   public short getShort(String key) {
     Object val = set.get(key);
     if (val == null) {
@@ -166,7 +157,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   public short getShort(String key, short defaultValue) {
     Object val = set.get(key);
     if (val == null) {
@@ -182,7 +172,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   public int getInt(String key) {
     final Object val = set.get(key);
     if (val == null) {
@@ -200,7 +189,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   public int getInt(String key, int defaultValue) {
     Object val = set.get(key);
     if (val == null) {
@@ -214,6 +202,14 @@ public class StatsSet implements IParserAdvUtils {
     } catch (Exception e) {
       throw new IllegalArgumentException("Integer value required, but found: " + val);
     }
+  }
+
+  public List<Integer> getIntegerList(String key, String splitOn) {
+    List<Integer> result = new ArrayList<>();
+    for (int i : getIntArray(key, splitOn)) {
+      result.add(i);
+    }
+    return result;
   }
 
   public int[] getIntArray(String key, String splitOn) {
@@ -241,15 +237,6 @@ public class StatsSet implements IParserAdvUtils {
     return result;
   }
 
-  public List<Integer> getIntegerList(String key, String splitOn) {
-    List<Integer> result = new ArrayList<>();
-    for (int i : getIntArray(key, splitOn)) {
-      result.add(i);
-    }
-    return result;
-  }
-
-  @Override
   public long getLong(String key) {
     Object val = set.get(key);
     if (val == null) {
@@ -265,7 +252,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   public long getLong(String key, long defaultValue) {
     Object val = set.get(key);
     if (val == null) {
@@ -281,7 +267,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   public float getFloat(String key) {
     Object val = set.get(key);
     if (val == null) {
@@ -297,7 +282,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   public float getFloat(String key, float defaultValue) {
     Object val = set.get(key);
     if (val == null) {
@@ -313,7 +297,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   public double getDouble(String key) {
     Object val = set.get(key);
     if (val == null) {
@@ -329,7 +312,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   public double getDouble(String key, double defaultValue) {
     Object val = set.get(key);
     if (val == null) {
@@ -345,7 +327,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   public String getString(String key) {
     Object val = set.get(key);
     if (val == null) {
@@ -354,7 +335,6 @@ public class StatsSet implements IParserAdvUtils {
     return String.valueOf(val);
   }
 
-  @Override
   public String getString(String key, String defaultValue) {
     Object val = set.get(key);
     if (val == null) {
@@ -363,7 +343,6 @@ public class StatsSet implements IParserAdvUtils {
     return String.valueOf(val);
   }
 
-  @Override
   @SuppressWarnings("unchecked")
   public <T extends Enum<T>> T getEnum(String key, Class<T> enumClass) {
     Object val = set.get(key);
@@ -382,7 +361,6 @@ public class StatsSet implements IParserAdvUtils {
     }
   }
 
-  @Override
   @SuppressWarnings("unchecked")
   public <T extends Enum<T>> T getEnum(String key, Class<T> enumClass, T defaultValue) {
     Object val = set.get(key);
@@ -443,10 +421,6 @@ public class StatsSet implements IParserAdvUtils {
     set.put(key, value);
   }
 
-  public void set(String key, int value) {
-    set.put(key, value);
-  }
-
   public void set(String key, long value) {
     set.put(key, value);
   }
@@ -474,5 +448,9 @@ public class StatsSet implements IParserAdvUtils {
     }
 
     set(key, value);
+  }
+
+  public void set(String key, int value) {
+    set.put(key, value);
   }
 }

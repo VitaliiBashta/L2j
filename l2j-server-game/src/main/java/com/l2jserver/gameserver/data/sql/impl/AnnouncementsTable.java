@@ -29,10 +29,6 @@ public class AnnouncementsTable {
 		load();
 	}
 	
-	public static AnnouncementsTable getInstance() {
-		return SingletonHolder._instance;
-	}
-	
 	private void load() {
 		announcements.clear();
 		try (var con = context.connectionFactory.getConnection();
@@ -56,10 +52,13 @@ public class AnnouncementsTable {
 			LOG.warn("Failed loading announcements:", e);
 		}
 	}
-	
+
+	public static AnnouncementsTable getInstance() {
+		return SingletonHolder._instance;
+	}
+
 	/**
 	 * Sending all announcements to the player
-	 * @param player
 	 */
 	public void showAnnouncements(L2PcInstance player) {
 		sendAnnouncements(player, AnnouncementType.NORMAL);
@@ -84,21 +83,18 @@ public class AnnouncementsTable {
 	 * Adds announcement
 	 */
 	public void addAnnouncement(IAnnouncement announce) {
-		if (announce.storeMe()) {
-			announcements.put(announce.getId(), announce);
-		}
+		announcements.put(announce.getId(), announce);
 	}
-	
+
 	/**
 	 * Removes announcement by id
-	 * @param id
 	 * @return {@code true} if announcement exists and was deleted successfully, {@code false} otherwise.
 	 */
 	public boolean deleteAnnouncement(int id) {
 		final IAnnouncement announce = announcements.remove(id);
-		return (announce != null) && announce.deleteMe();
+		return (announce != null);
 	}
-	
+
 	public IAnnouncement getAnnounce(int id) {
 		return announcements.get(id);
 	}
