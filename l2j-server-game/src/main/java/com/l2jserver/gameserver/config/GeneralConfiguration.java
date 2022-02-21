@@ -351,9 +351,7 @@ public interface GeneralConfiguration extends Mutable, Reloadable {
 	@Key("AllowCursedWeapons")
 	Boolean allowCursedWeapons();
 	
-	@Key("AllowPetWalkers")
-	Boolean allowPetWalkers();
-	
+
 	@Key("ShowServerNews")
 	Boolean showServerNews();
 	

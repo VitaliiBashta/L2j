@@ -22,20 +22,6 @@ public abstract class AbstractNpcAI extends Quest {
     return npc.getId() + ".html";
   }
 
-  /**
-   * Registers the following events to the current script:<br>
-   *
-   * <ul>
-   *   <li>ON_ATTACK
-   *   <li>ON_KILL
-   *   <li>ON_SPAWN
-   *   <li>ON_SPELL_FINISHED
-   *   <li>ON_SKILL_SEE
-   *   <li>ON_FACTION_CALL
-   *   <li>ON_AGGR_RANGE_ENTER
-   * </ul>
-   *
-   */
   public void registerMobs(int... mobs) {
     addAttackId(mobs);
     addKillId(mobs);

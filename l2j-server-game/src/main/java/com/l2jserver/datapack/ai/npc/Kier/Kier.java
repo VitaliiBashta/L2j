@@ -7,12 +7,9 @@ import com.l2jserver.datapack.quests.Q10283_RequestOfIceMerchant.Q10283_RequestO
 import com.l2jserver.gameserver.model.actor.L2Npc;
 import com.l2jserver.gameserver.model.actor.instance.L2PcInstance;
 import com.l2jserver.gameserver.model.quest.QuestState;
+import org.springframework.stereotype.Service;
 
-/**
- * Kier AI.
- * @author Adry_85
- * @since 2.6.0.0
- */
+@Service
 public final class Kier extends AbstractNpcAI {
 	// NPC
 	private static final int KIER = 32022;

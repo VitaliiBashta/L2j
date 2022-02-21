@@ -191,19 +191,15 @@ public class Quest extends AbstractScript implements Identifiable {
     }
   }
 
-  public int getDominionWarState(int castleId) {
-    return TerritoryWarManager.getInstance().isTWInProgress() ? 5 : 0;
-  }
-
   /**
    * Delete a variable of player's quest from the database.
    *
-   * @param qs  the {@link QuestState} object whose variable to delete
+   * @param qs the {@link QuestState} object whose variable to delete
    * @param var the name of the variable to delete
    */
   public static void deleteQuestVarInDb(QuestState qs, String var) {
     try (var con = ConnectionFactory.getInstance().getConnection();
-         var ps =
+        var ps =
             con.prepareStatement(
                 "DELETE FROM character_quests WHERE charId=? AND name=? AND var=?")) {
       ps.setInt(1, qs.getPlayer().getObjectId());
@@ -335,6 +331,10 @@ public class Quest extends AbstractScript implements Identifiable {
 
   public static void playSound(L2PcInstance player, IAudio sound) {
     player.sendPacket(sound.getPacket());
+  }
+
+  public int getDominionWarState(int castleId) {
+    return TerritoryWarManager.getInstance().isTWInProgress() ? 5 : 0;
   }
 
   /**
@@ -1340,20 +1340,12 @@ public class Quest extends AbstractScript implements Identifiable {
     setNpcQuestStartId(npcIds);
   }
 
-  /**
-   * Add the quest to the NPC's first-talk (default action dialog).
-   *
-   * @param npcIds the IDs of the NPCs to register
-   */
+  /** Add the quest to the NPC's first-talk (default action dialog). */
   public void addFirstTalkId(int... npcIds) {
     setNpcFirstTalkId(event -> notifyFirstTalk(event.getNpc(), event.getActiveChar()), npcIds);
   }
 
-  /**
-   * Add the quest to the NPC's first-talk (default action dialog).
-   *
-   * @param npcIds the IDs of the NPCs to register
-   */
+  /** Add the quest to the NPC's first-talk (default action dialog). */
   public void addFirstTalkId(Collection<Integer> npcIds) {
     setNpcFirstTalkId(event -> notifyFirstTalk(event.getNpc(), event.getActiveChar()), npcIds);
   }
@@ -2497,12 +2489,6 @@ public class Quest extends AbstractScript implements Identifiable {
     // TODO: Implement.
   }
 
-  public boolean reload() {
-    unload();
-
-    return false;
-  }
-
   @Override
   public boolean unload() {
     return unload(true);
@@ -2542,6 +2528,12 @@ public class Quest extends AbstractScript implements Identifiable {
    * By default, nothing is saved.
    */
   public void saveGlobalData() {}
+
+  public boolean reload() {
+    unload();
+
+    return false;
+  }
 
   public void setOnEnterWorld(boolean state) {
     if (state) {

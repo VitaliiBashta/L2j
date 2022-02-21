@@ -11,10 +11,6 @@ import com.l2jserver.gameserver.model.skills.Skill;
 import com.l2jserver.gameserver.model.stats.Formulas;
 import com.l2jserver.gameserver.network.SystemMessageId;
 
-/**
- * Lethal effect implementation.
- * @author Adry_85
- */
 public final class Lethal extends AbstractEffect {
 	private final double _fullLethal;
 	private final double _halfLethal;

@@ -178,7 +178,7 @@ public abstract class L2Character extends L2Object implements ISkillsHolder {
 	private boolean _allSkillsDisabled;
 	private L2Character _debugger = null;
 	private Team _team = Team.NONE;
-	private boolean _lethalable = true;
+	private boolean lethalable = true;
 	private volatile Map<Integer, OptionsSkillHolder> _triggerSkills;
 	private volatile Map<Integer, InvulSkillHolder> _invulAgainst;
 	/** The character that summons this character. */
@@ -5248,8 +5248,8 @@ public abstract class L2Character extends L2Object implements ISkillsHolder {
 		return false;
 	}
 
-	public void setLethalable(boolean val) {
-		_lethalable = val;
+	public boolean isLethalable() {
+		return lethalable;
 	}
 
 	public void disableCoreAI(boolean val) {
@@ -5299,8 +5299,8 @@ public abstract class L2Character extends L2Object implements ISkillsHolder {
 		_exceptions = masks;
 	}
 
-	public boolean isLethalable() {
-		return _lethalable;
+	public void setLethalable(boolean val) {
+		lethalable = val;
 	}
 
 	public void addTriggerSkill(OptionsSkillHolder holder) {
