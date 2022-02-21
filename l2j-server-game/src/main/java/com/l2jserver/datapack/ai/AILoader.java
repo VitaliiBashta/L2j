@@ -67,7 +67,6 @@ import com.l2jserver.datapack.ai.npc.TownPets.TownPets;
 import com.l2jserver.datapack.ai.npc.Trainers.HealerTrainer.HealerTrainer;
 import com.l2jserver.datapack.ai.npc.VarkaSilenosSupport.VarkaSilenosSupport;
 import com.l2jserver.datapack.ai.npc.VillageMasters.FirstClassTransferTalk.FirstClassTransferTalk;
-import com.l2jserver.datapack.ai.npc.WyvernManager.WyvernManager;
 import com.l2jserver.datapack.village_master.Clan.Clan;
 import com.l2jserver.datapack.village_master.DarkElfChange1.DarkElfChange1;
 import com.l2jserver.datapack.village_master.DarkElfChange2.DarkElfChange2;
@@ -151,7 +150,6 @@ public class AILoader {
     HealerTrainer.class,
     VarkaSilenosSupport.class,
     FirstClassTransferTalk.class,
-    WyvernManager.class,
     // Fantasy Isle
     MC_Show.class,
     HandysBlockCheckerEvent.class,
